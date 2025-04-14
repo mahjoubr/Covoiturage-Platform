@@ -1,6 +1,7 @@
 import { Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,ManyToMany,ManyToOne } from "typeorm";
 
 import { AppUser } from "src/app-user/entities/app-user.entity";
+import { Ride } from "src/ride/entities/ride.entity";
 @Entity()
 export class Review {
   @PrimaryGeneratedColumn()
@@ -20,4 +21,7 @@ export class Review {
 
   @ManyToOne(() => AppUser, user => user.reviews)
   reviewedUser: AppUser;
+
+  @ManyToOne(()=>Ride, {eager: true})
+  ride : Ride;
 }
