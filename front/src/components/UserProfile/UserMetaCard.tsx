@@ -3,7 +3,6 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import React from "react";
 
 interface UserMetaCardProps {
   isEditable: boolean; 

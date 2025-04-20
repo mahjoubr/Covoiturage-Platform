@@ -1,9 +1,7 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
-import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import UserHistoryCard from "../components/UserProfile/UserHistoryCard";
 import PageMeta from "../components/common/PageMeta";
-import React from "react";
 import { Ride } from "../types";
 
 const rides: Ride[] = [

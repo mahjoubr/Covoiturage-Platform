@@ -1,11 +1,4 @@
-import React from "react";
-
-interface Ride {
-  from: string;
-  to: string;
-  date: string;
-  riders: string[];
-}
+import { Ride } from "../../types";
 
 interface UserHistoryCardProps {
   ride: Ride;
