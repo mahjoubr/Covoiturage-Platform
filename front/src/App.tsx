@@ -19,6 +19,7 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import Posts from "./pages/Posts/PostsPage";
 import UserProfiles from "./pages/UserProfile";
 
 export default function App() {
@@ -55,6 +56,7 @@ export default function App() {
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
+            <Route path="/posts" element={<Posts/>}/>
           </Route>
 
           {/* Auth Layout */}
