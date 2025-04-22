@@ -20,7 +20,7 @@ export class AppUser extends User {
   @Column()
   imageUrl: string;
 
-  @OneToMany(()=>Post,post=>post.user)
+  @OneToMany(()=>Post,post=>post.postOwner)
   posts:Post[];
 
   @OneToMany(() => Review, review => review.reviewedUser)

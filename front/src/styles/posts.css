@@ -56,3 +56,13 @@
   .carpools-container {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 !important;
   }
+
+  .md\:p-6 {
+    padding: 0.25rem !important;
+    padding-top: 0rem !important;
+    margin-top: 0rem !important;
+}
+.md\:px-8 {
+  padding-top: 0rem !important;
+  margin-top: 0rem !important;
+}
