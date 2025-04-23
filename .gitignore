@@ -42,6 +42,7 @@ back/.env.development.local
 back/.env.test.local
 back/.env.production.local
 back/.env.local
+back/src/.env
 
 # Temp and runtime (back)
 back/.temp/
