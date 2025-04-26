@@ -17,6 +17,8 @@ import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
+import ChatPage from "./pages/Chat/chatPage";
+
 import Home from "./pages/Dashboard/Home";
 
 export default function App() {
@@ -33,6 +35,8 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
+            <Route path="/chat" element={<ChatPage />} />
+
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
