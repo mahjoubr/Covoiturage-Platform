@@ -8,6 +8,7 @@ front/node_modules/
 package-lock.json
 back/package-lock.json
 front/package-lock.json
+/node_modules
 # Logs (shared + back)
 logs
 *.log
