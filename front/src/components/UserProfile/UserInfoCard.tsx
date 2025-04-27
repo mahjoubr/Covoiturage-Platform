@@ -6,8 +6,9 @@ import Label from "../form/Label";
 
 interface UserMetaCardProps {
   isEditable: boolean; 
+  
 }
-export default function UserInfoCard({ isEditable }: UserMetaCardProps) {
+export default function UserInfoCard({ isEditable}: UserMetaCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
   const handleSave = () => {
     // Handle save logic here
@@ -69,7 +70,7 @@ export default function UserInfoCard({ isEditable }: UserMetaCardProps) {
             </div>
           </div>
         </div>
-        {isEditable && (
+        {isEditable  && (
         <button
           onClick={openModal}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
@@ -91,6 +92,7 @@ export default function UserInfoCard({ isEditable }: UserMetaCardProps) {
           </svg>
           Edit
         </button>)}
+        
       </div>
       {isEditable && (
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
@@ -105,47 +107,11 @@ export default function UserInfoCard({ isEditable }: UserMetaCardProps) {
           </div>
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
-                  </div>
-                </div>
-              </div>
               <div className="mt-7">
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
-                </h5>
-
+                
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
+                    <Label>Name</Label>
                     <Input type="text" value="Musharof" />
                   </div>
 
@@ -162,6 +128,10 @@ export default function UserInfoCard({ isEditable }: UserMetaCardProps) {
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
                     <Input type="text" value="+09 363 398 46" />
+                  </div>
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Date of birth</Label>
+                    <Input type="Date" value="08/04/2003" />
                   </div>
 
                   <div className="col-span-2">
