@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column ,OneToMany} from 'typeorm';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+
 export enum RideState {
   NOT_STARTED = 'NotStarted',
   STARTED = 'Started',
