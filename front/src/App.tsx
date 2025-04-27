@@ -22,6 +22,7 @@ import ChatPage from "./pages/Chat/chatPage";
 
 import Home from "./pages/Dashboard/Home";
 import UserProfiles from "./pages/UserProfile";
+import ReviewPage from "./pages/Review/ReviewFormPage";
 
 export default function App() {
   return (
@@ -40,7 +41,7 @@ export default function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
-
+            <Route path="/review" element={<ReviewPage />} />
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />

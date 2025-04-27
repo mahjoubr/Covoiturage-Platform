@@ -17,10 +17,10 @@ export class Ride {
   @Column({ type: 'time' })
   time: string;
 
-  @Column({ type: 'time' })
+  @Column()
   departure: string;
 
-  @Column({ type: 'time' })
+  @Column()
   arrival: string;
 
   @Column('decimal')

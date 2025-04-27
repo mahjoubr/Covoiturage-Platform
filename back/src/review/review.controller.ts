@@ -9,7 +9,7 @@ export class ReviewController {
 
   @Post()
   create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewService.create(createReviewDto);
+    return this.reviewService.createReview(createReviewDto);
   }
 
   @Get()
@@ -31,4 +31,35 @@ export class ReviewController {
   remove(@Param('id') id: string) {
     return this.reviewService.remove(+id);
   }
+
+
+  @Get('paginate')
+  paginate(@Param('page') page: number, @Param('limit') limit: number) {
+    return this.reviewService.paginate(page, limit);
+  }
+  @Get('search')
+  search(@Param('searchTerm') searchTerm: string, @Param('fields') fields: string[], @Param('page') page: number, @Param('limit') limit: number) {
+    return this.reviewService.search(searchTerm, fields, page, limit);
+
+  }
+
+  @Get('reviewedUser/:reviewedUserId')
+  findByReviewedUserId(@Param('reviewedUserId') reviewedUserId: number) {
+    return this.reviewService.findByReviewedUserId(reviewedUserId);
+  }
+  @Get('reviewer/:reviewerId')
+  findByReviewerId(@Param('reviewerId') reviewerId: number) {
+    return this.reviewService.findByReviewerId(reviewerId);
+  }
+  @Get('ride/:rideId')
+  findByRideId(@Param('rideId') rideId: number) {
+    return this.reviewService.findByRideId(rideId);
+  }
+
+
+  
+    @Get('reviewer/:reviewerId/ride/:rideId')
+    findByReviewerIdAndRideId(@Param('reviewerId') reviewerId: number, @Param('rideId') rideId: number) {
+      return this.reviewService.findByReviewerIdAndRideId(reviewerId, rideId);
+    }
 }
