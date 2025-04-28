@@ -16,7 +16,7 @@ export class Post {
   listRide: Ride[]; 
 
   @Column()
-  typeOfOffer: string;
+  typeOfOffer: string;    //enum
 
   @Column({ type: 'timestamp' })
   date: Date;
