@@ -9,7 +9,16 @@
     @apply relative text-base font-normal z-1 bg-gray-50 font-outfit;
   }
 }
-
+.error-message {
+  color: white; 
+  background-color: rgba(155, 7, 7, 0.658);
+  border-radius: 5px; 
+  padding: 10px; 
+  margin-top: 15px; 
+  margin-bottom: 10px;
+  font-size: 14px; 
+  font-weight: bold; 
+}
 @layer components {
   .menu-item {
     @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
@@ -56,6 +65,7 @@
   .menu-dropdown-badge {
     @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-brand-500 dark:text-brand-400;
   }
+
   .menu-dropdown-badge-active {
     @apply bg-brand-100 dark:bg-brand-500/20;
   }

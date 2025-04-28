@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../user/dto/register.dto';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { LoginDto } from 'src/user/dto/login.dto';
+import { JwtAuthResponse } from './dto/jwt-auth-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,10 +27,7 @@ export class AuthService {
   }
   
   
-     
-  
-
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<JwtAuthResponse> {
     const user = await this.validateUser(loginDto);
     
     if (!user) {
@@ -37,9 +35,12 @@ export class AuthService {
     }
   
     const payload = { email: user.email, sub: user.id ,role: user.role};
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     return {
-      user,
-      access_token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,  
+      user,  
     };
   }
 

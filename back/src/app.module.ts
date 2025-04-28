@@ -11,10 +11,9 @@ import { AppUserModule } from './app-user/app-user.module';
 import { AdminModule } from './admin/admin.module';
 import { AppUserRideModule } from './app-user-ride/app-user-ride.module';
 import { ReviewModule } from './review/review.module';
-import { User } from './user/entities/user.entity';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { GraphqlModule } from './graphql/graphql.module';
 
 @Module({
       imports: [
@@ -27,9 +26,20 @@ import { AuthModule } from './auth/auth.module';
           database: 'covoiturage', 
           entities: [__dirname + '/**/*.entity{.ts,.js}'], 
           synchronize: true,     
-        }), AuthModule,
-    
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
+        }), 
+        AuthModule,
+        RideModule, 
+        PostModule, 
+        CommentModule, 
+        MessageModule, 
+        ChatModule, 
+        ReviewModule, 
+        UserModule, 
+        AppUserModule, 
+        AdminModule, 
+        AppUserRideModule, 
+        ReviewModule, 
+        GraphqlModule],
         controllers: [AppController],
         providers: [AppService],
 })
