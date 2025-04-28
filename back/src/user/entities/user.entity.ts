@@ -16,5 +16,8 @@ import {
   
     @Column()
     password: string;
+
+    @Column({ default: 'user' }) 
+    role: 'user' | 'admin';
   }
   
