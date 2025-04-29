@@ -23,6 +23,7 @@ import ChatPage from "./pages/Chat/chatPage";
 import Home from "./pages/Dashboard/Home";
 import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
+import NotificationPage from "./pages/Notification/NotificationPage";
 
 export default function App() {
   return (
@@ -37,6 +38,8 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile/Edit" element={<EditProfile />} />
             <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/notifications" element={<NotificationPage />} />
+
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
