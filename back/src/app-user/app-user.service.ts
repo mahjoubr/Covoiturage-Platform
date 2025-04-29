@@ -1,3 +1,4 @@
+
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { GenericService } from 'src/services/genericService';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +17,7 @@ export class AppUserService extends GenericService {
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
 
+
   ) {
     super(appUserRepo);
   }
@@ -28,7 +30,7 @@ export class AppUserService extends GenericService {
   async findByEmail(email: string): Promise<User | null> {
     return this.appUserRepo.findOne({ where: { email } });
   }
-
+  
 
   async updateUserRating(userId: number): Promise<void> {
     try {

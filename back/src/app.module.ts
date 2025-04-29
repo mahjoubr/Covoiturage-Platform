@@ -15,6 +15,7 @@ import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { GraphqlModule } from './graphql/graphql.module';
 
 @Module({
       
@@ -27,8 +28,6 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
        
-       
-        
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
@@ -43,7 +42,7 @@ import { AuthModule } from './auth/auth.module';
         };
       },
     }), AuthModule,
-    
+        GraphqlModule,
       RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
         controllers: [AppController],
         providers: [AppService],

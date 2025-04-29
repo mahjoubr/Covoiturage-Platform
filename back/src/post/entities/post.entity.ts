@@ -43,19 +43,4 @@ export class Post {
 
   @Column("simple-array")
   listRide: Ride[]; 
-<<<<<<< HEAD
-=======
-
-  @Column()
-  typeOfOffer: string;    //enum
-
-  @Column({ type: 'timestamp' })
-  date: Date;
-
-  @OneToMany(()=>Comment,comment=>comment.post)
-  comments: Comment[];
-
-  @ManyToOne(()=>AppUser,appuser=>appuser.posts)
-  user: User;
->>>>>>> 9816555ea1d3d6f0e42e1d7113652def32c42a52
 }
