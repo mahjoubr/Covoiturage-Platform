@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column,ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column,ManyToOne, Unique } from 'typeorm';
 import { AppUser} from 'src/app-user/entities/app-user.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
 export enum Role {
@@ -7,6 +7,7 @@ export enum Role {
 }
 
 @Entity()
+@Unique(["appUser", "ride"]) 
 export class AppUserRide {
   @PrimaryGeneratedColumn()
   id: number;

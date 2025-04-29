@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column ,OneToMany} from 'typeorm';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+
 export enum RideState {
   NOT_STARTED = 'NotStarted',
   STARTED = 'Started',
@@ -17,10 +18,10 @@ export class Ride {
   @Column({ type: 'time' })
   time: string;
 
-  @Column({ type: 'time' })
+  @Column()
   departure: string;
 
-  @Column({ type: 'time' })
+  @Column()
   arrival: string;
 
   @Column('decimal')
