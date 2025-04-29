@@ -5,17 +5,19 @@ import { RegisterDto } from '../user/dto/register.dto';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { LoginDto } from 'src/user/dto/login.dto';
 import { JwtAuthResponse } from './dto/jwt-auth-response.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private appuserService: AppUserService,
+    private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
-    const user = await this.appuserService.findByEmail(email);
+    const user = await this.userService.findByEmail(email);
   
     if (!user) return null;
   

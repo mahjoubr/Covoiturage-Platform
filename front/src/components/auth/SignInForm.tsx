@@ -19,9 +19,15 @@ export default function SignInForm() {
     e.preventDefault();
     setError(""); 
     try {
-      const user = await login(email, password);
-      console.log("Logged in user:", user);
-      navigate("/"); 
+      const result = await login(email, password);
+      console.log("Logged in user:", result);
+      if (result.user.role=== 'admin') {
+        navigate("/profile");
+      } else if (result.user.role === 'user') {
+        navigate("/");
+      } else {
+        navigate("/signup"); 
+      }
     } catch (error: any) {
       console.error("Login failed:", error);
       setError("Login failed. Please check your credentials and try again."); 

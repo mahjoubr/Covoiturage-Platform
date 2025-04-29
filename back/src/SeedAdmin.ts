@@ -1,7 +1,8 @@
-import { AppUserService } from "./app-user/app-user.service";
 import * as bcrypt from 'bcryptjs';
+import { UserService } from "./user/user.service";
+import { AdminService } from './admin/admin.service';
 
-export async function seedAdmin(userService: AppUserService) {
+export async function seedAdmin(adminService: AdminService) {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
   
@@ -9,10 +10,10 @@ export async function seedAdmin(userService: AppUserService) {
       throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be set in the environment');
     }
   
-    const existingAdmin = await userService.findByEmail(adminEmail);
+    const existingAdmin = await adminService.findByEmail(adminEmail);
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      await userService.create({
+      await adminService.create({
         email: adminEmail,
         password: hashedPassword,
         role: 'admin',

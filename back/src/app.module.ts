@@ -28,8 +28,6 @@ import { GraphqlModule } from './graphql/graphql.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
        
-       
-        
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
