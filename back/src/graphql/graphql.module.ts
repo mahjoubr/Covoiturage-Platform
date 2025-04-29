@@ -11,10 +11,14 @@ import { AuthResolver } from 'src/auth/auth.resolver';
         driver: ApolloDriver,
         autoSchemaFile: join(process.cwd(), 'src/graphql/schema.gql'),
         playground: true, 
+        context: ({ req }) => ({
+          user: req.user,}),
         introspection: true, 
         debug: true,
         path: '/graphql',
+        
     }),
+    
     
     AuthModule, 
   ],

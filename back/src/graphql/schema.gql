@@ -16,15 +16,10 @@ type AppUser {
   role: String!
   name: String!
   lastName: String!
-  dateOfBirth: DateTime!
-  phoneNumber: String!
+  dateOfBirth: String
+  phoneNumber: String
   imageUrl: String!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type JwtAuthResponse {
   accessToken: String!
@@ -34,11 +29,13 @@ type JwtAuthResponse {
 
 type Query {
   dummyQuery: String
+  getAppUserInfo: AppUser!
 }
 
 type Mutation {
   register(input: RegisterInput!): AppUser!
   login(input: LoginInput!): JwtAuthResponse!
+  updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
 }
 
 input RegisterInput {
@@ -51,4 +48,13 @@ input RegisterInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input UpdateAppUserInput {
+  name: String
+  lastName: String
+  dateOfBirth: String
+  phoneNumber: String
+  email: String
+  password: String
 }

@@ -3,7 +3,7 @@ import { User } from '../../user/entities/user.entity';
 import { Post } from 'src/post/entities/post.entity';
 import { Review } from 'src/review/entities/review.entity';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 @ChildEntity()
 @ObjectType()
 export class AppUser extends User {
@@ -15,12 +15,12 @@ export class AppUser extends User {
   @Column()
   lastName: string;
 
-  @Field()
-  @Column({ type: 'date' })
-  dateOfBirth: Date;
+  @Field({ nullable: true })
+  @Column({  nullable: true })
+  dateOfBirth: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   phoneNumber: string;
   
   @Field()

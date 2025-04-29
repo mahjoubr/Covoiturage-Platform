@@ -24,4 +24,13 @@ export interface Drive {
       id: number;
       username: string;
     };
+    
   }
+  export type UpdateAppUserInput = {
+    name: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    dateOfBirth: string;
+    password: string;
+  };

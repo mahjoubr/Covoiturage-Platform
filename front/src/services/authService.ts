@@ -1,6 +1,6 @@
 
 import client from "../graphQl/client";
-import { LOGIN_MUTATION, REGISTER_MUTATION } from "../graphQl/queries/auth";
+import { LOGIN_MUTATION, REGISTER_MUTATION } from "../graphQl/mutations/auth";
 
 export const login = async (email: string, password: string) => {
   const { data } = await client.mutate({

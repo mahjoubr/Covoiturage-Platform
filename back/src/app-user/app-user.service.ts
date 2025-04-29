@@ -30,7 +30,6 @@ export class AppUserService extends GenericService {
   async findByEmail(email: string): Promise<User | null> {
     return this.appUserRepo.findOne({ where: { email } });
   }
-  
 
   async updateUserRating(userId: number): Promise<void> {
     try {

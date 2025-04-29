@@ -16,10 +16,18 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql/graphql.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 
 @Module({
       
   imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -45,6 +53,6 @@ import { GraphqlModule } from './graphql/graphql.module';
         GraphqlModule,
       RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
         controllers: [AppController],
-        providers: [AppService],
+        providers: [AppService, JwtStrategy],
 })
 export class AppModule {}
