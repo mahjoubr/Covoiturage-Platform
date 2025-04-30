@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { GenericService } from 'src/services/genericService';
+import { GenericService } from '../services/genericService';
 
 @Injectable()
 export class UserService extends GenericService {

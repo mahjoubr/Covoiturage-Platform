@@ -9,6 +9,45 @@ type User {
   role: String!
 }
 
+type Comment {
+  id: Float!
+  text: String!
+  date: DateTime!
+  post: Post!
+  commenter: AppUser!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Post {
+  id: ID!
+  destination: String!
+  departure: String!
+  date: DateTime!
+  time: String!
+  seatCount: Int!
+  frequency: String!
+  description: String
+  price: Float
+  contactInfo: String
+  comments: [Comment!]
+  postOwner: AppUser!
+  listRide: [Ride!]
+}
+
+type Review {
+  id: Float!
+  stars: Float!
+  comment: String
+  date: DateTime!
+  reviewer: AppUser!
+  reviewedUser: AppUser!
+  ride: Ride!
+}
+
 type AppUser {
   id: Float!
   email: String!
@@ -19,6 +58,36 @@ type AppUser {
   dateOfBirth: String
   phoneNumber: String
   imageUrl: String!
+  posts: [Post!]!
+  reviews: [Review!]!
+  rating: Float!
+  appUserRides: [AppUserRide!]!
+}
+
+type AppUserRide {
+  id: Float!
+  role: Role!
+  appUser: AppUser!
+  ride: Ride!
+}
+
+"""The role of the user in the ride"""
+enum Role {
+  DRIVER
+  PASSENGER
+}
+
+type Ride {
+  id: Float!
+  date: DateTime!
+  time: String!
+  departure: String!
+  arrival: String!
+  price: Float!
+  nbPassengers: Float!
+  state: String!
+  appUserRides: [AppUserRide!]!
+  post: Post!
 }
 
 type JwtAuthResponse {
@@ -29,6 +98,16 @@ type JwtAuthResponse {
 
 type Query {
   dummyQuery: String
+  getAllRides: [Ride!]!
+  getRideById(id: String!): Ride!
+  getRidesByState(state: String!): [Ride!]!
+  getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
+  getRidesByDriver: [Ride!]!
+  getRidesByPassenger: [Ride!]!
+  getPosts: [Post!]!
+  getPostById(id: String!): Post!
+  getAllComments: [Comment!]!
+  getCommentsByPost(postId: Int!): [Comment!]!
   getAppUserInfo: AppUser!
 }
 
@@ -37,6 +116,10 @@ type Mutation {
   login(input: LoginInput!): JwtAuthResponse!
   updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
   updatePhoto(updatePhotoInput: UploadPhotoInput!): AppUser!
+  createRide(createRideInput: CreateRideInput!): Ride!
+  updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
+  removeRide(id: String!): Boolean!
+  createComment(input: CreateCommentInput!): Comment!
 }
 
 input RegisterInput {
@@ -62,4 +145,30 @@ input UpdateAppUserInput {
 
 input UploadPhotoInput {
   file: String!
+}
+
+input CreateRideInput {
+  date: DateTime!
+  time: String!
+  departure: String!
+  arrival: String!
+  price: Float!
+  nbPassengers: Int!
+  state: String = "NotStarted"
+}
+
+input UpdateRideInput {
+  date: DateTime
+  time: String
+  departure: String
+  arrival: String
+  price: Float
+  nbPassengers: Int
+  state: String
+}
+
+input CreateCommentInput {
+  text: String!
+  postId: Int!
+  commenterId: Int!
 }
