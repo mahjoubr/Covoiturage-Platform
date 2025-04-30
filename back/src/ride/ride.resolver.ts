@@ -3,7 +3,10 @@ import { Ride, RideState } from './entities/ride.entity';
 import { RideService } from './ride.service';
 import { CreateRideInput } from './dto/create-ride.input';
 import { UpdateRideInput } from './dto/update-ride.input';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
+import { CurrentUser } from 'src/auth/user.decorator';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
 
 @Resolver(() => Ride)
 export class RideResolver {
@@ -12,8 +15,6 @@ export class RideResolver {
   @Query(() => [Ride], { name: 'getAllRides' })
   async findAll(): Promise<Ride[]> {
     const rides = await this.rideService.findAll();
-    
-    // Ensure date is properly formatted as Date object
     return rides.map(ride => ({
       ...ride,
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
@@ -21,10 +22,8 @@ export class RideResolver {
   }
 
   @Query(() => Ride, { name: 'getRideById' })
-  async findOne(@Args('id', { type: () => Int }) id: number): Promise<Ride> {
-    const ride = await this.rideService.findOne(id);
-    
-    // Ensure date is properly formatted as Date object
+  async findOne(@Args('id', { type: () => String }) id: string): Promise<Ride> {
+    const ride = await this.rideService.findOne(+id);
     return {
       ...ride,
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
@@ -33,7 +32,6 @@ export class RideResolver {
 
   @Mutation(() => Ride)
   async createRide(@Args('createRideInput') createRideInput: CreateRideInput): Promise<Ride> {
-    // Ensure date is saved as a Date object
     if (createRideInput.date && typeof createRideInput.date === 'string') {
       createRideInput.date = new Date(createRideInput.date);
     }
@@ -43,21 +41,20 @@ export class RideResolver {
 
   @Mutation(() => Ride)
   async updateRide(
-    @Args('id', { type: () => Int }) id: number,
+    @Args('id', { type: () => String }) id: string,
     @Args('updateRideInput') updateRideInput: UpdateRideInput
   ): Promise<Ride> {
-    // Ensure date is saved as a Date object if provided
     if (updateRideInput.date && typeof updateRideInput.date === 'string') {
       updateRideInput.date = new Date(updateRideInput.date);
     }
     
-    return this.rideService.update(id, updateRideInput);
+    return this.rideService.update(+id, updateRideInput);
   }
 
   @Mutation(() => Boolean)
-  async removeRide(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+  async removeRide(@Args('id', { type: () => String }) id: String): Promise<boolean> {
     try {
-      await this.rideService.remove(id);
+      await this.rideService.remove(+id);
       return true;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -84,11 +81,29 @@ export class RideResolver {
     @Args('endDate', { type: () => GraphQLISODateTime }) endDate: Date
   ): Promise<Ride[]> {
     const rides = await this.rideService.findByDateRange(startDate, endDate);
-    
-    // Ensure dates are properly formatted
+
     return rides.map(ride => ({
       ...ride,
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
     }));
   }
+  @Query(() => [Ride], { name: 'getRidesByDriver' })
+@UseGuards(GqlAuthGuard)
+async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  const rides = await this.rideService.findByDriver(user.id);
+  return rides.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
+  }));
+}
+
+@Query(() => [Ride], { name: 'getRidesByPassenger' })
+@UseGuards(GqlAuthGuard)
+async getRidesByPassenger(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  const rides = await this.rideService.findByPassenger(user.id);
+  return rides.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
+  }));
+}
 }

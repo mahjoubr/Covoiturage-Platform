@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send } from 'lucide-react';
-import { CarpoolPost } from '../../types/posts.ts';
+import { CarpoolPost,Comment } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
 
-interface Comment {
-  id: string;
-  author: string;
-  text: string;
-  timestamp: Date;
-  postId: string; 
-}
 
 interface ViewPostModalProps {
   isOpen: boolean;
@@ -48,7 +41,21 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
     
     const comment: Comment = {
       id: Date.now().toString(), 
-      author: 'You', 
+      commenter: {
+        id: 1,
+        name: 'Test',
+        lastName: 'User',
+        email: 'testuser@example.com',
+        password: 'testpassword',
+        role: 'user',
+        dateOfBirth: '2000-01-01',
+        phoneNumber: '1234567890',
+        imageUrl: 'https://via.placeholder.com/150',
+        rating: 4.5,
+        posts: [],
+        reviews: [],
+        appUserRides: [],
+      },
       text: newComment,
       timestamp: new Date(),
       postId: post.id
@@ -65,19 +72,26 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
   };
 
   // Format relative time for comments
-  const formatCommentTime = (date: Date) => {
+  const formatCommentTime = (date: Date | string | undefined): string => {
+    if (!date) return 'Unknown time';
+  
+    const parsedDate = typeof date === 'string' ? new Date(date) : date;
+  
+    if (isNaN(parsedDate.getTime())) return 'Invalid time';
+  
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60));
+  
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
+  
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    
+  
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
   };
+  
 
   // Handle join ride button
   const handleJoinRide = (e: React.MouseEvent) => {
@@ -222,10 +236,14 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
                     <div className="flex justify-between items-center mb-1">
                       <div className="flex items-center">
                         <div className="w-5 h-5 bg-blue-100 dark:bg-blue-600 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-200 text-xs font-medium">
-                          {comment.author.charAt(0)}
+                        {comment.commenter?.name
+                          ? `${comment.commenter.name.charAt(0)}`
+                          : ""}
                         </div>
                         <span className="ml-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
-                          {comment.author}
+                          {comment.commenter?.name && comment.commenter?.lastName
+                          ? `${comment.commenter.name} ${comment.commenter.lastName}`
+                          : "Unknown"}
                         </span>
                       </div>
                       <span className="text-xs text-gray-500 dark:text-gray-400">

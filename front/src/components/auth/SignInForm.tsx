@@ -21,9 +21,13 @@ export default function SignInForm() {
     try {
       const result = await login(email, password);
       console.log("Logged in user:", result);
+      const { accessToken, user } = result; 
+
+    localStorage.setItem('auth_token', accessToken); 
+    console.log("Token saved:", accessToken);
       if (result.user.role=== 'admin') {
         navigate("/profile");
-      } else if (result.user.role === 'user') {
+      } else if (user.role === 'user') {
         navigate("/");
       } else {
         navigate("/signup"); 

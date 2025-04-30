@@ -1,13 +1,13 @@
-// seed.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppUser } from './app-user/entities/app-user.entity';
 import { Post } from './post/entities/post.entity';
-import { Ride } from './ride/entities/ride.entity';
+import { Ride, RideState } from './ride/entities/ride.entity';
 import { AppUserRide, Role } from './app-user-ride/entities/app-user-ride.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {RideState} from './ride/entities/ride.entity';
+import { faker } from '@faker-js/faker';
+import { Comment } from './comment/entities/comment.entity';
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
 
@@ -15,65 +15,97 @@ async function bootstrap() {
   const postRepository = app.get<Repository<Post>>(getRepositoryToken(Post));
   const rideRepository = app.get<Repository<Ride>>(getRepositoryToken(Ride));
   const appUserRideRepository = app.get<Repository<AppUserRide>>(getRepositoryToken(AppUserRide));
+  const commentRepository = app.get<Repository<Comment>>(getRepositoryToken(Comment));
+  console.log('clearing the database...');
+  await commentRepository.delete({});
+await appUserRideRepository.delete({});
+await rideRepository.delete({});
+await postRepository.delete({});
+await appUserRepository.delete({});
+
+
 
   console.log('Seeding database...');
 
-  // Create AppUser
-  const appUser = appUserRepository.create({
-    email: 'user@example.com',
-    password: 'hashed_password_here', // Ideally hashed
-    name: 'John',
-    lastName: 'Doe',
-    dateOfBirth: new Date('1990-01-01'),
-    phoneNumber: '123456789',
-    imageUrl: 'https://example.com/image.png',
-    rating: 5.0,
-  });
+  const users: AppUser[] = [];
+  const rides: Ride[] = [];
+  const posts: Post[] = [];
 
-  await appUserRepository.save(appUser);
+  for (let i = 0; i < 10; i++) {
+    const user = appUserRepository.create({
+      email: faker.internet.email(),
+      password: 'hashed_password_here',
+      name: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      dateOfBirth: faker.date.birthdate({ min: 20, max: 50, mode: 'age' }),
+      phoneNumber: faker.phone.number(),
+      imageUrl: faker.image.avatar(),
+      rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // between 3.0 and 5.0
+    });
+    await appUserRepository.save(user);
+    users.push(user);
+  }
 
-  // Create Ride
-  const ride = rideRepository.create({
-    date: new Date('2025-05-01'),
-    time: '10:00',
-    departure: 'City A',
-    arrival: 'City B',
-    price: 25.5,
-    nbPassengers: 3,
-    state: RideState.NOT_STARTED,
-  });
+  for (let i = 0; i < 10; i++) {
+    const ride = rideRepository.create({
+      date: faker.date.soon({ days: 30 }),
+      time: `${faker.number.int({ min: 6, max: 20 })}:00`,
+      departure: faker.location.city(),
+      arrival: faker.location.city(),
+      price: parseFloat(faker.commerce.price({ min: 10, max: 50 })),
+      nbPassengers: faker.number.int({ min: 1, max: 4 }),
+      state: faker.helpers.arrayElement([RideState.NOT_STARTED, RideState.STARTED, RideState.CLOSED]),
+    });
+    await rideRepository.save(ride);
+    rides.push(ride);
+  }
 
-  await rideRepository.save(ride);
+  for (let i = 0; i < 10; i++) {
+    const post = postRepository.create({
+      destination: rides[i].arrival,
+      departure: rides[i].departure,
+      date: rides[i].date,
+      time: rides[i].time,
+      seatCount: rides[i].nbPassengers,
+      frequency: 'Once',
+      description: faker.lorem.sentence(),
+      price: rides[i].price,
+      contactInfo: users[i].email,
+      postOwner: users[i],
+      listRide: [rides[i]],
+    });
+    await postRepository.save(post);
+    posts.push(post);
+  }
 
-  // Create Post
-  const post = postRepository.create({
-    destination: 'City B',
-    departure: 'City A',
-    date: new Date('2025-05-01'),
-    time: '10:00',
-    seatCount: 3,
-    frequency: 'Once',
-    description: 'Going from City A to City B',
-    price: 25.5,
-    contactInfo: 'user@example.com',
-    postOwner: appUser,
-    listRide: [ride],
-  });
-
-  await postRepository.save(post);
-
-  // Create AppUserRide
-  const appUserRide = appUserRideRepository.create({
-    role: Role.DRIVER,
-    appUser,
-    ride,
-  });
-
-  await appUserRideRepository.save(appUserRide);
+  for (let i = 0; i < 10; i++) {
+    const appUserRide = appUserRideRepository.create({
+      role: faker.helpers.arrayElement([Role.DRIVER, Role.PASSENGER]),
+      appUser: users[i],
+      ride: rides[i],
+    });
+    await appUserRideRepository.save(appUserRide);
+  }
+  for (const post of posts) {
+    const numberOfComments = faker.number.int({ min: 0, max: 3 });
+  
+    for (let i = 0; i < numberOfComments; i++) {
+      const commenter = faker.helpers.arrayElement(users);
+  
+      const comment = commentRepository.create({
+        text: faker.lorem.sentences({ min: 1, max: 2 }),
+        date: faker.date.recent({ days: 10 }),
+        post: post,
+        commenter: commenter,
+      });
+  
+      await commentRepository.save(comment);
+    }
+  }
 
   console.log('✅ Database seeding finished!');
-
   await app.close();
 }
 
 bootstrap();
+

@@ -23,6 +23,7 @@ import { GraphqlModule } from './graphql/graphql.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

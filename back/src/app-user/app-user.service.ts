@@ -1,12 +1,12 @@
 
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { GenericService } from 'src/services/genericService';
+import { GenericService } from '../services/genericService';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppUser } from './entities/app-user.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
-import { User } from 'src/user/entities/user.entity';
-import { Review } from 'src/review/entities/review.entity';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { User } from '../user/entities/user.entity';
+import { Review } from '../review/entities/review.entity';
 
 @Injectable()
 export class AppUserService extends GenericService {

@@ -14,13 +14,11 @@ const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick }) => {
   const [showAlert, setShowAlert] = useState(false);
 
   const handleJoinRide = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent onClick event
+    e.stopPropagation(); 
     
     if (requestPending) {
       setRequestPending(false);
       setShowAlert(true);
-      
-      // Auto-hide the alert after 3 seconds
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);

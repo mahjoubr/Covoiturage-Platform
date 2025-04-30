@@ -11,7 +11,8 @@ export class PostResolver {
     const posts = await this.postService.findAll();
     return posts.map(post => ({
       ...post,
-      date: post.date instanceof Date ? post.date : new Date(post.date)
+      date: post.date instanceof Date ? post.date : new Date(post.date),
+      relations: ['listRide']
     }));
   }
 
