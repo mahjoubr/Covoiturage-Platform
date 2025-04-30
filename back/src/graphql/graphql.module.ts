@@ -17,6 +17,7 @@ import { AuthResolver } from 'src/auth/auth.resolver';
         debug: true,
         path: '/graphql',
         
+        
     }),
     
     

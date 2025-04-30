@@ -13,3 +13,12 @@ export const UPDATE_USER = gql`
     }
   }
 `;
+
+
+export const UPDATE_USER_PHOTO = gql`
+  mutation UpdatePhoto($updatePhotoInput: UploadPhotoInput!) {
+    updatePhoto(updatePhotoInput: $updatePhotoInput){
+      imageUrl
+    }
+  }
+`;

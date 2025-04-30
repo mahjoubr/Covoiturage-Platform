@@ -8,6 +8,17 @@ export const GET_APPUSER_INFO = gql`
       email
       phoneNumber
       dateOfBirth
+      imageUrl
+    }
+  }
+`;
+
+export const GET_APPUSER_PHOTO = gql`
+  query getAppUserPhoto {
+    getAppUserInfo {
+      imageUrl
+      name
+      lastName
     }
   }
 `;

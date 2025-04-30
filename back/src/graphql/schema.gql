@@ -36,6 +36,7 @@ type Mutation {
   register(input: RegisterInput!): AppUser!
   login(input: LoginInput!): JwtAuthResponse!
   updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
+  updatePhoto(updatePhotoInput: UploadPhotoInput!): AppUser!
 }
 
 input RegisterInput {
@@ -57,4 +58,8 @@ input UpdateAppUserInput {
   phoneNumber: String
   email: String
   password: String
+}
+
+input UploadPhotoInput {
+  file: String!
 }

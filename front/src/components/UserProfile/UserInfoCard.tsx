@@ -5,27 +5,15 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useState } from "react";
 import { fetchUserById, updateUser } from "../../services/userService";
+import { UpdateAppUserInput, User } from "../../types";
 
 
 interface UserMetaCardProps {
   isEditable: boolean; 
   
 }
-interface User {
-  name: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string ;
-  dateOfBirth?: string | null; 
-}
-interface UpdateAppUserInput {
-  name: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string ;
-  dateOfBirth: string; 
-  password: string;
-}
+
+
 export default function UserInfoCard({ isEditable}: UserMetaCardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState('');

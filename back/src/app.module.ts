@@ -19,6 +19,8 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import * as path from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
       
@@ -30,6 +32,10 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: path.join(process.cwd(), 'uploads'), 
+      serveRoot: '/uploads',  
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -49,7 +55,8 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
           autoLoadEntities: true,
         };
       },
-    }), AuthModule,
+    }),
+     AuthModule,
         GraphqlModule,
       RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
         controllers: [AppController],
