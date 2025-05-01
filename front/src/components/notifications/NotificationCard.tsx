@@ -1,12 +1,8 @@
 import React from 'react';
 import { formatTimeAgo } from './utils';
 import { Notification } from '../../types';
-import './NotificationCard.css';
 
-// Icon mapping function
 const getNotificationIcon = (type: string) => {
-  // In a real implementation, we'd import and use actual icons
-  // For now, we'll return a simplified version
   switch (type) {
     case 'message':
       return '✉️';
@@ -40,9 +36,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => 
   } = notification;
 
   const handleClick = () => {
-    // In a real implementation, this would:
-    // 1. Mark the notification as read
-    // 2. Navigate to actionUrl if provided
     console.log(`Clicked notification ${id}`);
     if (actionUrl) {
       console.log(`Navigating to ${actionUrl}`);
@@ -50,32 +43,36 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => 
   };
 
   return (
-    <div 
-      className={`notification-card ${!read ? 'unread' : ''}`}
+    <div
       onClick={handleClick}
       role="button"
       tabIndex={0}
+      className={`flex gap-4 p-4 rounded-md cursor-pointer shadow-sm transition
+        bg-white dark:bg-gray-800 
+        text-gray-800 dark:text-gray-100 
+        ${!read ? 'border-l-4 border-blue-500' : 'border border-gray-200 dark:border-gray-700'}`}
     >
-      <div className="notification-icon">
-        {getNotificationIcon(type)}
-      </div>
-      
-      <div className="notification-content">
-        <div className="notification-header">
-          <h3>{title}</h3>
-          <span className="notification-time">{formatTimeAgo(timestamp)}</span>
+      <div className="text-2xl">{getNotificationIcon(type)}</div>
+
+      <div className="flex flex-col flex-grow">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium">{title}</h3>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {formatTimeAgo(timestamp)}
+          </span>
         </div>
-        
-        <p className="notification-message">{message}</p>
-        
+        <p className="text-sm">{message}</p>
+
         {sender && (
-          <div className="notification-sender">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             From: {sender.name}
           </div>
         )}
       </div>
-      
-      {!read && <div className="unread-indicator" aria-label="Unread notification"></div>}
+
+      {!read && (
+        <span className="w-2 h-2 rounded-full bg-blue-500 self-center" aria-label="Unread notification"></span>
+      )}
     </div>
   );
 };
