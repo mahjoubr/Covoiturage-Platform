@@ -5,7 +5,7 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import StarRating from "./StarRating";
 import { fetchUserPhoto, uploadUserPhoto } from "../../services/userService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "../../types"
 import  FileInput  from "../form/input/FileInput";
 import { useApolloClient } from "@apollo/client";
@@ -18,15 +18,17 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
   const { isOpen, openModal, closeModal } = useModal();
   const [user, setUser] = useState<User | null>(null);
   const getUserData = async () => {
-        try {
-          const fetchedUser = await fetchUserPhoto();
-          setUser(fetchedUser); 
-        } catch (error) {
-          console.error(error);
-        }
-      };
-    
-      getUserData()
+    try {
+      const fetchedUser = await fetchUserPhoto();
+      setUser(fetchedUser); 
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  useEffect(() => {
+    getUserData();
+  }, [])
         const client = useApolloClient();
         const [file, setFile] = useState<File | null>(null);
       

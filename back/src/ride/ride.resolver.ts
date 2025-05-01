@@ -7,6 +7,8 @@ import { NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { PaginationResult } from 'src/services/paginationService';
+import { RidePaginationResult } from './dto/ride-pagination-result';
 
 @Resolver(() => Ride)
 export class RideResolver {
@@ -38,6 +40,7 @@ export class RideResolver {
     
     return this.rideService.create(createRideInput);
   }
+  
 
   @Mutation(() => Ride)
   async updateRide(
@@ -96,6 +99,42 @@ async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
     date: ride.date instanceof Date ? ride.date : new Date(ride.date)
   }));
 }
+
+@Query(() => RidePaginationResult, { name: 'getRidesPaginatedByDriver' })
+@UseGuards(GqlAuthGuard)
+async getRidesPaginatedByDriver(
+  @CurrentUser() user: AppUser,
+  @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+): Promise<PaginationResult<Ride>> {
+  const result = await this.rideService.findPaginatedByDriver(user.id, page, limit);
+
+  result.data = result.data.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date),
+  }));
+
+  return result;
+}
+
+@Query(() => RidePaginationResult, { name: 'getRidesPaginatedByPassenger' })
+@UseGuards(GqlAuthGuard)
+async getRidesPaginatedByPassenger(
+  @CurrentUser() user: AppUser,
+  @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+): Promise<PaginationResult<Ride>> {
+  const result = await this.rideService.findPaginatedByPassenger(user.id, page, limit);
+
+  result.data = result.data.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date),
+  }));
+
+  return result;
+}
+
+
 
 @Query(() => [Ride], { name: 'getRidesByPassenger' })
 @UseGuards(GqlAuthGuard)

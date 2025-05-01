@@ -6,38 +6,11 @@ import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import ReviewCarousel from "../components/UserProfile/ReviewCarousel";
+import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 
-const drives: Drive[] = [
-  {
-    from: "United States",
-    to: "Phoenix",
-    date: "12/02/2024 17:00h",
-    riders: ["Maram ben Rhouma", "John Doe"],
-  },
-  {
-    from: "Canada",
-    to: "Toronto, Ontario",
-    date: "14/03/2024 09:30h",
-    riders: ["Alice Johnson", "Bob Smith"],
-  },
- 
-];
-const rides: Ride[] = [
-  
-  {
-    from: "Canada",
-    to: "Toronto, Ontario",
-    date: "14/03/2024 09:30h",
-    driver: "Alice Johnson",
-  },
-  {
-    from: "Mexico",
-    to: "Mexico City",
-    date: "15/04/2024 14:00h",
-    driver: "Carlos Lopez",
-  },
-];
 const reviews: Review[] = [
   {
     id: 1,
@@ -72,7 +45,44 @@ const reviews: Review[] = [
         username: ""
       }
     },]
-const UserProfiles= () => {  return (
+const UserProfiles= () => { 
+  const navigate = useNavigate();
+  const [page] = useState(1);
+  const limit = 2;
+  const {
+          loading: loadingDriver,
+          error: errorDriver,
+          data: driverData,
+        }= useRidesPaginatedByDriver(page, limit);
+        const driverRides = driverData?.getRidesPaginatedByDriver?.data ?? [];
+        const drives: Drive[] = driverRides.map((ride: any) => ({
+          from: ride.departure,
+          to: ride.arrival,
+          date: new Date(ride.date).toLocaleDateString('en-CA'),
+          time: ride.time,
+          state: ride.state,
+          riders: ride.appUserRides?.map((r: any) =>
+            `${r.appUser?.name ?? ''} ${r.appUser?.lastName ?? ''}`.trim()
+          ).filter(Boolean) ?? [],
+        }));
+  
+        const {
+          loading: loadingPassenger,
+          error: errorPassenger,
+          data: passengerData,
+        }= useRidesPaginatedByPassenger(page, limit);
+        const passengerRides = passengerData?.getRidesPaginatedByPassenger?.data ?? [];
+        const rides: Ride[] = passengerRides.map((ride: any) => ({
+          from: ride.departure,
+          to: ride.arrival,
+          date: new Date(ride.date).toLocaleDateString('en-CA'),
+          time: ride.time,
+          state: ride.state,
+          driver: 
+            `${ride.driver?.name ?? ''} ${ride.driver?.lastName ?? ''}`.trim(),
+        }));
+      
+  return (
     <>
       <PageMeta
         title="Profile"
@@ -89,13 +99,20 @@ const UserProfiles= () => {  return (
           <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
           History as a driver
           </h2>
+          {loadingDriver ? (
+          <p>Loading driver history...</p>
+        ) : errorDriver ? (
+          <p>Error loading driver rides</p>
+        ) : (
+          drives.map((ride: any) => (
+            <UserDriveCard key={ride.id} drive={ride} />
+          ))
+        )}
           {drives.map((drive, index) => (
         <UserDriveCard key={index} drive={drive} />
       ))}
         <div style={{justifySelf: "center"}}>
-        <button className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto">
-            view more
-        </button>
+        
         </div>
         
       </div>
@@ -103,17 +120,26 @@ const UserProfiles= () => {  return (
       <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
           History as a rider
       </h2>         
-      {rides.map((ride, index) => (
-        <UserRideCard key={index} ride={ride} />
-      ))}
+     {loadingPassenger ? (
+                         <p>Loading rider history...</p>
+                       ) : errorPassenger ? (
+                         <p>Error loading rider rides</p>
+                       ) : (
+                         rides.map((ride, index) => (
+                           <UserRideCard key={index} ride={ride} />
+                         ))
+               
+           )}
         <div style={{justifySelf: "center"}}>
-        <button className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto">
+        </div>
+      </div>
+      </div>
+      <div className="flex w-full items-center justify-center" >
+      <button  onClick={() => navigate('/rides')}
+         className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto">
             view more
         </button>
         </div>
-
-      </div>
-      </div>
             <ReviewCarousel reviews={reviews} />
       
           

@@ -40,4 +40,8 @@ export class CreateRideInput {
   @Field({ nullable: true })
   @IsEnum(RideState)
   state?: RideState = RideState.NOT_STARTED;
+  
+  @Field(() => [Int])
+  @IsNotEmpty()
+  riderIds: number[];
 }

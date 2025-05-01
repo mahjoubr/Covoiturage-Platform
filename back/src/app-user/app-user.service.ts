@@ -4,17 +4,11 @@ import { GenericService } from '../services/genericService';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppUser } from './entities/app-user.entity';
 import { Repository } from 'typeorm';
-<<<<<<< HEAD
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
-import { User } from 'src/user/entities/user.entity';
-import { Review } from 'src/review/entities/review.entity';
-import { saveFile } from '../common/helpers/file-upload.helper';
-import { FileUpload } from 'graphql-upload/processRequest.mjs';
-=======
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
->>>>>>> b7676a497e875bf51c8a095307f33ff9f066f020
+import { saveFile } from '../common/helpers/file-upload.helper';
+import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 @Injectable()
 export class AppUserService extends GenericService {

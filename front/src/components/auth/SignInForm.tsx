@@ -25,6 +25,7 @@ export default function SignInForm() {
 
     localStorage.setItem('auth_token', accessToken); 
     console.log("Token saved:", accessToken);
+    console.log(result.user.id)
       if (result.user.role=== 'admin') {
         navigate("/profile");
       } else if (user.role === 'user') {

@@ -3,7 +3,7 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchUserById, updateUser } from "../../services/userService";
 import { UpdateAppUserInput, User } from "../../types";
 
@@ -32,8 +32,9 @@ const [error, setError] = useState<string | null>(null);
         console.error(error);
       }
     };
-  
-    getUserData();
+    useEffect(() => {
+      getUserData();
+    }, [])
 
   
   const { isOpen, openModal, closeModal } = useModal();

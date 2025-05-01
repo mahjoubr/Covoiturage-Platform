@@ -4,6 +4,7 @@ import { User } from '../../user/entities/user.entity';
 import { Post } from 'src/post/entities/post.entity';
 import { Review } from 'src/review/entities/review.entity';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { Ride } from 'src/ride/entities/ride.entity';
 @ChildEntity()
 @ObjectType() // Add @ObjectType() to mark this as a GraphQL type
 export class AppUser extends User {
@@ -45,4 +46,8 @@ export class AppUser extends User {
   @OneToMany(() => AppUserRide, (appUserRide) => appUserRide.appUser)
   @Field(() => [AppUserRide]) // Expose this field in GraphQL
   appUserRides: AppUserRide[];
+
+  @OneToMany(() => Ride, ride => ride.driver)
+  drivenRides: Ride[];
+
 }

@@ -88,6 +88,14 @@ type Ride {
   state: String!
   appUserRides: [AppUserRide!]!
   post: Post!
+  driver: AppUser!
+}
+
+type RidePaginationResult {
+  data: [Ride!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
 }
 
 type JwtAuthResponse {
@@ -98,17 +106,19 @@ type JwtAuthResponse {
 
 type Query {
   dummyQuery: String
+  getAppUserInfo: AppUser!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
+  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
-  getAppUserInfo: AppUser!
 }
 
 type Mutation {
@@ -155,6 +165,7 @@ input CreateRideInput {
   price: Float!
   nbPassengers: Int!
   state: String = "NotStarted"
+  riderIds: [Int!]!
 }
 
 input UpdateRideInput {
@@ -165,6 +176,7 @@ input UpdateRideInput {
   price: Float
   nbPassengers: Int
   state: String
+  riderIds: [Int!]
 }
 
 input CreateCommentInput {

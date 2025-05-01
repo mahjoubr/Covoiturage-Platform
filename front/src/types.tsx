@@ -3,12 +3,16 @@ export interface Drive {
     to: string;
     date: string;
     riders: string[];
+    time: string;
+    state: string;
   }
 
   export interface Ride {
     from: string;
     to: string;
     date: string;
+    time: string;
+    state:string,
     driver: string;
   }
   export interface Review {
