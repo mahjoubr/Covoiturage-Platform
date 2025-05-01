@@ -1,26 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { GenericService } from 'src/services/genericService';
+import { Repository } from 'typeorm';
+import { Comment } from './entities/comment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class CommentService {
-  create(createCommentDto: CreateCommentDto) {
-    return 'This action adds a new comment';
-  }
-
-  findAll() {
-    return `This action returns all comment`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
-
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
-  }
+export class CommentService extends GenericService {
+  constructor(@InjectRepository(Comment) private readonly repo: Repository<Comment>) {
+    super(repo);
+  } 
 }
