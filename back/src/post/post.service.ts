@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Post } from './entities/post.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { GenericService } from '../services/genericService';
 
 @Injectable()
-export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+export class PostService extends GenericService {
+  constructor(@InjectRepository(Post) private readonly postRepo: Repository<Post>) {
+    super(postRepo);
   }
+  async findAll(options = {}): Promise<Post[]> {
+    return this.postRepo.createQueryBuilder('post')
+  .leftJoinAndSelect('post.postOwner', 'postOwner')
+  .leftJoinAndSelect('post.listRide', 'listRide')
+  .leftJoinAndSelect('post.comments', 'comments')
+.leftJoinAndSelect('comments.commenter', 'commenter')
 
-  findAll() {
-    return `This action returns all post`;
-  }
+  .getMany();
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
   }
-
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async findOne(id: number): Promise<Post> {
+    const post = await this.postRepo.createQueryBuilder('post')
+      .leftJoinAndSelect('post.listRide', 'listRide')
+      .leftJoinAndSelect('post.postOwner', 'postOwner')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('comments.commenter', 'commenter')
+      .where('post.id = :id', { id })
+      .getOne();
+  
+    if (!post) {
+      throw new NotFoundException(`Entity with ID ${id} not found`);
+    }
+  
+    return post;
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} post`;
-  }
+  
+  
 }

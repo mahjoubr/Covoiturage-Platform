@@ -15,20 +15,33 @@ import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { GraphqlModule } from './graphql/graphql.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import * as path from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
       
   imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: path.join(process.cwd(), 'uploads'), 
+      serveRoot: '/uploads',  
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
        
-       
-        
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
@@ -42,10 +55,11 @@ import { AuthModule } from './auth/auth.module';
           autoLoadEntities: true,
         };
       },
-    }), AuthModule,
-    
+    }),
+     AuthModule,
+        GraphqlModule,
       RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
         controllers: [AppController],
-        providers: [AppService],
+        providers: [AppService, JwtStrategy],
 })
 export class AppModule {}
