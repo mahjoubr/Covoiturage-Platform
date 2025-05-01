@@ -1,7 +1,8 @@
+import { useLocation } from 'react-router';
 import ReviewForm from '../../components/review/ReviewForm';
 
 const ReviewPage = () => {
-  // Static ride data
+  
   const ride = {
     date: '2025-04-30',
     departure: 'Tunise',
@@ -12,7 +13,16 @@ const ReviewPage = () => {
     rideId: 123456
   };
 
-  // Handle review submission from child component
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const reviewedId = queryParams.get('reviewedId');
+  const rideId = queryParams.get('rideId');
+  if (!rideId || !reviewedId) {
+    console.error('Missing rideId or reviewedId in query parameters');
+    return null; // or handle the error as needed
+  }
+
   const handleReviewSubmitted = () => {
     console.log('Review was submitted successfully!');
   };
@@ -59,7 +69,8 @@ const ReviewPage = () => {
       
       {/* Review Form Component */}
       <ReviewForm 
-        rideId={ride.rideId} 
+        rideId={Number(rideId)}
+        reviewedId={Number(reviewedId)}
         onReviewSubmitted={handleReviewSubmitted} 
       />
     </div>

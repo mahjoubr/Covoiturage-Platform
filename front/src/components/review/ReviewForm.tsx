@@ -3,10 +3,12 @@ import { Star, CheckCircle } from 'lucide-react';
 
 interface ReviewFormProps {
   rideId: number;
+  reviewedId:number,
+
   onReviewSubmitted: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, onReviewSubmitted }) => {
+const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSubmitted }) => {
   const [stars, setStars] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -20,6 +22,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, onReviewSubmitted }) =>
     const reviewData = {
       stars,
       comment,
+      reviewedId,
       rideId,
     };
 
