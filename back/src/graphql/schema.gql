@@ -98,6 +98,7 @@ type JwtAuthResponse {
 
 type Query {
   dummyQuery: String
+  getAppUserInfo: AppUser!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!
@@ -113,9 +114,11 @@ type Query {
 type Mutation {
   register(input: RegisterInput!): AppUser!
   login(input: LoginInput!): JwtAuthResponse!
-  createRide(createRideInput: CreateRideInput!): Ride!
+  updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
+  createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
+  createPost(createPostInput: CreatePostInput!): Post!
   createComment(input: CreateCommentInput!): Comment!
 }
 
@@ -129,6 +132,15 @@ input RegisterInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input UpdateAppUserInput {
+  name: String
+  lastName: String
+  dateOfBirth: String
+  phoneNumber: String
+  email: String
+  password: String
 }
 
 input CreateRideInput {
@@ -151,8 +163,21 @@ input UpdateRideInput {
   state: String
 }
 
+input CreatePostInput {
+  destination: String!
+  departure: String!
+  date: DateTime!
+  time: String!
+  seatCount: Int!
+  frequency: String!
+  description: String
+  price: Float
+  contactInfo: String
+  listRide: [String!]!
+  postOwnerId: Float!
+}
+
 input CreateCommentInput {
   text: String!
   postId: Int!
-  commenterId: Int!
 }

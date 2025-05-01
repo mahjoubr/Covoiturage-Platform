@@ -5,6 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { Post } from '../post/entities/post.entity';
 import { AppUser } from '../app-user/entities/app-user.entity';
+import { CurrentUser } from 'src/auth/user.decorator';
+import { AppUserService } from 'src/app-user/app-user.service';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 
 @Resolver(() => Comment)
 export class CommentResolver {
@@ -15,6 +19,7 @@ export class CommentResolver {
     private postRepository: Repository<Post>,
     @InjectRepository(AppUser)
     private userRepository: Repository<AppUser>,
+    private readonly userService :AppUserService
   ) {}
 
   @Query(() => [Comment])
@@ -29,13 +34,15 @@ export class CommentResolver {
       relations: ['commenter', 'post'],
     });
   }
-
+  
   @Mutation(() => Comment)
+  @UseGuards(GqlAuthGuard)
   async createComment(
     @Args('input') input: CreateCommentInput,
+    @CurrentUser() user: AppUser
   ): Promise<Comment> {
     const post = await this.postRepository.findOneByOrFail({ id: input.postId });
-    const commenter = await this.userRepository.findOneByOrFail({ id: input.commenterId });
+    const commenter = await this.userService.findOne(+user.id);
 
     const comment = this.commentRepository.create({
       text: input.text,

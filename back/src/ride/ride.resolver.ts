@@ -7,10 +7,14 @@ import { NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Post } from 'src/post/entities/post.entity';
+import { PostService } from 'src/post/post.service';
 
 @Resolver(() => Ride)
 export class RideResolver {
-  constructor(private readonly rideService: RideService) {}
+  constructor(private readonly rideService: RideService,private readonly postrepo :PostService) {}
 
   @Query(() => [Ride], { name: 'getAllRides' })
   async findAll(): Promise<Ride[]> {
@@ -31,13 +35,30 @@ export class RideResolver {
   }
 
   @Mutation(() => Ride)
-  async createRide(@Args('createRideInput') createRideInput: CreateRideInput): Promise<Ride> {
+  async createRide(
+    @Args('createRideInput') createRideInput: CreateRideInput,
+    @Args('postId') postId: number,  // Accept the postId as a parameter
+  ): Promise<Ride> {
     if (createRideInput.date && typeof createRideInput.date === 'string') {
       createRideInput.date = new Date(createRideInput.date);
     }
-    
-    return this.rideService.create(createRideInput);
+  
+    // Find the post by the provided postId
+    const post = await this.postrepo.findOne(postId);
+  
+    if (!post) {
+      throw new Error('Post not found');
+    }
+  
+    // Create a new Ride and associate it with the found Post
+    const ride = await this.rideService.createRide(createRideInput, post);
+  
+    return ride;
   }
+  
+  
+  
+  
 
   @Mutation(() => Ride)
   async updateRide(

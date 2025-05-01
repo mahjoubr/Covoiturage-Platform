@@ -29,9 +29,9 @@ export class CreatePostInput {
   @Field({ nullable: true })
   contactInfo?: string;
 
-  @Field(() => [String]) // maybe just ride IDs (or change if needed)
+  @Field(() => [String]) 
   listRide: string[];
 
   @Field()
-  postOwnerId: string; // assuming you just pass the User ID
+  postOwnerId: number; 
 }

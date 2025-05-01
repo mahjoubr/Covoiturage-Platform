@@ -4,9 +4,12 @@ import { PostController } from './post.controller';
 import { Post } from './entities/post.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostResolver } from './post.resolver';
+import { Ride } from 'src/ride/entities/ride.entity';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { AppUserModule } from 'src/app-user/app-user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post])],
+  imports: [TypeOrmModule.forFeature([Post, Ride, AppUser]),AppUserModule],
   controllers: [PostController],
   providers: [PostService,PostResolver],
   exports: [PostService],

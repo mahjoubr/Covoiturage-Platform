@@ -11,7 +11,8 @@ query {
         id
         postOwner {
           id
-          username
+          name
+          lastName
         }
       }
     }
@@ -29,7 +30,7 @@ query {
       appUser {
         id
         name
-        lasname
+        lastName
       }
     }
   }
@@ -38,11 +39,9 @@ query {
 export const GET_USER = gql`
 query {
   getAppUserInfo {
-    
     id
     name
-    lasname
-      
+    lastName
   }
 }
   `;

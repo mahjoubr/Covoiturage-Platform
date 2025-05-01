@@ -1,6 +1,7 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { Post } from './entities/post.entity';
 import { PostService } from './post.service';
+import { CreatePostInput } from './dto/post-graphql.dto';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -24,4 +25,9 @@ export class PostResolver {
       date: post.date instanceof Date ? post.date : new Date(post.date)
     };
   }
+  @Mutation(() => Post)
+async createPost(@Args('createPostInput') createPostInput: CreatePostInput): Promise<Post> {
+  return this.postService.create(createPostInput);
+}
+
 }

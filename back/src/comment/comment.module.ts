@@ -6,9 +6,10 @@ import { Post } from 'src/post/entities/post.entity';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { CommentResolver } from './comment.resolver';
 import { Comment } from './entities/comment.entity';
+import { AppUserModule } from 'src/app-user/app-user.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Comment, Post, AppUser])],
+  imports:[TypeOrmModule.forFeature([Comment, Post, AppUser]),AppUserModule],
   controllers: [CommentController],
   providers: [CommentService,CommentResolver],
 })
