@@ -8,13 +8,20 @@ import { fetchUserPhoto, uploadUserPhoto } from "../../services/userService";
 import { useEffect, useState } from "react";
 import { User } from "../../types"
 import  FileInput  from "../form/input/FileInput";
-import { useApolloClient } from "@apollo/client";
+import { useApolloClient, useQuery } from "@apollo/client";
+import { GET_AVERAGE_RATING } from "../../graphQl/queries/reviews";
 interface UserMetaCardProps {
   isReportable: boolean; 
   isEditable: boolean;
 }
 
 export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardProps) {
+  const { loading, error, data } = useQuery(GET_AVERAGE_RATING);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error loading rating: {error.message}</p>;
+
+  const rating = data?.getAverageRating ?? 0;
   const { isOpen, openModal, closeModal } = useModal();
   const [user, setUser] = useState<User | null>(null);
   const getUserData = async () => {
@@ -70,7 +77,7 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                
-              <StarRating rating={4} />
+              <StarRating rating={rating} />
 
               </div>
             </div>

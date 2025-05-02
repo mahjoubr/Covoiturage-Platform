@@ -8,11 +8,12 @@ import { SearchService } from 'src/services/searchService';
 import { UserService } from 'src/user/user.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { AppUserModule } from 'src/app-user/app-user.module';
+import { ReviewResolver } from './review.resolver';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Review]),AppUserModule],
   controllers: [ReviewController],
-  providers: [ReviewService,PaginationService,SearchService ],
+  providers: [ReviewService,PaginationService,SearchService , ReviewResolver],
   exports: [ReviewService],
 })
 export class ReviewModule {}

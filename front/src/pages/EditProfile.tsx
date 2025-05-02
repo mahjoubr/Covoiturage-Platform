@@ -1,7 +1,7 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import PageMeta from "../components/common/PageMeta";
-import { Drive, Review, Ride } from "../types";
+import { Drive, Ride } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
@@ -10,41 +10,6 @@ import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../serv
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 
-
-const reviews: Review[] = [
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 5,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 4,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-    {
-      id: 1,
-      reviewer: { id: 1, username: 'John Doe' },
-      stars: 3,
-      comment: 'Excellent product! Would definitely recommend.',
-      date: '2024-03-15',
-      reviewedUser: {
-        id: 0,
-        username: ""
-      }
-    },]
 const UserProfiles= () => { 
   const navigate = useNavigate();
   const [page] = useState(1);
@@ -140,7 +105,7 @@ const UserProfiles= () => {
             view more
         </button>
         </div>
-            <ReviewCarousel reviews={reviews} />
+            <ReviewCarousel />
       
           
         </div>

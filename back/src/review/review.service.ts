@@ -51,10 +51,12 @@ export class ReviewService extends GenericService {
 
 
       async findByReviewedUserId (reviewedUserId: number) {
-        return this.reviewRepository.find({ where: { reviewedUser: { id: reviewedUserId } } });
+        return this.reviewRepository.find({ where: { reviewedUser: { id: reviewedUserId } }, 
+          relations: ['reviewer', 'reviewedUser', 'ride'],
+          order: { date: 'DESC' },});
       }
       async findByReviewerId (reviewerId: number) {
-        return this.reviewRepository.find({ where: { reviewer: { id: reviewerId } } });
+        return this.reviewRepository.find({ where: { reviewer: { id: reviewerId } }});
       }
 
       async findByRideId (rideId: number) {
@@ -63,6 +65,23 @@ export class ReviewService extends GenericService {
       async findByReviewerIdAndRideId (reviewerId: number, rideId: number) {  
         return this.reviewRepository.find({ where: { reviewer: { id: reviewerId }, ride: { id: rideId } } });
       }
+
+      async getAverageRating(userId: number): Promise<number> {
+        const reviews = await this.reviewRepository.find({
+          where: [
+            { reviewedUser: { id: userId } },
+          ],
+        });
+    
+        if (reviews.length === 0) {
+          return 0;
+        }
+        const totalStars = reviews.reduce((sum, review) => sum + review.stars, 0);
+        const averageRating = totalStars / reviews.length;
+    
+        return Math.round(averageRating); 
+      }
+    
 
 
 }

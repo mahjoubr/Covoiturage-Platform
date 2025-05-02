@@ -1,25 +1,30 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Review } from '../../types';
+import { useQuery } from '@apollo/client';
+import { GET_MY_REVIEWS } from '../../graphQl/queries/reviews';
 import ReviewCard from './ReviewCard';
 
-interface ReviewCarouselProps {
-  reviews: Review[];
-  itemsToShow?: number;
-}
-
-export default function ReviewCarousel({ reviews, itemsToShow = 3 }: ReviewCarouselProps) {
+export default function ReviewCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsToShow = 3;
+
+  const { loading, error, data } = useQuery(GET_MY_REVIEWS);
+  if (loading) return <p>Loading reviews...</p>;
+  if (error) return <p>Error loading reviews: {error.message}</p>;
+
+  const reviews = data?.getMyReviews || [];
+
+  const totalSlides = Math.ceil(reviews.length / itemsToShow);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex + itemsToShow >= reviews.length ? 0 : prevIndex + 1
+    setCurrentIndex((prevIndex) =>
+      prevIndex + itemsToShow >= reviews.length ? 0 : prevIndex + itemsToShow
     );
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? reviews.length - itemsToShow : prevIndex - 1
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? (totalSlides - 1) * itemsToShow : prevIndex - itemsToShow
     );
   };
 
@@ -27,7 +32,7 @@ export default function ReviewCarousel({ reviews, itemsToShow = 3 }: ReviewCarou
 
   return (
     <div className="relative w-full">
-      <div className="flex items-center">
+      <div className="flex items-center relative">
         <button
           onClick={prevSlide}
           className="absolute left-0 z-10 p-2 -translate-x-full text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
@@ -38,7 +43,7 @@ export default function ReviewCarousel({ reviews, itemsToShow = 3 }: ReviewCarou
 
         <div className="w-full overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleReviews.map((review) => (
+            {visibleReviews.map((review: any) => (
               <ReviewCard key={review.id} review={review} />
             ))}
           </div>
@@ -54,7 +59,7 @@ export default function ReviewCarousel({ reviews, itemsToShow = 3 }: ReviewCarou
       </div>
 
       <div className="flex justify-center mt-4 gap-2">
-        {Array.from({ length: Math.ceil(reviews.length / itemsToShow) }).map((_, index) => (
+        {Array.from({ length: totalSlides }).map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index * itemsToShow)}

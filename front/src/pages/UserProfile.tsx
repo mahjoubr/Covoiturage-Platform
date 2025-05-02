@@ -1,47 +1,13 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import PageMeta from "../components/common/PageMeta";
-import { Drive, Review, Ride } from "../types";
+import { Drive, Ride } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import ReviewCarousel from "../components/UserProfile/ReviewCarousel";
 import { useState } from "react";
 import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 5,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 4,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-    {
-      id: 1,
-      reviewer: { id: 1, username: 'John Doe' },
-      stars: 3,
-      comment: 'Excellent product! Would definitely recommend.',
-      date: '2024-03-15',
-      reviewedUser: {
-        id: 0,
-        username: ""
-      }
-    },]
     const UserProfiles = () => {
       const [page] = useState(1);
       const limit = 2;
@@ -126,7 +92,7 @@ const reviews: Review[] = [
       <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
           Reviews
           </h2>  
-      <ReviewCarousel reviews={reviews} />
+      <ReviewCarousel />
         </div>
       </div>
     </>

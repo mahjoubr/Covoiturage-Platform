@@ -119,6 +119,9 @@ type Query {
   getPostById(id: String!): Post!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
+  getAllReviews: [Review!]!
+  getMyReviews: [Review!]!
+  getAverageRating: Int!
 }
 
 type Mutation {
