@@ -4,12 +4,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { GenericService } from '../services/genericService';
 import { CreatePostInput } from './dto/post-graphql.dto';
-import { Ride } from 'src/ride/entities/ride.entity';
+import { Ride, RideState } from 'src/ride/entities/ride.entity';
 import { AppUserService } from 'src/app-user/app-user.service';
+import { CreateRideInput } from 'src/ride/dto/create-ride.input';
+import { RideService } from 'src/ride/ride.service';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class PostService extends GenericService {
-  constructor(@InjectRepository(Post) private readonly postRepo: Repository<Post>,@InjectRepository(Ride) private rideRepo: Repository<Ride>,private readonly userService: AppUserService) {
+  constructor(
+    @InjectRepository(Post) private readonly postRepo: Repository<Post>,
+    @InjectRepository(Ride) private rideRepo: Repository<Ride>,
+    private readonly userService: AppUserService,
+    private readonly subscriptionService : SubscriptionService,
+    private readonly rideService: RideService) {
     super(postRepo);
   }
   async create(createPostInput: CreatePostInput): Promise<Post> {
@@ -31,7 +39,31 @@ export class PostService extends GenericService {
       }
     }
     
-    return this.postRepo.save(post);
+    const savedPost = await this.postRepo.save(post);
+
+    // Create initial ride for this post
+    const rideInput: CreateRideInput = {
+      date: createPostInput.date,
+      time: createPostInput.time,
+      departure: createPostInput.departure,
+      arrival: createPostInput.destination,
+      price: createPostInput.price ?? 0, // fallback if price is undefined
+      nbPassengers: createPostInput.seatCount,
+      state: RideState.NOT_STARTED,
+    };
+  
+    // Create ride using rideService
+    await this.rideService.createRide(rideInput, savedPost);
+
+    //HERE
+    await this.subscriptionService.subscribe(
+      postOwnerId,
+      post.id,
+      'post' // Entity type
+    );
+    //ENDS HERE
+    return savedPost;
+
   }
   
   

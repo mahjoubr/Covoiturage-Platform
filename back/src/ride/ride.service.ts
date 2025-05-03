@@ -28,7 +28,7 @@ export class RideService extends GenericService {
   async findByState(state: RideState): Promise<Ride[]> {
     return this.rideRepo.find({
       where: { state },
-      relations: ['appUserRides'],
+      relations: ['appUserRides','post'],
     });
   }
 

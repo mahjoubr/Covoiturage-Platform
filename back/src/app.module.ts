@@ -16,6 +16,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql/graphql.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import {EventStreamModule } from './SSE/sse.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
       
@@ -23,6 +26,7 @@ import { GraphqlModule } from './graphql/graphql.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -44,7 +48,7 @@ import { GraphqlModule } from './graphql/graphql.module';
       },
     }), AuthModule,
         GraphqlModule,
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
+      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule],
         controllers: [AppController],
         providers: [AppService],
 })
