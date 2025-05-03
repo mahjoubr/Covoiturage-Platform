@@ -4,6 +4,25 @@ import ChatMessages from './chatMessages';
 import ChatInput from './chatInput';
 
 const ChatBox: React.FC = () => {
+  const messages = [
+    {
+      id: 1,
+      name: 'Lindsey',
+      avatar: '/images/user/user-17.jpg',
+      text: 'I want to make an appointment tomorrow from 2:00 to 5:00pm?',
+      time: '2 hours ago',
+      from: "user",
+      timestamp: '2023-03-01T14:00:00Z',
+    },
+    {
+      id: 2,
+      text: "If don't like something, I'll stay away from it.",
+      time: '2 hours ago',
+      from: "user",
+      timestamp: '2023-03-01T14:00:00Z',
+    },
+  ];
+  
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:w-3/4">
       {/* Chat Header */}
@@ -35,7 +54,7 @@ const ChatBox: React.FC = () => {
       </div>
 
       {/* Chat Messages */}
-      <ChatMessages />
+      <ChatMessages messages={messages} />
       
       {/* Chat Input */}
       <ChatInput />

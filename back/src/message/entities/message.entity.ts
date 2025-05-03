@@ -1,6 +1,6 @@
 import { Chat } from 'src/chat/entities/chat.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class Message {
@@ -10,14 +10,11 @@ export class Message {
   @Column({ type: 'text' })
   text: string;
 
-  @Column({ type: 'timestamp' })
-  date: Date;
-
+  @CreateDateColumn()
+  createdAt: Date;
+  
   @ManyToOne(()=>User,{ eager: true })
   sender: User;
-
-  @ManyToOne(()=>User,{ eager: true })
-  receiver: User;
 
   @ManyToOne(()=>Chat,chat=>chat.messages)
   chat: Chat;

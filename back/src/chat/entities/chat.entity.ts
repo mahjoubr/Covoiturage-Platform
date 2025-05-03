@@ -1,6 +1,7 @@
 import { Message } from 'src/message/entities/message.entity';
-import { Entity, OneToMany,ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, OneToMany,ManyToOne, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { Ride } from 'src/ride/entities/ride.entity';
 
 @Entity()
 export class Chat {
@@ -11,8 +12,12 @@ export class Chat {
   messages: Message[];
 
   @ManyToOne(() => User, { eager: true })
-  user1: User;
+  driver: User;
 
   @ManyToOne(() => User, { eager: true })
-  user2: User;
+  rider: User;
+  
+  @OneToOne(() => Ride, { eager: true })  
+  @JoinColumn()
+  ride: Ride;
 }
