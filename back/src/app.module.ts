@@ -21,6 +21,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import * as path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ScheduleModule } from '@nestjs/schedule';
+import {EventStreamModule } from './SSE/sse.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { JoinRequestModule } from './join-request/join-request.module';
 
 @Module({
       
@@ -37,6 +41,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       rootPath: path.join(process.cwd(), 'uploads'), 
       serveRoot: '/uploads',  
     }),
+    ScheduleModule.forRoot(),
+    
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -58,7 +64,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     }),
      AuthModule,
         GraphqlModule,
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
+      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule],
         controllers: [AppController],
         providers: [AppService, JwtStrategy],
 })

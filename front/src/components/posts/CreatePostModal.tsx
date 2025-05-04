@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_POST } from '../../graphQl/queries/posts';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CreatePostFormData } from '../../types/posts.ts';
 import '../../styles/posts.css';
+import { GET_USER } from '../../graphQl/queries/rides.ts';
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (postData: CreatePostFormData) => void;
+  userData: {
+    id?: string;
+    name?: string;
+    lastName?: string;
+  };
 }
+
 
 const initialFormData: CreatePostFormData = {
   destination: '',
@@ -13,15 +22,36 @@ const initialFormData: CreatePostFormData = {
   date: '',
   time: '',
   seatCount: 1,
-  driverName: '',
+  driverName:'' ,
   frequency: 'One-time',
   description: '',
   price: 0,
   contactInfo: ''
 };
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSubmit,userData }) => {
+  /*
+  const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  // Fetch user data only if logged in
+  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
+    skip: !isLoggedIn,
+    fetchPolicy: 'network-only',
+    onCompleted: (data) => console.log('GET_USER completed:', data),
+    onError: (error) => console.error('GET_USER error:', error)
+  });*/
   const [formData, setFormData] = useState<CreatePostFormData>(initialFormData);
+
+  useEffect(() => {
+    if (userData.name && userData?.lastName) {
+      setFormData((prev) => ({
+        ...prev,
+        driverName: `${userData.name} ${userData.lastName}`, // Combine name and lastName
+      }));
+    }
+  }, [userData]);
+  
+
   const [errors, setErrors] = useState<Partial<Record<keyof CreatePostFormData, string>>>({});
 
   const validateForm = (): boolean => {
@@ -52,15 +82,34 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSu
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      onSubmit(formData);
-      setFormData(initialFormData);
-      onClose();
-    }
-  };
+  const [createPost] = useMutation(CREATE_POST);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const { driverName, ...formDataWithoutDriverName } = formData;
+
+
+  if (!validateForm()) return;
+
+  try {
+    await createPost({
+      variables: {
+        createPostInput: {
+          ...formDataWithoutDriverName,
+          date: new Date(formData.date), // Ensure proper Date format
+          postOwnerId: userData.id, // Replace with actual user ID dynamically if possible
+          listRide: [] // Add ride IDs or empty array
+        }
+      }
+    });
+
+    setFormData(initialFormData);
+    onClose();
+  } catch (err) {
+    console.error("Failed to create post:", err);
+  }
+};
+
 
   if (!isOpen) return null;
 
@@ -89,9 +138,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSu
                 type="text"
                 name="driverName"
                 value={formData.driverName}
-                onChange={handleChange}
-                className={`w-full px-2 py-1 text-sm border ${errors.driverName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100`}
+                readOnly
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 cursor-not-allowed"
               />
+
               {errors.driverName && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.driverName}</p>}
             </div>
             

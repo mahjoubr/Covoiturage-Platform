@@ -12,6 +12,7 @@ import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
+import { Post } from 'src/post/entities/post.entity';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -23,11 +24,21 @@ export class RideService extends GenericService {
     
     super(rideRepo);
   }
+  async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
+    // Create a new ride and associate it with the post
+    const ride = this.rideRepo.create({
+      ...createRideInput,
+      post, // Associate the ride with the post
+    });
+
+    // Save the ride in the database
+    return await this.rideRepo.save(ride);
+  }
   
   async findByState(state: RideState): Promise<Ride[]> {
     return this.rideRepo.find({
       where: { state },
-      relations: ['appUserRides'],
+      relations: ['appUserRides','post'],
     });
   }
 

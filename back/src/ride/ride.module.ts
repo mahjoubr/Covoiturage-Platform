@@ -1,21 +1,23 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RideService } from './ride.service';
 import { RideController } from './ride.controller';
 import { Ride } from './entities/ride.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RideResolver } from './ride.resolver';
-import { PaginationService } from 'src/services/paginationService';
-import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
-import { AppUserService } from 'src/app-user/app-user.service';
+import { Post } from 'src/post/entities/post.entity';
+import { PostModule } from 'src/post/post.module';
+import { RideSchedulerService } from './ride-scheduler.service';
 import { AppUserModule } from 'src/app-user/app-user.module';
+import { EventStreamModule } from 'src/SSE/sse.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { AppUserRideModule } from 'src/app-user-ride/app-user-ride.module';
+import { PaginationService } from 'src/services/paginationService';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ride]),
-          AppUserModule,
-          AppUserRideModule],
+  imports: [TypeOrmModule.forFeature([Ride,Post]),forwardRef(() => PostModule), AppUserModule,AppUserRideModule,
+  EventStreamModule,SubscriptionModule ],
   controllers: [RideController], 
-  providers: [RideService,RideResolver,PaginationService],
+  providers: [RideService,RideResolver,RideSchedulerService,PaginationService],
   exports: [RideService]
 })
 export class RideModule {}
