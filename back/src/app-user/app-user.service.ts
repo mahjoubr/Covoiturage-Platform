@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
+import { saveFile } from '../common/helpers/file-upload.helper';
+import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 @Injectable()
 export class AppUserService extends GenericService {
@@ -30,7 +32,6 @@ export class AppUserService extends GenericService {
   async findByEmail(email: string): Promise<User | null> {
     return this.appUserRepo.findOne({ where: { email } });
   }
-  
 
   async updateUserRating(userId: number): Promise<void> {
     try {
@@ -71,6 +72,15 @@ export class AppUserService extends GenericService {
       console.error("Error updating user rating:", error.message);
       throw error;
     }
+  }
+  async uploadPhoto(userId: number, file: string ): Promise<AppUser> {
+    const user = await this.appUserRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+  
+    const imageUrl = await saveFile(file);
+    user.imageUrl = imageUrl;
+  
+    return this.appUserRepo.save(user);
   }
   
 }

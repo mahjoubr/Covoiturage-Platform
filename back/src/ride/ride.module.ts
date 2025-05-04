@@ -10,12 +10,14 @@ import { RideSchedulerService } from './ride-scheduler.service';
 import { AppUserModule } from 'src/app-user/app-user.module';
 import { EventStreamModule } from 'src/SSE/sse.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { AppUserRideModule } from 'src/app-user-ride/app-user-ride.module';
+import { PaginationService } from 'src/services/paginationService';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ride,Post]),forwardRef(() => PostModule), AppUserModule,
+  imports: [TypeOrmModule.forFeature([Ride,Post]),forwardRef(() => PostModule), AppUserModule,AppUserRideModule,
   EventStreamModule,SubscriptionModule ],
   controllers: [RideController], 
-  providers: [RideService,RideResolver,RideSchedulerService],
+  providers: [RideService,RideResolver,RideSchedulerService,PaginationService],
   exports: [RideService]
 })
 export class RideModule {}

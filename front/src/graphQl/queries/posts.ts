@@ -104,11 +104,6 @@ export const GET_RIDE = gql`
 query GetMatchingRide($postId: Int!) {
   matchingRide(postId: $postId) {
     id
-    post{
-      postOwner{
-      id
-      }
-    }
   }
 }
   `;

@@ -3,12 +3,16 @@ export interface Drive {
     to: string;
     date: string;
     riders: string[];
+    time: string;
+    state: string;
   }
 
   export interface Ride {
     from: string;
     to: string;
     date: string;
+    time: string;
+    state:string,
     driver: string;
   }
   export interface Review {
@@ -24,7 +28,28 @@ export interface Drive {
       id: number;
       username: string;
     };
+    
   }
+  export type UpdateAppUserInput = {
+    name: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    dateOfBirth: string;
+    password: string;
+  };
+  export interface User {
+    name: string;
+    lastName: string;
+    email: string;
+    phoneNumber?: string ;
+    dateOfBirth?: string | null; 
+    imageUrl?: string
+  }
+  export type UpdatePhotoInput = {
+    file: string;
+  }
+  
 export interface RidePost {
   id: string;
   date: string;
@@ -36,3 +61,20 @@ export interface RidePost {
   isRideYouTook: boolean;
   postId: string;
 }
+  }
+  export interface Sender {
+    id: string;
+    name: string;
+    avatar?: string;
+  }
+  
+  export interface Notification {
+    id: string;
+    type: 'message' | 'like' | 'comment' | 'follow' | 'mention' | 'other';
+    title: string;
+    message: string;
+    timestamp: Date;
+    read: boolean;
+    sender?: Sender;
+    actionUrl?: string;
+  }

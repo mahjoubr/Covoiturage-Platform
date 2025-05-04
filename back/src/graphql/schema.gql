@@ -55,8 +55,8 @@ type AppUser {
   role: String!
   name: String!
   lastName: String!
-  dateOfBirth: DateTime!
-  phoneNumber: String!
+  dateOfBirth: String
+  phoneNumber: String
   imageUrl: String!
   posts: [Post!]!
   reviews: [Review!]!
@@ -95,7 +95,15 @@ type Ride {
   state: String!
   appUserRides: [AppUserRide!]!
   post: Post!
+  driver: AppUser
   joinRequests: [JoinRequest!]
+}
+
+type RidePaginationResult {
+  data: [Ride!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
 }
 
 type JwtAuthResponse {
@@ -112,6 +120,8 @@ type Query {
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
+  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
@@ -128,6 +138,7 @@ type Mutation {
   register(input: RegisterInput!): AppUser!
   login(input: LoginInput!): JwtAuthResponse!
   updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
+  updatePhoto(updatePhotoInput: UploadPhotoInput!): AppUser!
   createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
@@ -158,6 +169,10 @@ input UpdateAppUserInput {
   phoneNumber: String
   email: String
   password: String
+}
+
+input UploadPhotoInput {
+  file: String!
 }
 
 input CreateRideInput {

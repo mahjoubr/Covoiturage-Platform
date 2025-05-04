@@ -5,7 +5,7 @@ interface UserHistoryCardProps {
 }
 
 export default function UserHistoryCard({ drive }: UserHistoryCardProps) {
-
+  
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6"style={{marginBottom: "10px"}}>
@@ -38,13 +38,29 @@ export default function UserHistoryCard({ drive }: UserHistoryCardProps) {
                   {drive.date}
                 </p>
               </div>
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Time
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {drive.time}
+                </p>
+              </div>
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  State
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {drive.state}
+                </p>
+              </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   Riders
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {drive.riders.join(", ")}
+                  {drive.riders}
                 </p>
               </div>
             </div>

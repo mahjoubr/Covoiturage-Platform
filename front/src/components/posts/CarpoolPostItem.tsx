@@ -317,7 +317,7 @@ const token = localStorage.getItem('auth_token');
     onCompleted: (data) => console.log('GET_ride completed:', data),
     onError: (error) => console.error('GET_ride error:', error)
   });
-
+  console.log(rideData,userData);
   const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
     variables:{rideId:Number(rideData?.matchingRide?.id),userId:Number(userData.id)},
     skip: !isLoggedIn,
@@ -325,6 +325,7 @@ const token = localStorage.getItem('auth_token');
     onCompleted: (data) => console.log('GET_ride completed:', data),
     onError: (error) => console.error('GET_ride error:', error)
   });
+  console.log(joinRequest);
 useEffect(() => {
   if (joinRequest?.getJoinRequestsByRideUser) {
     const hasRequests = Array.isArray(joinRequest.getJoinRequestsByRideUser) 
