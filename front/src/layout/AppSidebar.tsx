@@ -13,6 +13,7 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  ReviewIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -39,6 +40,12 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon:<ReviewIcon/>,
+    name:"Reviews",
+    subItems: [{ name: "My Reviews", path: "/reviews", pro: false },
+    { name: "Received Reviews", path: "/recievedReviews", pro: false }],
   },
   {
     icon:<ChatIcon />,

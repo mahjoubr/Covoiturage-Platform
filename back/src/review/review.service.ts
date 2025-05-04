@@ -20,7 +20,10 @@ export class ReviewService extends GenericService {
         
      }
 
+
+     
      async createReview(createReviewDto: CreateReviewDto) {
+      console.log('Creating review:', createReviewDto);
     
       const review = this.reviewRepository.create({
         stars: createReviewDto.stars,
@@ -50,11 +53,20 @@ export class ReviewService extends GenericService {
 
 
 
-      async findByReviewedUserId (reviewedUserId: number) {
-        return this.reviewRepository.find({ where: { reviewedUser: { id: reviewedUserId } } });
+      async findByReviewerId(userId: number): Promise<Review[]> {
+        return this.reviewRepository.find({
+          where: { reviewer: { id: userId } },
+          relations: ['reviewedUser', 'ride'],    // <- ensure this
+          order: { date: 'DESC' }
+        });
       }
-      async findByReviewerId (reviewerId: number) {
-        return this.reviewRepository.find({ where: { reviewer: { id: reviewerId } } });
+      
+      async findByReviewedUserId(userId: number): Promise<Review[]> {
+        return this.reviewRepository.find({
+          where: { reviewedUser: { id: userId } },
+          relations: ['reviewer', 'ride'],       // <- and this
+          order: { date: 'DESC' }
+        });
       }
 
       async findByRideId (rideId: number) {

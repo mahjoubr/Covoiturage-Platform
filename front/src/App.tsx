@@ -25,6 +25,7 @@ import Posts from "./pages/Posts/PostsPage";
 import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
+import ReviewsPage from "./pages/Review/ReviewsPage";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />

@@ -7,6 +7,9 @@ export const login = async (email: string, password: string) => {
     mutation: LOGIN_MUTATION,
     variables: { input: { email, password } }
   });
+   const token = data.login.accessToken;
+  localStorage.setItem('auth_token', token);
+  
   return data.login;
 };
 

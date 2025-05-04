@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Star, CheckCircle } from 'lucide-react';
+import { createReview } from '../../services/reviews'; // <-- Import service
 
 interface ReviewFormProps {
   rideId: number;
-  reviewedId:number,
-
+  reviewedId: number;
   onReviewSubmitted: () => void;
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSubmitted }) => {
+  console.log('Ride ID:', rideId);
+  console.log('Reviewed User ID:', reviewedId);
+  
   const [stars, setStars] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -18,29 +21,25 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
     event.preventDefault();
     setIsSubmitting(true);
 
-    // Data to be sent to the backend
     const reviewData = {
       stars,
       comment,
-      reviewedId,
+      reviewerId: Number(localStorage.getItem('user_id')),
+      reviewedUserId: reviewedId, 
       rideId,
     };
 
     try {
-      // Simulate API call
+      await createReview(reviewData); 
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+
       setTimeout(() => {
-        console.log('Review submitted:', reviewData);
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        
-        // Reset form after showing success message briefly
-        setTimeout(() => {
-          setStars(0);
-          setComment('');
-          setIsSubmitted(false);
-          onReviewSubmitted(); // Notify parent component
-        }, 3000);
-      }, 1000);
+        setStars(0);
+        setComment('');
+        setIsSubmitted(false);
+        onReviewSubmitted();
+      }, 3000);
     } catch (error) {
       console.error('Error submitting review:', error);
       setIsSubmitting(false);
@@ -58,10 +57,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
       ) : (
         <>
           <h3 className="text-lg font-semibold mb-4">Rate Your Experience</h3>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
-              {/* Star Rating */}
               <div className="mb-4 md:mb-0 md:w-1/3">
                 <label className="block text-gray-700 mb-2">Rating</label>
                 <div className="flex space-x-1">
@@ -73,22 +71,21 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
                       className="focus:outline-none"
                     >
                       <Star
-                        fill={star <= stars ? "#FFD700" : "none"}
-                        color={star <= stars ? "#FFD700" : "#CBD5E0"}
+                        fill={star <= stars ? '#FFD700' : 'none'}
+                        color={star <= stars ? '#FFD700' : '#CBD5E0'}
                         size={28}
                       />
                     </button>
                   ))}
                 </div>
               </div>
-              
-              {/* Comment Field */}
+
               <div className="md:w-2/3">
-                <label htmlFor="comment" className="block text-gray-700 mb-2" >
+                <label htmlFor="comment" className="block text-gray-700 mb-2">
                   Comment
                 </label>
                 <textarea
-                 required
+                  required
                   id="comment"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -98,19 +95,18 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
                 />
               </div>
             </div>
-            
-            {/* Submit Button */}
+
             <div className="mt-4">
               <button
                 type="submit"
                 disabled={isSubmitting || stars === 0}
                 className={`w-full py-3 px-4 rounded-md text-white font-medium ${
-                  stars === 0 
-                    ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-blue-600 hover:bg-blue-700"
+                  stars === 0
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                {isSubmitting ? "Submitting..." : "Submit Review"}
+                {isSubmitting ? 'Submitting...' : 'Submit Review'}
               </button>
             </div>
           </form>

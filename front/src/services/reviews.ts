@@ -1,17 +1,50 @@
 import axios from 'axios';
-import { Review } from '../interfaces/review';
+import { Review } from '../types/review';
+import { useQuery } from "@apollo/client";
+import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA } from '../graphQl/queries/reviews';
+import { GetReviewFormDataResponse } from '../types/reviewFormData';
 
+import client from "../graphQl/client";
+
+import axiosInstance from './axiosInstance';
 const API_URL = 'http://localhost:3000/review';
 
-export const createReview = async (reviewData: Review) => {
+export async function createReview(reviewData: any) {
+  console.log("Submitting review with data:", reviewData);
   try {
-    const response = await axios.post(`${API_URL}`, reviewData);
+    const response = await axiosInstance.post("/review", reviewData);
     return response.data;
   } catch (error) {
-    console.error('Error creating review:', error);
+    console.error("Error creating review:", error);
     throw error;
   }
+}
+
+
+export const getReviewFormData = async (
+  rideId: number,
+  reviewedUserId: number
+) => {
+  const { data } = await client.query<{ reviewFormData: GetReviewFormDataResponse }>({
+    query: GET_REVIEW_FORM_DATA,
+    variables: { rideId, reviewedUserId },
+    fetchPolicy: 'network-only',
+  });
+  return data.reviewFormData;
 };
+
+export const getMyReviews = async () => {
+  const { data } = await client.query({
+    query: GET_MY_REVIEWS,
+    fetchPolicy: 'network-only',
+  });
+  return data.getMyReviews;
+};
+
+
+
+
+
 
 export const getAllReviews = async () => {
   try {
@@ -35,7 +68,7 @@ export const getReviewById = async (id: number) => {
 
 export const updateReview = async (id: number, reviewData: Review) => {
   try {
-    const response = await axios.patch(`${API_URL}/${id}`, reviewData);
+    const response = await axiosInstance.patch(`${API_URL}/${id}`, reviewData);
     return response.data;
   } catch (error) {
     console.error('Error updating review:', error);
@@ -45,7 +78,7 @@ export const updateReview = async (id: number, reviewData: Review) => {
 
 export const deleteReview = async (id: number) => {
   try {
-    const response = await axios.delete(`${API_URL}/${id}`);
+    const response = await axiosInstance.delete(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting review:', error);
