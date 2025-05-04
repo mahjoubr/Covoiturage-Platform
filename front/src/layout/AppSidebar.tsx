@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-
-// Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
   CalenderIcon,
+  ChatIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
@@ -40,6 +39,11 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon:<ChatIcon />,
+    name: "Chat",
+    path: "/chat",
   },
   {
     name: "Forms",
