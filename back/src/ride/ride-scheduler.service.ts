@@ -6,7 +6,7 @@ import { Post } from 'src/post/entities/post.entity';
 import { PostService } from 'src/post/post.service';
 import { CreateRideInput } from './dto/create-ride.input';
 import { SubscriptionService } from 'src/subscription/subscription.service';
-import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 
 @Injectable()
 export class RideSchedulerService {
@@ -74,7 +74,7 @@ export class RideSchedulerService {
             for (const recipientId of subscribers) {
               
                 const event = {
-                  type: 'update_post',
+                  type: EventType.POST_UPDATED,
                   targetId: post.id,
                   recipientId,
                   payload: {

@@ -41,6 +41,7 @@
     "dotenv": "^16.5.0",
     "graphql": "^16.11.0",
     "graphql-iso-date": "^3.6.1",
+    "graphql-scalars": "^1.24.2",
     "graphql-tools": "^9.0.18",
     "mysql2": "^3.14.0",
     "passport": "^0.7.0",

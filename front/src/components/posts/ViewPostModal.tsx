@@ -302,6 +302,7 @@ import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
 import { useMutation } from '@apollo/client';
 import { CREATE_COMMENT } from '../../graphQl/queries/posts';
+import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
 
 
 interface ViewPostModalProps {
@@ -318,7 +319,8 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
-  
+    const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
+  const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
   // Apollo mutation hook configuration
   const [createComment] = useMutation(CREATE_COMMENT, {
     onCompleted: (data) => {
@@ -394,19 +396,21 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
   };
   
   // Handle join ride button
-  const handleJoinRide = (e: React.MouseEvent) => {
+  const handleJoinRide =async  (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering other events
     
     if (requestPending) {
       setRequestPending(false);
       setShowAlert(true);
-      
+      await deleteJoinRequest({ variables: { postId: Number(post.id) } });
       // Auto-hide the alert after 3 seconds
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
     } else {
       setRequestPending(true);
+      await createJoinRequest({ variables: { postId: Number(post.id) } });
+      
     }
   };
 

@@ -2,8 +2,14 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+export enum EventType{
+  POST_UPDATED='update_post',
+  NEW_COMMENT= 'new_comment',
+  JOIN_REQUEST= 'join_request'
+}
+
 export interface StreamEvent {
-  type: string;
+  type: EventType;
   targetId: number; 
   recipientId: number; 
   payload: any;     

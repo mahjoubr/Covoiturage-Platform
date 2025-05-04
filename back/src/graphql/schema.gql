@@ -77,6 +77,13 @@ enum Role {
   PASSENGER
 }
 
+type JoinRequest {
+  id: Float!
+  date: DateTime!
+  user: AppUser
+  ride: Ride
+}
+
 type Ride {
   id: Float!
   date: DateTime!
@@ -88,6 +95,7 @@ type Ride {
   state: String!
   appUserRides: [AppUserRide!]!
   post: Post!
+  joinRequests: [JoinRequest!]
 }
 
 type JwtAuthResponse {
@@ -107,8 +115,13 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
+  matchingRide(postId: Int!): Ride
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
+  getJoinRequestById(id: Float!): JoinRequest!
+  getAllJoinRequests: [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
+  getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
 }
 
 type Mutation {
@@ -119,7 +132,11 @@ type Mutation {
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
   createPost(createPostInput: CreatePostInput!): Post!
+  deletePost(id: Float!): Boolean!
+  updatePost(id: Float!, status: String!): Post!
   createComment(input: CreateCommentInput!): Comment!
+  createJoinRequest(postId: Int!): JoinRequest!
+  deleteJoinRequest(postId: Int!): Boolean!
 }
 
 input RegisterInput {

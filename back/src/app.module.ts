@@ -19,6 +19,7 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import {EventStreamModule } from './SSE/sse.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { JoinRequestModule } from './join-request/join-request.module';
 
 @Module({
       
@@ -48,7 +49,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
       },
     }), AuthModule,
         GraphqlModule,
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule],
+      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule],
         controllers: [AppController],
         providers: [AppService],
 })

@@ -99,3 +99,26 @@ export const CREATE_COMMENT = gql`
   }
 `;
 
+
+export const GET_RIDE = gql`
+query GetMatchingRide($postId: Int!) {
+  matchingRide(postId: $postId) {
+    id
+    post{
+      postOwner{
+      id
+      }
+    }
+  }
+}
+  `;
+  export const GET_JOIN_REQUESTS = gql`
+  query GetJoinRequestsByRideUser($rideId: Int!, $userId: Int!) {
+    getJoinRequestsByRideUser(rideId: $rideId, userId: $userId) {
+      id
+    }
+  }
+`;
+
+
+

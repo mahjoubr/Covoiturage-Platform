@@ -1,6 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { GenericService } from 'src/services/genericService';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
@@ -10,7 +8,7 @@ import { AppUserService } from 'src/app-user/app-user.service';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { PostService } from 'src/post/post.service';
 import { SubscriptionService } from 'src/subscription/subscription.service';
-import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 
 @Injectable()
 export class CommentService extends GenericService {
@@ -35,12 +33,10 @@ async createCommentWithNotif(createDto: CreateCommentInput, commenter: AppUser):
   const savedComment = await this.repo.save(comment);
   const subscribers = await this.subscriptionService.getSubscribers(post.id, 'post');
   
-  // Send notification to each subscribed user
   for (const recipientId of subscribers) {
-    // Skip sending notification to comment author
     if (recipientId !== commenter.id) {
       const event = {
-        type: 'new_comment',
+        type: EventType.NEW_COMMENT,
         targetId: post.id,
         recipientId,
         payload: {
