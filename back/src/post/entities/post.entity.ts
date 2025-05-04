@@ -5,6 +5,10 @@ import { Ride } from '../../ride/entities/ride.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne } from 'typeorm';
 import { JoinRequest } from 'src/join-request/entities/join-request.entity';
 
+export enum PostStatus{
+  OPEN='open',
+  CLOSED='closed'
+}
 @ObjectType()
 @Entity()
 export class Post {
@@ -60,7 +64,8 @@ export class Post {
   @OneToMany(() => Ride, ride => ride.post)
   listRide: Ride[];
 
+  @Field({ nullable: true })
   @Column({ default: 'OPEN' })
-  status: string;
+  status: PostStatus;
 
 }

@@ -32,7 +32,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
     onCompleted: (data) => console.log('GET_USER completed:', data),
     onError: (error) => console.error('GET_USER error:', error),
   });
-
+  const userInfo = userData?.getAppUserInfo || {};
   const { data: driverRidesData, loading: driverLoading } = useQuery(GET_RIDES_BY_DRIVER, {
     skip: !isLoggedIn || !userData,
     onCompleted: (data) => console.log('GET_RIDES_BY_DRIVER completed:', data),
@@ -67,6 +67,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
               ? `${post.postOwner.name} ${post.postOwner.lastName}`
               : "Unknown",
           comments: post.comments ?? [],
+          postOwnerId:post.postOwner.id,
         };
         setSelectedPost(formattedPost);
         setIsViewModalOpen(true);
@@ -228,6 +229,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
         isOpen={isViewModalOpen} 
         onClose={() => setIsViewModalOpen(false)} 
         post={selectedPost} 
+        userData={userInfo}
       />
     </div>
   );

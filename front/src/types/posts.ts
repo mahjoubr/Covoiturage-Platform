@@ -13,6 +13,8 @@ export interface CarpoolPost {
     price?: number;
     contactInfo?: string;
     comments? : Comment[];
+    postOwnerId: number;
+    status: string;
   }
 
 export enum RideState {

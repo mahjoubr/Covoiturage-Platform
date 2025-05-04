@@ -36,6 +36,7 @@ type Post {
   comments: [Comment!]
   postOwner: AppUser!
   listRide: [Ride!]
+  status: String
 }
 
 type Review {
@@ -106,6 +107,11 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
+type MatchingRideResult {
+  ride: Ride
+  postOwnerId: String
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
@@ -125,7 +131,7 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
-  matchingRide(postId: Int!): Ride
+  matchingRide(postId: Int!): MatchingRideResult
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!
@@ -143,8 +149,8 @@ type Mutation {
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
   createPost(createPostInput: CreatePostInput!): Post!
-  deletePost(id: Float!): Boolean!
-  updatePost(id: Float!, status: String!): Post!
+  deletePost(id: Int!): Boolean!
+  closepost(id: Int!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!

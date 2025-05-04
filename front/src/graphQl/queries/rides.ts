@@ -121,17 +121,3 @@ export const DELETE_JOIN_REQUEST = gql`
 `;
 
 
-export const DELETE_POST = gql`
-  mutation DeletePost($postId: Int!) {
-    deletePost(id: $postId)
-  }
-`;
-
-export const UPDATE_POST_STATUS = gql`
-  mutation UpdatePostStatus($id: Int!, $status: String!) {
-    updatePost(id: $id, updatePostInput: { status: $status }) {
-      id
-      status
-    }
-  }
-`;
