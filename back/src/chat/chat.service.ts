@@ -6,6 +6,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Chat } from './entities/chat.entity';
 import { Repository } from 'typeorm';
 import { Ride } from 'src/ride/entities/ride.entity';
+import { MessageService } from 'src/message/message.service';
 
 @Injectable()
 export class ChatService {
@@ -16,23 +17,25 @@ export class ChatService {
   private userRepository: Repository<User>,
 
   @InjectRepository(Ride)
-  private rideRepository: Repository<Ride>,) {
+  private rideRepository: Repository<Ride>,
+  private readonly MessageService: MessageService,
+) {
 
   }
 
   async create(createChatDto: CreateChatDto) {
-    if(!createChatDto.driverId || !createChatDto.riderId || !createChatDto.rideId) {
+    if(!createChatDto.driver.id || !createChatDto.rider.id || !createChatDto.ride.id) {
       throw new Error('Driver ID, Rider ID, and Ride ID are required.');
     }
-    const ride=await this.rideRepository.findOne({ where: { id: createChatDto.rideId } });
+    const ride=await this.rideRepository.findOne({ where: { id: createChatDto.ride.id } });
     if (!ride) {
       throw new Error('Ride not found.');
     }
     const status = ride.state;
     if(status !=='Closed'){
       
-      const driver = await this.userRepository.findOne({ where: { id: createChatDto.driverId } });
-      const rider = await this.userRepository.findOne({ where: { id: createChatDto.riderId } });
+      const driver = await this.userRepository.findOne({ where: { id: createChatDto.driver.id } });
+      const rider = await this.userRepository.findOne({ where: { id: createChatDto.rider.id } });
       const chat = this.chatRepository.create({
         driver: driver,
         rider: rider,
@@ -42,20 +45,49 @@ export class ChatService {
     }
     
   }
+  async getMessagesByRideId(id: number) {
+    const chat = await this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.driver', 'driver')
+      .leftJoinAndSelect('chat.rider', 'rider')
+      .leftJoinAndSelect('chat.ride', 'ride')
+      .where('ride.id = :id', { id })
+      .getOne();
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+    return this.MessageService.getChatMessages(chat.id).then(messages => {
+      return messages;
+    });
+
+
+  }
 
   findAll() {
-    return `This action returns all chat`;
+    return this.chatRepository.find({ relations: ['driver', 'rider'] });
+  }
+  findByUserId(userId: number) {
+    return this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.driver', 'driver')
+      .leftJoinAndSelect('chat.rider', 'rider')
+      .where('driver.id = :userId OR rider.id = :userId', { userId })
+      .getMany();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} chat`;
+    return this.chatRepository.findOne({ where: { id }, relations: ['driver', 'rider'] });
   }
 
   update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
+    return this.chatRepository.update(id, updateChatDto as Partial<Chat>).then(() => {
+      return this.chatRepository.findOne({ where: { id }, relations: ['driver', 'rider'] });
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} chat`;
+    return this.chatRepository.delete(id).then(() => {
+      return { deleted: true };
+    });
   }
 }
