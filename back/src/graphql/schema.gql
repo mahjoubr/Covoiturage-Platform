@@ -107,10 +107,10 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
-
 type MatchingRideResult {
   ride: Ride
   postOwnerId: String
+}
 
 type UserInfo {
   id: Float!
