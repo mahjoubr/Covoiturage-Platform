@@ -13,7 +13,7 @@ interface CarpoolRideListProps {
 
 type FilterType = 'yourRides' | 'ridesTaken' | null;
 
-const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ rides, onView }) => {
+const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ rides}) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
 
   const filteredRides = useMemo(() => {

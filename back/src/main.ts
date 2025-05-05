@@ -15,9 +15,9 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.enableCors({
     origin: 'http://localhost:5173',
-    credentials: true, 
+    credentials: true,
   });
-  
+
   app.useGlobalPipes(new ValidationPipe());
 
   const adminService = app.get(AdminService);

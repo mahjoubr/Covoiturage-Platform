@@ -8,7 +8,6 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
 import { saveFile } from '../common/helpers/file-upload.helper';
-import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 @Injectable()
 export class AppUserService extends GenericService {

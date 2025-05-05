@@ -1,7 +1,6 @@
 // src/pages/NotificationPage.tsx
 import React from 'react';
 import Notifications from '../../components/notifications/Notifications';
-import { useTheme } from '../../context/ThemeContext';
 
 const NotificationPage: React.FC = () => {
       //const { toggleTheme } = useTheme();
