@@ -21,8 +21,10 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import ChatPage from "./pages/Chat/chatPage";
 
 import Home from "./pages/Dashboard/Home";
+import Posts from "./pages/Posts/PostsPage";
 import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
+import Rides from "./pages/Rides/RidesPage";
 import NotificationPage from "./pages/Notification/NotificationPage";
 
 export default function App() {
@@ -63,6 +65,8 @@ export default function App() {
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
+            <Route path="/posts" element={<Posts/>}/>
+            <Route path="/rides" element={<Rides/>}/>
           </Route>
 
           {/* Auth Layout */}

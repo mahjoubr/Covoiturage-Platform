@@ -1,29 +1,66 @@
-import { AppUser } from 'src/app-user/entities/app-user.entity';
-import { Comment } from 'src/comment/entities/comment.entity';
-import { Ride } from 'src/ride/entities/ride.entity';
-import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { ObjectType, Field, Int, Float, ID, GraphQLISODateTime } from '@nestjs/graphql';
+import { AppUser } from '../../app-user/entities/app-user.entity';
+import { Comment } from '../../comment/entities/comment.entity';
+import { Ride } from '../../ride/entities/ride.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import { JoinRequest } from 'src/join-request/entities/join-request.entity';
 
+@ObjectType()
 @Entity()
 export class Post {
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text' })
-  text: string;
+  @Field()
+  @Column({ type: 'varchar' })
+  destination: string;
 
-  @Column("simple-array")
-  listRide: Ride[]; 
+  @Field()
+  @Column({ type: 'varchar' })
+  departure: string;
 
-  @Column()
-  typeOfOffer: string;    //enum
-
-  @Column({ type: 'timestamp' })
+  @Field(() => GraphQLISODateTime) 
+  @Column({ type: 'date' })
   date: Date;
 
-  @OneToMany(()=>Comment,comment=>comment.post)
-  comments: Comment[];
+  @Field()
+  @Column({ type: 'varchar' })
+  time: string;
 
-  @ManyToOne(()=>AppUser,appuser=>appuser.posts)
-  user: User;
+  @Field(() => Int)
+  @Column({ type: 'int' })
+  seatCount: number;
+
+  @Field()
+  @Column({ type: 'varchar' })
+  frequency: string;
+
+  @Field({ nullable: true })
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'float', nullable: true })
+  price?: number;
+
+  @Field({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  contactInfo?: string;
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, comment => comment.post, { cascade: true })
+  comments?: Comment[];
+
+  @Field(() => AppUser)
+  @ManyToOne(() => AppUser, user => user.posts)
+  postOwner: AppUser;
+
+  @Field(() => [Ride], { nullable: true })
+  @OneToMany(() => Ride, ride => ride.post)
+  listRide: Ride[];
+
+  @Column({ default: 'OPEN' })
+  status: string;
+
 }

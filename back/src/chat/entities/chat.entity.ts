@@ -3,6 +3,7 @@ import { Entity, OneToMany,ManyToOne, PrimaryGeneratedColumn, OneToOne, JoinColu
 import { User } from 'src/user/entities/user.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
 
+
 @Entity()
 export class Chat {
   @PrimaryGeneratedColumn()
