@@ -13,9 +13,11 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  ReviewIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import { CarIcon, NewspaperIcon } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -39,6 +41,23 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+
+    icon: <NewspaperIcon />,
+    name: "Posts",
+    path: "/Posts",
+  },
+  {
+    icon: <CarIcon />,
+    name: "Rides",
+    path: "/rides",
+
+    icon:<ReviewIcon/>,
+    name:"Reviews",
+    subItems: [{ name: "My Reviews", path: "/reviewed-list", pro: false },
+    { name: "Received Reviews", path: "/received-reviews", pro: false }],
+
   },
   {
     icon:<ChatIcon />,

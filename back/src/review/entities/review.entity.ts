@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
-import { ObjectType, Field, Float } from '@nestjs/graphql'; // Import GraphQL decorators
+import { ObjectType, Field, Float, GraphQLISODateTime } from '@nestjs/graphql'; // Import GraphQL decorators
 import { AppUser } from '../../app-user/entities/app-user.entity';
 import { Ride } from '../../ride/entities/ride.entity';
 import { Max, Min } from 'class-validator';
@@ -21,9 +21,9 @@ export class Review {
   @Field({ nullable: true }) // Expose this field in GraphQL (nullable)
   comment: string;
 
-  @CreateDateColumn()
-  @Field(() => Date) // Expose this field in GraphQL
-  date: Date;
+  @Column({ type: 'date' })
+  @Field(() => String) // Change from Date to String
+  date: string;
 
   @ManyToOne(() => AppUser)
   @Field(() => AppUser) // Expose the related AppUser in GraphQL
