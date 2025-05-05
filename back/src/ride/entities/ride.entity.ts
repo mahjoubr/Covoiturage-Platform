@@ -1,8 +1,9 @@
 import { AppUserRide } from '../../app-user-ride/entities/app-user-ride.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, ManyToMany } from 'typeorm';
 import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql'; // Import GraphQL decorators
 import { Post } from '../../post/entities/post.entity';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { JoinRequest } from 'src/join-request/entities/join-request.entity';
 
 export enum RideState {
   NOT_STARTED = 'NotStarted',
@@ -56,8 +57,14 @@ export class Ride {
   @ManyToOne(() => Post, post => post.listRide)
   @Field(()=>Post)
   post: Post;
+  
+  @ManyToOne(() => AppUser, (user) => user.drivenRides, { nullable: true })
+  @Field(() => AppUser, { nullable: true })
+  driver?: AppUser;
+  
 
-  @ManyToOne(() => AppUser, (user) => user.drivenRides)
-  @Field(() => AppUser)
-  driver: AppUser;
+  
+  @Field(()=>[JoinRequest],{nullable:true})
+  @OneToMany(()=>JoinRequest,joinRequest=>joinRequest.ride)
+  joinRequests: JoinRequest[];
 }

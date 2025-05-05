@@ -6,6 +6,8 @@ import ChatBox from '../../components/chat/chatBox';
 const ChatPage: React.FC = () => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   
+
+  
   return (
 <div className="mx-auto max-w-full pt-1 p-4 md:pt-4 md:p-6">
 {/* Breadcrumb */}

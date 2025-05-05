@@ -11,7 +11,8 @@ query {
         id
         postOwner {
           id
-          username
+          name
+          lastName
         }
       }
     }
@@ -29,7 +30,7 @@ query {
       appUser {
         id
         name
-        lasname
+        lastName
       }
     }
   }
@@ -38,10 +39,9 @@ query {
 export const GET_USER = gql`
 query {
   getAppUserInfo {
-    
     id
     name
-    lasname
+    lastName
       
   }
 }
@@ -92,4 +92,46 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
     currentPage
   }
 }
+`;
+
+
+  export const CREATE_JOIN_REQUEST = gql`
+  mutation CreateJoinRequest($postId: Int!) {
+    createJoinRequest(postId: $postId) {
+      id
+      date
+      ride {
+        id
+        departure
+        arrival
+      }
+      user {
+        id
+        name
+        lastName
+      }
+    }
+  }
+`;
+
+export const DELETE_JOIN_REQUEST = gql`
+  mutation DeleteJoinRequest($postId: Int!) {
+    deleteJoinRequest(postId: $postId)
+  }
+`;
+
+
+export const DELETE_POST = gql`
+  mutation DeletePost($postId: Int!) {
+    deletePost(id: $postId)
+  }
+`;
+
+export const UPDATE_POST_STATUS = gql`
+  mutation UpdatePostStatus($id: Int!, $status: String!) {
+    updatePost(id: $id, updatePostInput: { status: $status }) {
+      id
+      status
+    }
+  }
 `;

@@ -25,8 +25,12 @@ import Posts from "./pages/Posts/PostsPage";
 import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
+
 import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
 import UpdateReviewModal from "./pages/Review/updateReview";
+
+import NotificationPage from "./pages/Notification/NotificationPage";
+
 export default function App() {
   return (
     <React.Fragment>
@@ -40,6 +44,8 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile/Edit" element={<EditProfile />} />
             <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/notifications" element={<NotificationPage />} />
+
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
