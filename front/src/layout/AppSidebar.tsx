@@ -44,7 +44,7 @@ const navItems: NavItem[] = [
   {
     icon: <NewspaperIcon />,
     name: "Posts",
-    path: "/posts",
+    path: "/Posts",
   },
   {
     icon: <CarIcon />,

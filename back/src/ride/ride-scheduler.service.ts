@@ -44,7 +44,23 @@ export class RideSchedulerService {
 
           ride.state = RideState.STARTED;
           await this.rideService.update(ride.id, ride);
-
+          const Ridesubscribers = await this.subscriptionService.getSubscribers(ride.id, 'ride');
+          
+          for (const recipientId of Ridesubscribers) {
+              const event = {
+                type: EventType.RIDE_START,
+                targetId: ride.id,
+                recipientId,
+                payload: {
+                  rideId: ride.id,
+                  userId: recipientId,
+                  timestamp: new Date().toISOString(),
+                },
+              };
+              this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+            this.eventStreamService.emitEvent(event);
+            this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+            }
           const post = ride.post as Post;
           if (!post) {
             this.logger.warn(`Ride ${ride.id} has no associated post.`);

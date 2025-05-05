@@ -58,7 +58,7 @@ type AppUser {
   lastName: String!
   dateOfBirth: String
   phoneNumber: String
-  imageUrl: String!
+  imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
   rating: Float!
@@ -136,7 +136,7 @@ type Query {
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
-  getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
 }
 
@@ -154,6 +154,8 @@ type Mutation {
   createComment(input: CreateCommentInput!): Comment!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
+  deleteJoinRequestById(id: Int!): Boolean!
+  acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
 }
 
 input RegisterInput {
