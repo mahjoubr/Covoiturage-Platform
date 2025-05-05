@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RideService } from './ride.service';
 import { RideState } from './entities/ride.entity';
-import { Post } from 'src/post/entities/post.entity';
+import { Post, PostStatus } from 'src/post/entities/post.entity';
 import { PostService } from 'src/post/post.service';
 import { CreateRideInput } from './dto/create-ride.input';
 import { SubscriptionService } from 'src/subscription/subscription.service';
@@ -44,14 +44,30 @@ export class RideSchedulerService {
 
           ride.state = RideState.STARTED;
           await this.rideService.update(ride.id, ride);
-
+          const Ridesubscribers = await this.subscriptionService.getSubscribers(ride.id, 'ride');
+          
+          for (const recipientId of Ridesubscribers) {
+              const event = {
+                type: EventType.RIDE_START,
+                targetId: ride.id,
+                recipientId,
+                payload: {
+                  rideId: ride.id,
+                  userId: recipientId,
+                  timestamp: new Date().toISOString(),
+                },
+              };
+              this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+            this.eventStreamService.emitEvent(event);
+            this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+            }
           const post = ride.post as Post;
           if (!post) {
             this.logger.warn(`Ride ${ride.id} has no associated post.`);
             continue;
           }
 
-          if ((post.frequency !== 'One-time')&&(post.frequency !== 'Once')) {
+          if ((post.frequency !== 'One-time')&&(post.frequency !== 'Once')&&(post.status!=PostStatus.CLOSED)) {
             this.logger.debug(`Post ${post.id} has frequency ${post.frequency}. Creating next ride.`);
 
             const nextDate = this.calculateNextDate(ride.date, post.frequency);
@@ -60,6 +76,7 @@ export class RideSchedulerService {
               date: nextDate,
               state: RideState.NOT_STARTED,
             };
+          
 
             delete (newRideInput as any)['id']; 
 
@@ -89,6 +106,9 @@ export class RideSchedulerService {
             }
 
             this.logger.debug(`Post ${post.id} updated with new date ${nextDate.toISOString()}`);
+          }
+          else{
+            this.postService.close(post.id);
           }
         } else {
           this.logger.debug(`Ride ${ride.id} is not yet due.`);

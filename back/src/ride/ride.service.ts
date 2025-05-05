@@ -17,8 +17,8 @@ import { Post } from 'src/post/entities/post.entity';
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
   private readonly paginationService: PaginationService,
-  private userRepository: AppUserService,
-  private appUserRideRepo: AppUserRideService,
+  private userService: AppUserService,
+  private appUserRideService: AppUserRideService,
 
 ){
     
@@ -107,6 +107,18 @@ async findByPassenger(passengerId: number): Promise<Ride[]> {
     .leftJoinAndSelect('ride.appUserRides', 'allAppUserRides')
     .leftJoinAndSelect('allAppUserRides.appUser', 'eachPassenger')
     .getMany();
+}
+// ride.service.ts
+// ride.service.ts
+// ride.service.ts
+async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
+  const ride = await this.rideRepo.findOne({ where: { id: rideId } });
+  if (!ride) throw new Error('Ride not found');
+
+  const user = await this.userService.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  return this.appUserRideService.addPassenger(user, ride);
 }
 
 
