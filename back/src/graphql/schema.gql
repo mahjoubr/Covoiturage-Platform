@@ -43,7 +43,7 @@ type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: DateTime!
+  date: String!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -87,7 +87,7 @@ type JoinRequest {
 
 type Ride {
   id: Float!
-  date: DateTime!
+  date: String!
   time: String!
   departure: String!
   arrival: String!
@@ -107,9 +107,33 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
+
 type MatchingRideResult {
   ride: Ride
   postOwnerId: String
+
+type UserInfo {
+  id: Float!
+  name: String!
+  lastName: String!
+  rating: Float!
+  phoneNumber: String!
+  imageUrl: String!
+}
+
+type RideDetails {
+  id: Float!
+  departure: String!
+  date: String!
+  arrival: String!
+  price: Float!
+  time: String!
+}
+
+type ReviewFormData {
+  reviewedUser: UserInfo!
+  ride: RideDetails!
+
 }
 
 type JwtAuthResponse {
@@ -121,6 +145,9 @@ type JwtAuthResponse {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!

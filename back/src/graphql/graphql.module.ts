@@ -4,6 +4,10 @@ import { join } from 'path';
 import { AuthModule } from '../auth/auth.module'; 
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AuthResolver } from 'src/auth/auth.resolver';
+import { ReviewResolver } from 'src/review/review.resolver';
+import { ReviewModule } from 'src/review/review.module';
+import { RideModule } from 'src/ride/ride.module';
+import { AppUserModule } from 'src/app-user/app-user.module';
 
 @Module({
   imports: [
@@ -22,7 +26,10 @@ import { AuthResolver } from 'src/auth/auth.resolver';
     
     
     AuthModule, 
+    ReviewModule,
+    RideModule,
+    AppUserModule
   ],
-  providers: [AuthResolver],
+  providers: [AuthResolver,ReviewResolver],
 })
 export class GraphqlModule {}
