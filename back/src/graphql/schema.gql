@@ -133,6 +133,7 @@ type RideDetails {
 type ReviewFormData {
   reviewedUser: UserInfo!
   ride: RideDetails!
+
 }
 
 type JwtAuthResponse {
