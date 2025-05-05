@@ -1,41 +1,102 @@
-// src/components/chat/ChatBox.tsx
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatMessages from './chatMessages';
 import ChatInput from './chatInput';
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
+import { GET_APPUSER_INFO } from './../../graphQl/queries/userProfile'; 
+import { useMessagesByChat } from '../../hooks/useMessagesByChat';
+import { GET_CHAT_MESSAGES, SEND_MESSAGE, MESSAGE_SUBSCRIPTION } from './../../graphQl/queries/chat'; 
 
-const ChatBox: React.FC = () => {
-  const messages = [
-    {
-      id: 1,
-      name: 'Lindsey',
-      avatar: '/images/user/user-17.jpg',
-      text: 'I want to make an appointment tomorrow from 2:00 to 5:00pm?',
-      time: '2 hours ago',
-      from: "user",
-      timestamp: '2023-03-01T14:00:00Z',
-    },
-    {
-      id: 2,
-      text: "If don't like something, I'll stay away from it.",
-      time: '2 hours ago',
-      from: "user",
-      timestamp: '2023-03-01T14:00:00Z',
-    },
-  ];
+
+interface ChatProps {
+  chatId: number;
+  currentUserId: number;
+}
+
+interface Message {
+  id: number;
+  text: string;
+  createdAt: string;
+  sender: {
+    id: number;
+    name: string;
+  };
+}
+
+const ChatBox: React.FC<ChatProps> = ({ chatId, currentUserId }) => {
+  const [messageText, setMessageText] = useState('');
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
   
+  
+  const { loading, error, data } = useQuery(GET_CHAT_MESSAGES, {
+    variables: { chatId },
+    fetchPolicy: 'network-only',
+  });
+
+  const { data: userData } = useQuery(GET_APPUSER_INFO, {
+    variables: { id: currentUserId },
+  });
+  const [sendMessage] = useMutation(SEND_MESSAGE);
+  
+  const user = userData?.getAppUserInfo || { name: '', lastName: '', imageUrl: '' };
+  useSubscription(MESSAGE_SUBSCRIPTION, {
+    variables: { chatId },
+    onData: ({ data }) => {
+      const newMessage = data?.data?.messageAdded;
+      if (newMessage) {
+        
+        scrollToBottom();
+      }
+    },
+  });
+
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [data?.getChatMessages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageText.trim()) return;
+
+    try {
+      await sendMessage({
+        variables: {
+          createMessageInput: {
+            text: messageText,
+            chatId: chatId,
+            senderId: currentUserId,
+          },
+        },
+      });
+      setMessageText('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+    }
+  };
+
+  if (loading) return <div className="loading">Loading messages...</div>;
+  if (error) return <div className="error">Error loading messages: {error.message}</div>;
+
+  const messages = data?.getChatMessages || [];
+
+
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:w-3/4">
       {/* Chat Header */}
       <div className="sticky flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 xl:px-6">
         <div className="flex items-center gap-3">
           <div className="relative h-12 w-full max-w-[48px] rounded-full">
-            <img src="/images/user/user-17.jpg" alt="profile" className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
+          <img src={user.imageUrl} alt={`${user.name}'s profile`}className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
             <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
           </div>
 
           <h5 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Lindsey Curtis
-          </h5>
+          {user.name}{user.lastName}
+                    </h5>
         </div>
 
         <div className="flex items-center gap-3">
@@ -52,12 +113,8 @@ const ChatBox: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Chat Messages */}
       <ChatMessages messages={messages} />
-      
-      {/* Chat Input */}
-      <ChatInput />
+      <ChatInput currentUserId={currentUserId} chatId={chatId} />
     </div>
   );
 };

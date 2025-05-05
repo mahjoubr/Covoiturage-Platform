@@ -1,17 +1,81 @@
-// src/components/chat/ChatInput.tsx
-import React, { useState } from 'react';
 
-const ChatInput: React.FC = () => {
-  const [message, setMessage] = useState('');
-  
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      // Here you would typically implement your message sending logic
-      console.log('Sending message:', message);
-      setMessage('');
-    }
+import { useMutation, useQuery, useSubscription } from '@apollo/client';
+import React, { useEffect, useRef, useState } from 'react';
+import { GET_CHAT_MESSAGES, MESSAGE_SUBSCRIPTION, SEND_MESSAGE } from '../../graphQl/queries/chat';
+import { GET_APPUSER_INFO } from '../../graphQl/queries/userProfile';
+
+
+interface ChatProps {
+  chatId: number;
+  currentUserId: number;
+}
+
+interface Message {
+  id: number;
+  text: string;
+  createdAt: string;
+  sender: {
+    id: number;
+    name: string;
   };
+}
+const ChatInput: React.FC <ChatProps> = ({ chatId, currentUserId })  => {
+    const [messageText, setMessageText] = useState('');
+    const messagesEndRef = useRef<null | HTMLDivElement>(null);
+    
+    
+    const { loading, error, data } = useQuery(GET_CHAT_MESSAGES, {
+      variables: { chatId },
+      fetchPolicy: 'network-only',
+    });
+  
+    const { data: userData } = useQuery(GET_APPUSER_INFO, {
+      variables: { id: currentUserId },
+    });
+    const [sendMessage] = useMutation(SEND_MESSAGE);
+    
+    const user = userData?.getAppUserInfo || { name: '', lastName: '', imageUrl: '' };
+    useSubscription(MESSAGE_SUBSCRIPTION, {
+      variables: { chatId },
+      onData: ({ data }) => {
+        const newMessage = data?.data?.messageAdded;
+        if (newMessage) {
+          
+          scrollToBottom();
+        }
+      },
+    });
+  
+    
+    useEffect(() => {
+      scrollToBottom();
+    }, [data?.getChatMessages]);
+  
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+  
+    const handleSendMessage = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!messageText.trim()) return;
+  
+      try {
+        await sendMessage({
+          variables: {
+            createMessageInput: {
+              text: messageText,
+              chatId: chatId,
+              senderId: currentUserId,
+            },
+          },
+        });
+        setMessageText('');
+      } catch (err) {
+        console.error('Error sending message:', err);
+      }
+    };
+  
+  
 
   return (
     <div className="sticky bottom-0 border-t border-gray-200 p-3 dark:border-gray-800">
