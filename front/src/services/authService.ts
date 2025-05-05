@@ -9,9 +9,20 @@ export const login = async (email: string, password: string) => {
   });
    const token = data.login.accessToken;
   localStorage.setItem('auth_token', token);
+  localStorage.setItem('user', JSON.stringify(data.login.user));
   
   return data.login;
 };
+
+
+export async function getCurrentUserId(): Promise<number | null> {
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  console.log(user);
+  console.log("the id is", user?.id);
+  return user?.id || null;
+}
+
 
 export async function signup(email: string, password: string, name: string, lastName: string) {
   try {
@@ -30,4 +41,6 @@ export async function signup(email: string, password: string, name: string, last
   } catch (error) {
     throw new Error("Signup failed");
   }
+
+ 
 }

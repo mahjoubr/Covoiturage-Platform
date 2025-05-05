@@ -19,14 +19,14 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import ChatPage from "./pages/Chat/chatPage";
-
+import MyReviewsWithClient from "./pages/Review/ReviewedListPage";
 import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
 import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
-import ReviewsPage from "./pages/Review/ReviewsPage";
-
+import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
+import UpdateReviewModal from "./pages/Review/updateReview";
 export default function App() {
   return (
     <React.Fragment>
@@ -45,8 +45,8 @@ export default function App() {
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
-            <Route path="reviews" element={<ReviewsPage />} />
-
+            <Route path="reviewed-list" element={<MyReviewsWithClient />} />
+            <Route path="received-reviews" element={<MyReceivedReviews />} />
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
 

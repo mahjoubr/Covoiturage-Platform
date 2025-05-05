@@ -18,7 +18,7 @@ export class Ride {
   id: number;
 
   @Column({ type: 'date' })
-  @Field(() =>  GraphQLISODateTime) 
+  @Field(() => String) // Change from Date to String
   date: Date;
 
   @Column({ type: 'time' })

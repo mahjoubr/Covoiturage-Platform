@@ -7,6 +7,7 @@ import { MyUser } from 'src/auth/decorators/my_user.decorator';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 
 @Controller('review')
+@UseGuards(GqlAuthGuard)
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
@@ -28,15 +29,14 @@ export class ReviewController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
+  update(@MyUser()userInfo, @Body() updateReviewDto: UpdateReviewDto) {
+    return this.reviewService.updateReview(userInfo.id,updateReviewDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
+  remove(@MyUser() userInfo,@Param('id') id: string) {
+    return this.reviewService.deleteReview(userInfo.id,+id);
   }
-
 
   @Get('paginate')
   paginate(@Query('page') page: number, @Query('limit') limit: number) {

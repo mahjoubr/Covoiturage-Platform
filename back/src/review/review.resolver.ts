@@ -10,6 +10,7 @@ import graphqlFields from 'graphql-fields';
 import { ReviewService } from './review.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
+import { Review } from './entities/review.entity';
 
 @Resolver()
 export class ReviewResolver {
@@ -19,7 +20,12 @@ export class ReviewResolver {
     private reviewService: ReviewService
   ) {}
 
-  @Query(() => ReviewFormData)
+
+
+  
+
+
+ @Query(() => ReviewFormData)
   async reviewFormData(
     @Args('rideId', { type: () => Int }) rideId: number,
     @Args('reviewedUserId', { type: () => Int }) reviewedUserId: number
@@ -52,6 +58,15 @@ export class ReviewResolver {
   }
 
   @UseGuards(GqlAuthGuard)
+  @Query(() => [Review], { name: 'getMyReviews' })
+  async getMyReviews(@CurrentUser() user: AppUser): Promise<Review[]> {
+    console.log('hi everyone its me again \n \n\n');
+  
+    return this.reviewService.findByReviewerId(user.id);
+  }
+
+  /*
+  @UseGuards(GqlAuthGuard)
   @Query(() => [ReviewItem], { name: 'getMyReviews' })
   async getMyReviews(@CurrentUser() user: AppUser) {
     const reviews = await this.reviewService.findByReviewerId(user.id);
@@ -83,13 +98,14 @@ export class ReviewResolver {
     console.log('results:', results);
     return results;
   }
-  
+  */
 
 
-  @UseGuards(GqlAuthGuard)
-  @Query(() => [ReviewItem], { name: 'getUserReviews' })
-  getUserReviews(@CurrentUser() user: AppUser) {
-    return this.reviewService.findByReviewedUserId(user.id);
+  @Query(() => [Review], { name: 'getUserReviews' })
+  getUserReviews(
+    @Args('userId', { type: () => Int }) userId: number,
+  ): Promise<Review[]> {
+    console.log('userId:', userId);
+    return this.reviewService.findByReviewedUserId(userId);
   }
-
 }

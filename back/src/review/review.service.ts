@@ -20,14 +20,21 @@ export class ReviewService extends GenericService {
         
      }
 
-
-     
+     async findOne(id: number): Promise<Review> {
+      //include the relations you need
+      const review = await this.reviewRepository.findOne({ where: { id }, relations: ['reviewer', 'reviewedUser', 'ride'] });
+      if (!review) {
+        throw new Error('Review not found');
+      }
+      return review;
+     }
      async createReview(createReviewDto: CreateReviewDto) {
       console.log('Creating review:', createReviewDto);
     
       const review = this.reviewRepository.create({
         stars: createReviewDto.stars,
         comment: createReviewDto.comment,
+        date: new Date().toISOString().split('T')[0], // Set the current date
         reviewer: { id: createReviewDto.reviewerId },      
         reviewedUser: { id: createReviewDto.reviewedUserId },
         ride: { id: createReviewDto.rideId },               
@@ -40,7 +47,46 @@ export class ReviewService extends GenericService {
     
     }
     
+    async deleteReview(userid:number,id: number) {
 
+      const review = await this.findOne(id);
+      if (!review) {
+        throw new Error('Review not found');
+      }
+      if(review.reviewer.id !== userid) {
+        throw new Error('You are not allowed to delete this review');
+      }
+    
+      await this.reviewRepository.remove(review);
+    
+      // Update the user's rating after deleting the review
+      await this.userService.updateUserRating(review.reviewedUser.id);
+    }
+
+
+    async updateReview(userId:number,updateDto:UpdateReviewDto): Promise<any> {
+       
+        const review = await this.findOne(updateDto.id);
+        console.log('Updating review:', review);
+        console.log('Update data:', updateDto);
+        console.log('User ID:', userId);
+        if (!review) {
+            throw new Error('Review not found');
+        }
+        console.log('Reviewer ID:', review.reviewer.id);
+        if (!review) {
+          throw new Error('Review not found');
+      }
+        if(review.reviewer.id !== userId) {
+
+            throw new Error('You are not allowed to update this review');
+        }
+       
+        Object.assign(review, updateDto);
+        return this.reviewRepository.save(review);
+        
+
+    }
      async paginate (page: number, limit: number) {
         const queryBuilder = this.reviewRepository.createQueryBuilder('review');
         return this.paginationService.paginateQuery(queryBuilder, page, limit);

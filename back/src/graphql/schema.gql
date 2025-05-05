@@ -42,7 +42,7 @@ type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: DateTime!
+  date: String!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -79,7 +79,7 @@ enum Role {
 
 type Ride {
   id: Float!
-  date: DateTime!
+  date: String!
   time: String!
   departure: String!
   arrival: String!
@@ -121,16 +121,6 @@ type ReviewFormData {
   ride: RideDetails!
 }
 
-type ReviewItem {
-  id: Int!
-  rating: Float!
-  createdAt: DateTime!
-  ride: RideDetails!
-  reviewerUser: UserInfo
-  reviewedUser: UserInfo
-  comment: String
-}
-
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
@@ -141,8 +131,8 @@ type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [ReviewItem!]!
-  getUserReviews: [ReviewItem!]!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!

@@ -1,12 +1,12 @@
 import axios from 'axios';
-import { Review } from '../types/review';
-import { useQuery } from "@apollo/client";
-import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA } from '../graphQl/queries/reviews';
+import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA, GET_USER_REVIEWS } from '../graphQl/queries/reviews';
 import { GetReviewFormDataResponse } from '../types/reviewFormData';
 
 import client from "../graphQl/client";
 
 import axiosInstance from './axiosInstance';
+import { Review } from '../interfaces/Review';
+import { UpdateReviewPayload } from '../types/updateReview';
 const API_URL = 'http://localhost:3000/review';
 
 export async function createReview(reviewData: any) {
@@ -33,14 +33,36 @@ export const getReviewFormData = async (
   return data.reviewFormData;
 };
 
-export const getMyReviews = async () => {
+
+export const getMyReviews = async (): Promise<Review[]> => {
   const { data } = await client.query({
     query: GET_MY_REVIEWS,
     fetchPolicy: 'network-only',
   });
-  return data.getMyReviews;
+  const transformedReviews: Review[] = data.getMyReviews.map((review: any) => ({
+    ...review,
+    user: review.reviewedUser, // Rename field
+  }));
+
+  return transformedReviews;
 };
 
+
+export const getReceivedReviews = async (userId: number): Promise<Review[]> => {
+  console.log("Fetching received reviews for user ID:", userId);
+  const { data } = await client.query({
+    query: GET_USER_REVIEWS,
+    variables: { userId },
+    fetchPolicy: 'network-only',
+  });
+  console.log("Received reviews data:", data);
+  const transformedReviews: Review[] = data.getUserReviews.map((review: any) => ({
+    ...review,
+    user: review.reviewer, // Rename field
+  }));
+
+  return transformedReviews;
+}
 
 
 
@@ -66,7 +88,7 @@ export const getReviewById = async (id: number) => {
   }
 };
 
-export const updateReview = async (id: number, reviewData: Review) => {
+export const updateReview=async(id: number, reviewData: UpdateReviewPayload) => {
   try {
     const response = await axiosInstance.patch(`${API_URL}/${id}`, reviewData);
     return response.data;
@@ -74,7 +96,8 @@ export const updateReview = async (id: number, reviewData: Review) => {
     console.error('Error updating review:', error);
     throw error;
   }
-};
+}
+
 
 export const deleteReview = async (id: number) => {
   try {

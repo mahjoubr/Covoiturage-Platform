@@ -20,23 +20,49 @@ export const GET_REVIEW_FORM_DATA = gql`
   }
 `;
 
-
 export const GET_MY_REVIEWS = gql`
   query GetMyReviews {
     getMyReviews {
-      id rating comment createdAt
-      ride { id departure arrival date time price }
-      reviewedUser { id name lastName imageUrl }
+      id
+      stars
+      comment
+      date
+      ride {
+        id
+        departure
+        arrival
+        date
+        time
+      }
+      reviewedUser {
+        id
+        name
+        lastName
+        imageUrl
+      }
     }
   }
 `;
-
 export const GET_USER_REVIEWS = gql`
   query GetUserReviews($userId: Int!) {
     getUserReviews(userId: $userId) {
-      id rating comment createdAt
-      ride { id departure arrival date time price }
-      reviewerUser { id name lastName imageUrl }
+      id
+      stars
+      comment
+      date
+      ride {
+        id
+        departure
+        arrival
+        date
+        time
+      }
+      reviewer {
+        id
+        name
+        lastName
+        imageUrl
+      }
     }
   }
 `;
