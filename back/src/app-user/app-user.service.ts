@@ -82,6 +82,12 @@ export class AppUserService extends GenericService {
   
     return this.appUserRepo.save(user);
   }
-  
+  // user.service.ts
+// user.service.ts
+async findById(id: number): Promise<AppUser | null> {
+  return this.appUserRepo.findOne({ where: { id } });
+}
+
+
 }
   

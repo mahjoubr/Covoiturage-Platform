@@ -1,12 +1,14 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
-import { Post } from './entities/post.entity';
+import { Post, PostStatus } from './entities/post.entity';
 import { PostService } from './post.service';
 import { CreatePostInput } from './dto/post-graphql.dto';
 import { Ride, RideState } from 'src/ride/entities/ride.entity';
 import { Int } from 'type-graphql';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Logger } from '@nestjs/common';
+import { GraphQLJSONObject } from 'graphql-type-json';
+import { MatchingRideResult } from './dto/matching-ride-result.dto';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -18,7 +20,11 @@ export class PostResolver {
   @Query(() => [Post], { name: 'getPosts' })
   async getPosts(): Promise<Post[]> {
     const posts = await this.postService.findAll();
-    return posts.map(post => ({
+    
+    // Filter posts to only include those with OPEN status
+    const openPosts = posts.filter(post => post.status !== PostStatus.CLOSED);
+  
+    return openPosts.map(post => ({
       ...post,
       date: post.date instanceof Date ? post.date : new Date(post.date),
       relations: ['listRide']
@@ -37,47 +43,35 @@ export class PostResolver {
 async createPost(@Args('createPostInput') createPostInput: CreatePostInput): Promise<Post> {
   return this.postService.create(createPostInput);
 }
-
-
-@Query(() => Ride, { name: 'matchingRide', nullable: true })
-async getMatchingRide(@Args('postId', { type: () => Int }) postId: number): Promise<Ride | null> {
-  const post = await this.postRepository.findOne({
-    where: { id: postId },
-    relations: ['listRide'],
-  });
-  this.logger.log(post?.listRide);
-  if (!post) return null;
-
-  const matchingRide = post.listRide.find(
-    ride =>
-      ride.state==RideState.NOT_STARTED
-  );
-  
-
-  return matchingRide ?? null;
+@Query(() => MatchingRideResult, { name: 'matchingRide', nullable: true })
+async getMatchingRide(
+  @Args('postId', { type: () => Int }) postId: number
+): Promise<MatchingRideResult | null> {
+  return this.postService.findMatchingRideAndOwner(postId);
 }
 
 
 
 
-@Mutation(() => Boolean)  // You can return a boolean or the deleted post if you prefer
-  async deletePost(@Args('id') id: number): Promise<boolean> {
-    try {
-      await this.postService.remove(id);
-      return true;  // Return true if the post is successfully deleted
-    } catch (error) {
-      console.error(error);
-      return false; // Return false in case of any error
-    }
+@Mutation(() => Boolean)
+async deletePost(@Args('id',{ type: () => Int }) id: number): Promise<boolean> {
+  try {
+    await this.postService.remove(id);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
   }
+}
 
 
-  @Mutation(() => Post)
-  async updatePost(
-    @Args('id') id: number,  // The ID of the post to update
-    @Args('status') status: string,  // The updated data
-  ): Promise<Post> {
-    return this.postService.update(id, status);  // Call the update method in the service
+  @Mutation(() => Boolean)
+  async closepost(
+    @Args('id',{ type: () => Int }) id: number,
+  ): Promise<boolean> {
+    await this.postService.close(id);
+    return true;
+
   }
 
 }

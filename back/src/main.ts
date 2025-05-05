@@ -5,7 +5,6 @@ import { AppUserService } from './app-user/app-user.service';
 import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { AdminService } from './admin/admin.service';
-//import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import * as bodyParser from 'body-parser';
 dotenv.config();
 
