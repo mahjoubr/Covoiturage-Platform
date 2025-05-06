@@ -121,5 +121,18 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   return this.appUserRideService.addPassenger(user, ride);
 }
 
+async findByUserId(userId: number): Promise<Ride[]> {
+  return this.rideRepo
+    .createQueryBuilder('ride')
+    .leftJoinAndSelect('ride.appUserRides', 'appUserRide')
+    .leftJoinAndSelect('appUserRide.appUser', 'appUser')
+    .leftJoinAndSelect('ride.driver', 'driver')
+    .leftJoinAndSelect('ride.post', 'post')
+    .leftJoinAndSelect('ride.joinRequests', 'joinRequests')
+    .where('appUser.id = :userId', { userId }) // User is a passenger
+    .orWhere('driver.id = :userId', { userId }) // User is a driver
+    .getMany();
+}
+
 
 }

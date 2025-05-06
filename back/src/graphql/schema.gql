@@ -133,7 +133,6 @@ type RideDetails {
 type ReviewFormData {
   reviewedUser: UserInfo!
   ride: RideDetails!
-
 }
 
 type JwtAuthResponse {
@@ -155,6 +154,7 @@ type Query {
   getRidesByDriver: [Ride!]!
   getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!

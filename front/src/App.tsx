@@ -12,7 +12,7 @@ import Avatars from "./pages/UiElements/Avatars";
 import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
-import Calendar from "./pages/Calendar";
+import Calendar from "./pages/Calendar/calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -27,7 +27,6 @@ import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
 import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
-import UpdateReviewModal from "./pages/Review/updateReview";
 
 import NotificationPage from "./pages/Notification/NotificationPage";
 

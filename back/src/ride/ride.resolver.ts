@@ -142,11 +142,7 @@ export class RideResolver {
 @UseGuards(GqlAuthGuard)
 async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
   const rides = await this.rideService.findByDriver(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
-}
+  return rides;}
 
 @Query(() => RidePaginationResult, { name: 'getRidesPaginatedByDriver' })
 @UseGuards(GqlAuthGuard)
@@ -182,15 +178,22 @@ async getRidesPaginatedByPassenger(
   return result;
 }
 
+@Query(() => [Ride], { name: 'getRidesByUserId' })
+@UseGuards(GqlAuthGuard)
+async getRidesByUserId(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByUserId resolver")
+  const rides = await this.rideService.findByUserId(user.id);
+  console.log(rides)
+  return rides;
+}
 
 
 @Query(() => [Ride], { name: 'getRidesByPassenger' })
 @UseGuards(GqlAuthGuard)
 async getRidesByPassenger(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByPassenger resolver")
+  console.log(user.id)
   const rides = await this.rideService.findByPassenger(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
+  return rides;
 }
 }
