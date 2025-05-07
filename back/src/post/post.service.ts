@@ -92,6 +92,8 @@ export class PostService extends GenericService {
   
     return post;
   }
+
+
   async close(id: number): Promise<Post> {
     const post = await this.postRepo.findOne({ where: { id } });
   

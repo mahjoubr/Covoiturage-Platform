@@ -21,9 +21,8 @@ export class Ride {
   @Column({ type: 'date' })
   @Field(() => String) // Change from Date to String
   date: Date;
-
   @Column({ type: 'time' })
-  @Field() 
+  @Field()
   time: string;
 
   @Column()

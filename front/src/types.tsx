@@ -60,7 +60,7 @@ export interface RidePost {
   isYourRide: boolean;
   isRideYouTook: boolean;
   postId: string;
-}
+
   }
   export interface Sender {
     id: string;
@@ -78,3 +78,5 @@ export interface RidePost {
     sender?: Sender;
     actionUrl?: string;
   }
+
+

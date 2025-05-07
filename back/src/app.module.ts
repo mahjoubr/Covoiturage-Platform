@@ -11,9 +11,8 @@ import { AppUserModule } from './app-user/app-user.module';
 import { AdminModule } from './admin/admin.module';
 import { AppUserRideModule } from './app-user-ride/app-user-ride.module';
 import { ReviewModule } from './review/review.module';
-import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql/graphql.module';
 import { PassportModule } from '@nestjs/passport';
@@ -27,7 +26,6 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { JoinRequestModule } from './join-request/join-request.module';
 
 @Module({
-      
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -38,8 +36,8 @@ import { JoinRequestModule } from './join-request/join-request.module';
       isGlobal: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: path.join(process.cwd(), 'uploads'), 
-      serveRoot: '/uploads',  
+      rootPath: path.join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
     }),
     ScheduleModule.forRoot(),
     
@@ -47,11 +45,10 @@ import { JoinRequestModule } from './join-request/join-request.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-       
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
-          port:configService.get<number>('DB_PORT', 3306),
+          port: configService.get<number>('DB_PORT', 3306),
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_DATABASE'),
