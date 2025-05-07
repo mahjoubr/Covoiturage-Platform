@@ -8,11 +8,14 @@ import { Ride } from 'src/ride/entities/ride.entity';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { Int } from '@nestjs/graphql';
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { RideService } from 'src/ride/ride.service';
 @Resolver(() => JoinRequest)
 export class JoinRequestResolver {
   constructor(
     private readonly joinRequestService: JoinRequestService,
     private readonly postService: PostService,
+    private readonly rideService:RideService
   ) {}
 
   @UseGuards(GqlAuthGuard)
@@ -61,7 +64,7 @@ export class JoinRequestResolver {
   }
 
   @Query(() => [JoinRequest])
-  async getJoinRequestsByRide(@Args('rideId') rideId: number): Promise<JoinRequest[]> {
+  async getJoinRequestsByRide(@Args('rideId',{ type: () => Int }) rideId: number): Promise<JoinRequest[]> {
     return this.joinRequestService.findByRideId(rideId);
   }
   @Query(() => [JoinRequest])
@@ -69,4 +72,24 @@ export class JoinRequestResolver {
   @Args('userId', { type: () => Int }) userId: number,): Promise<JoinRequest[]> {
     return this.joinRequestService.findByRideUser(rideId,userId);
   }
+
+  // join-request.resolver.ts
+@Mutation(() => Boolean)
+async deleteJoinRequestById(
+  @Args('id', { type: () => Int }) id: number,
+): Promise<boolean> {
+  return this.joinRequestService.deleteById(id);
+}
+// ride.resolver.ts
+@Mutation(() => AppUserRide)
+async acceptJoinRequest(
+  @Args('requestId', { type: () => Int })requestId: number,
+  @Args('rideId', { type: () => Int }) rideId: number,
+  @Args('userId', { type: () => Int }) userId: number,
+): Promise<AppUserRide> {
+  await this.deleteJoinRequestById(requestId);
+  return this.rideService.addPassengerToRide(rideId, userId);
+}
+
+
 }

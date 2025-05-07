@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_POST } from '../../graphQl/queries/posts';
+import { CREATE_POST, GET_POSTS } from '../../graphQl/queries/posts';
 import React, { useEffect, useMemo, useState } from 'react';
 import { CreatePostFormData } from '../../types/posts.ts';
 import '../../styles/posts.css';
@@ -7,7 +7,6 @@ import { GET_USER } from '../../graphQl/queries/rides.ts';
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (postData: CreatePostFormData) => void;
   userData: {
     id?: string;
     name?: string;
@@ -29,17 +28,7 @@ const initialFormData: CreatePostFormData = {
   contactInfo: ''
 };
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSubmit,userData }) => {
-  /*
-  const token = localStorage.getItem('auth_token');
-  const isLoggedIn = !!token;
-  // Fetch user data only if logged in
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
-    skip: !isLoggedIn,
-    fetchPolicy: 'network-only',
-    onCompleted: (data) => console.log('GET_USER completed:', data),
-    onError: (error) => console.error('GET_USER error:', error)
-  });*/
+const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose,userData}) => {
   const [formData, setFormData] = useState<CreatePostFormData>(initialFormData);
 
   useEffect(() => {
@@ -82,7 +71,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onSu
     }
   };
 
-  const [createPost] = useMutation(CREATE_POST);
+  const [createPost] = useMutation(CREATE_POST, {
+    refetchQueries: [{ query: GET_POSTS }]
+  });
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -104,6 +95,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
 
     setFormData(initialFormData);
+    setFormData((prev) => ({
+      ...prev,
+      driverName: `${userData.name} ${userData.lastName}`, // Combine name and lastName
+    }));
     onClose();
   } catch (err) {
     console.error("Failed to create post:", err);

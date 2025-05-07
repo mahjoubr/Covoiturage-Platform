@@ -29,23 +29,23 @@ export class AppUser extends User {
   
   @Field()
   @Column()
-  @Field() // Expose this field in GraphQL
+  @Field({ nullable: true }) 
   imageUrl: string;
 
   @OneToMany(() => Post, (post) => post.postOwner)
-  @Field(() => [Post]) // Expose this field in GraphQL
+  @Field(() => [Post])
   posts: Post[];
 
   @OneToMany(() => Review, (review) => review.reviewedUser)
-  @Field(() => [Review]) // Expose this field in GraphQL
+  @Field(() => [Review]) 
   reviews: Review[];
 
   @Column({ type: 'float' })
-  @Field() // Expose this field in GraphQL
+  @Field()
   rating: number;
 
   @OneToMany(() => AppUserRide, (appUserRide) => appUserRide.appUser)
-  @Field(() => [AppUserRide]) // Expose this field in GraphQL
+  @Field(() => [AppUserRide]) 
   appUserRides: AppUserRide[];
 
   @OneToMany(() => Ride, ride => ride.driver)

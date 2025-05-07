@@ -5,7 +5,10 @@ import { filter, map } from 'rxjs/operators';
 export enum EventType{
   POST_UPDATED='update_post',
   NEW_COMMENT= 'new_comment',
-  JOIN_REQUEST= 'join_request'
+  JOIN_REQUEST= 'join_request',
+  JOIN_ACCEPT= 'join_accepted',
+  RIDE_DELETE='ride_deleted',
+  RIDE_START='ride_started'
 }
 
 export interface StreamEvent {

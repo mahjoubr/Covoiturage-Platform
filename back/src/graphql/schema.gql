@@ -36,13 +36,14 @@ type Post {
   comments: [Comment!]
   postOwner: AppUser!
   listRide: [Ride!]
+  status: String
 }
 
 type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: DateTime!
+  date: String!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -57,7 +58,7 @@ type AppUser {
   lastName: String!
   dateOfBirth: String
   phoneNumber: String
-  imageUrl: String!
+  imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
   rating: Float!
@@ -106,6 +107,35 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
+type MatchingRideResult {
+  ride: Ride
+  postOwnerId: String
+}
+
+type UserInfo {
+  id: Float!
+  name: String!
+  lastName: String!
+  rating: Float!
+  phoneNumber: String!
+  imageUrl: String!
+}
+
+type RideDetails {
+  id: Float!
+  departure: String!
+  date: String!
+  arrival: String!
+  price: Float!
+  time: String!
+}
+
+type ReviewFormData {
+  reviewedUser: UserInfo!
+  ride: RideDetails!
+
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
@@ -137,6 +167,9 @@ type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
   getDashboardData: DashboardData!
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!
@@ -147,12 +180,12 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
-  matchingRide(postId: Int!): Ride
+  matchingRide(postId: Int!): MatchingRideResult
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
-  getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
 }
 
@@ -165,11 +198,13 @@ type Mutation {
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
   createPost(createPostInput: CreatePostInput!): Post!
-  deletePost(id: Float!): Boolean!
-  updatePost(id: Float!, status: String!): Post!
+  deletePost(id: Int!): Boolean!
+  closepost(id: Int!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
+  deleteJoinRequestById(id: Int!): Boolean!
+  acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
 }
 
 input RegisterInput {

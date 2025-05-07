@@ -7,8 +7,8 @@ function Rides() {
     };
   
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <CarpoolRideList rides={sampleRides} onView={handleViewRide} />
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 mt-0 pt-0">
+        <CarpoolRideList  />
       </div>
     );
   }

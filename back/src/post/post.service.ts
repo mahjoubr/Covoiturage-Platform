@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Post } from './entities/post.entity';
+import { Post, PostStatus } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, In, Not, Repository } from 'typeorm';
 import { GenericService } from '../services/genericService';
 import { CreatePostInput } from './dto/post-graphql.dto';
 import { Ride, RideState } from 'src/ride/entities/ride.entity';
@@ -94,4 +94,75 @@ export class PostService extends GenericService {
   }
 
 
+  async close(id: number): Promise<Post> {
+    const post = await this.postRepo.findOne({ where: { id } });
+  
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+  
+    post.status = PostStatus.CLOSED;
+  
+    return await this.postRepo.save(post);
+  }
+
+  async findMatchingRideAndOwner(postId: number): Promise<{ ride: Ride | null; postOwnerId: number | null }> {
+    const post = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide', 'postOwner'],
+    });
+  
+    if (!post) return { ride: null, postOwnerId: null };
+  
+    const matchingRide = post.listRide.find((ride) => ride.state === RideState.NOT_STARTED);
+  
+    return {
+      ride: matchingRide ?? null,
+      postOwnerId: post.postOwner?.id ?? null,
+    };
+  }
+  async remove(postId: number): Promise<void> {
+    const post = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide'],
+    });
+  
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    
+  
+    // Find and delete the matching ride
+    const matchingRide = post?.listRide[post.listRide.length - 1] ?? null;
+  
+    if (matchingRide) {
+      await this.rideRepo.delete(matchingRide.id);
+    }
+  
+    // Refresh the list of rides after deletion
+    const updatedPost = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide'],
+    });
+  
+    if (!updatedPost || updatedPost.listRide.length === 0) {
+      // If no rides left, delete the post
+      await this.postRepo.delete(postId);
+    } else {
+      // Find the next matching ride and update post's date/time
+      
+      const nextRide = updatedPost?.listRide[updatedPost.listRide.length - 1] ?? null;
+      
+  
+      if (nextRide) {
+        updatedPost.date = nextRide.date;
+        updatedPost.time = nextRide.time;
+        updatedPost.status=PostStatus.CLOSED;
+        await this.postRepo.save(updatedPost);
+      }
+    }
+  }
+ 
+  
+  
 }
