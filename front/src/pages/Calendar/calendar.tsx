@@ -27,10 +27,8 @@ enum RideStatus {
 }
 
 const RideCalendar: React.FC = () => {
-  const [selectedRide, setSelectedRide] = useState<CalendarRide | null>(null);
   const [rideTitle, setRideTitle] = useState("");
-  const [rideStartDate, setRideStartDate] = useState("");
-  const [rideEndDate, setRideEndDate] = useState("");
+  const [rideDate, setRideDate] = useState("");
   const [rideStatus, setRideStatus] = useState(RideStatus.NOT_STARTED);
   const [rideDeparture, setRideDeparture] = useState("");
   const [rideDestination, setRideDestination] = useState("");
@@ -66,7 +64,7 @@ const RideCalendar: React.FC = () => {
           return {
             id: ride.id,
             title: `${ride.departure} → ${ride.arrival}`, 
-            start: ride.date,
+            date: ride.date,
             extendedProps: {
               status: status,
               departure: ride.departure,
@@ -95,7 +93,7 @@ const RideCalendar: React.FC = () => {
     const now = new Date();
     const upcoming = allRides
     .filter(ride => {
-      const rideStart = new Date(ride.start as string);
+      const rideStart = new Date(ride.date as string);
       return rideStart >= now;
     })
       .sort((a, b) => {
@@ -107,10 +105,8 @@ const RideCalendar: React.FC = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const ride = clickInfo.event;
-    setSelectedRide(ride as unknown as CalendarRide);
     setRideTitle(ride.title);
-    setRideStartDate(ride.start?.toISOString().split("T")[0] || "");
-    setRideEndDate(ride.start?.toISOString().split("T")[0] || "");
+    setRideDate(ride.start?.toISOString().split("T")[0] || "");
     setRideStatus(ride.extendedProps.status);
     setRideDeparture(ride.extendedProps.departure || "");
     setRideDestination(ride.extendedProps.destination || "");
@@ -229,7 +225,7 @@ const RideCalendar: React.FC = () => {
                     </div>
                     <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
                       <Clock className="mr-1 h-3 w-3" />
-                      <span>{formatDate(ride.start as string)}</span>
+                      <span>{formatDate(ride.date as string)}</span>
                     </div>
                     <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400">
                       <MapPin className="mr-1 h-3 w-3" />
@@ -292,22 +288,12 @@ const RideCalendar: React.FC = () => {
       <EventFormModal
         isOpen={isOpen}
         closeModal={closeModal}
-        selectedEvent={selectedRide}
         eventTitle={rideTitle}
-        setEventTitle={setRideTitle}
         eventDescription={`From ${rideDeparture} to ${rideDestination}`}
-        setEventDescription={() => {}}
         eventLocation={`${rideDeparture} → ${rideDestination}`}
-        setEventLocation={() => {}}
-        eventStartDate={rideStartDate}
-        setEventStartDate={() => {}}
-        eventEndDate={rideEndDate}
-        setEventEndDate={() => {}}
+        eventDate={rideDate}      
         eventLevel={rideStatus}
-        setEventLevel={() => {}}
-        handleAddOrUpdateEvent={() => closeModal()}
-        setIsDeleteModalOpen={() => {}}
-        calendarsEvents={Object.values(RideStatus)}
+      
       />
     </>
   );
