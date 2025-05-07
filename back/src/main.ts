@@ -1,12 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { seedAdmin } from './SeedAdmin';
-import { AppUserService } from './app-user/app-user.service';
 import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { AdminService } from './admin/admin.service';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import * as bodyParser from 'body-parser';
+
 dotenv.config();
 
 async function bootstrap() {
@@ -17,12 +16,13 @@ async function bootstrap() {
     origin: 'http://localhost:5173',
     credentials: true,
   });
+  const { graphqlUploadExpress } = require('graphql-upload');
 
   app.useGlobalPipes(new ValidationPipe());
 
   const adminService = app.get(AdminService);
   await seedAdmin(adminService);
   app.use(graphqlUploadExpress());
-  await app.listen(process.env.PORT ?? 3000); // moved to the end
+  await app.listen(process.env.APP_PORT ?? 3000); // moved to the end
 }
 bootstrap();

@@ -46,4 +46,7 @@ export class GenericService {
     const entity = await this.findOne(id);
     await this.repository.remove(entity);
   }
+  countAll() {
+    return this.repository.count();
+  }
 }

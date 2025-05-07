@@ -1,10 +1,10 @@
 import { ChildEntity, Column, Entity, OneToMany } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql'; // Import GraphQL decorators
 import { User } from '../../user/entities/user.entity';
-import { Post } from 'src/post/entities/post.entity';
-import { Review } from 'src/review/entities/review.entity';
-import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
-import { Ride } from 'src/ride/entities/ride.entity';
+import { Post } from '../../post/entities/post.entity';
+import { Review } from '../../review/entities/review.entity';
+import { AppUserRide } from '../../app-user-ride/entities/app-user-ride.entity';
+import { Ride } from '../../ride/entities/ride.entity';
 @ChildEntity()
 @ObjectType() // Add @ObjectType() to mark this as a GraphQL type
 export class AppUser extends User {
@@ -12,6 +12,7 @@ export class AppUser extends User {
   @Column()
   @Field() // Expose this field in GraphQL
   name: string;
+
 
   @Field()
   @Column()

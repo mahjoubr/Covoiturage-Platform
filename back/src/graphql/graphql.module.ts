@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
-import { AuthModule } from '../auth/auth.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+
+import { AuthModule } from '../auth/auth.module';
+import { AppUserModule } from '../app-user/app-user.module';import { RideModule } from '../ride/ride.module';
+import { PostModule } from '../post/post.module';
+import { ReviewModule } from '../review/review.module';
+import { ReportModule } from '../report/report.module';
+import { CommentModule } from '../comment/comment.module';
+
 import { AuthResolver } from 'src/auth/auth.resolver';
+import { DashboardResolver } from 'src/dashboard/dashboard.resolver';
 
 @Module({
   imports: [
@@ -18,9 +26,14 @@ import { AuthResolver } from 'src/auth/auth.resolver';
       debug: true,
       path: '/graphql',
     }),
-
     AuthModule,
+    AppUserModule,
+    RideModule,
+    PostModule,
+    ReviewModule,
+    ReportModule,
+    CommentModule,
   ],
-  providers: [AuthResolver],
+  providers: [AuthResolver, DashboardResolver],
 })
 export class GraphqlModule {}

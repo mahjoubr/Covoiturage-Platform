@@ -10,5 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class CommentService extends GenericService {
   constructor(@InjectRepository(Comment) private readonly repo: Repository<Comment>) {
     super(repo);
-  } 
+  }
+
+
 }

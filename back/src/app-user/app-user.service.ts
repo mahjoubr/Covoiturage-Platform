@@ -81,6 +81,15 @@ export class AppUserService extends GenericService {
   
     return this.appUserRepo.save(user);
   }
-  
+
+
+  async findRecent(limit: number): Promise<AppUser[]> {
+    return this.appUserRepo.find({
+      order: { id: 'DESC' },
+      take: limit,
+    });
+  }
+
+
 }
   
