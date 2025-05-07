@@ -24,7 +24,7 @@ export class Post {
   @Column({ type: 'varchar' })
   departure: string;
 
-  @Field(() => GraphQLISODateTime) 
+  @Field(() => String) 
   @Column({ type: 'date' })
   date: Date;
 

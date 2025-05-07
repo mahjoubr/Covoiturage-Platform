@@ -26,7 +26,7 @@ type Post {
   id: ID!
   destination: String!
   departure: String!
-  date: DateTime!
+  date: String!
   time: String!
   seatCount: Int!
   frequency: String!
@@ -128,6 +128,12 @@ type MatchingRideResult {
   postOwnerId: String
 }
 
+type PostPaginatedResponse {
+  data: [Post!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
 type UserInfo {
   id: Float!
   name: String!
@@ -173,7 +179,7 @@ type Query {
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
-  getPosts: [Post!]!
+  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   getAllComments: [Comment!]!
