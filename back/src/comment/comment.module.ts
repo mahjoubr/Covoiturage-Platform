@@ -15,5 +15,6 @@ import { SubscriptionModule } from 'src/subscription/subscription.module';
   imports:[TypeOrmModule.forFeature([Comment, Post, AppUser]),AppUserModule,PostModule,EventStreamModule,SubscriptionModule],
   controllers: [CommentController],
   providers: [CommentService,CommentResolver],
+    exports: [CommentService],
 })
 export class CommentModule {}

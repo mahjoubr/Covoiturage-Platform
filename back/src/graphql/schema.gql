@@ -86,7 +86,7 @@ type JoinRequest {
 
 type Ride {
   id: Float!
-  date: DateTime!
+  date: String!
   time: String!
   departure: String!
   arrival: String!
@@ -112,9 +112,31 @@ type JwtAuthResponse {
   user: User!
 }
 
+type DashboardStatsType {
+  userCount: Int!
+  rideCount: Int!
+  postCount: Int!
+  reviewCount: Int!
+  reportCount: Int!
+  commentCount: Int!
+}
+
+type RidesPerMonth {
+  month: String!
+  count: Int!
+}
+
+type DashboardData {
+  stats: DashboardStatsType!
+  ridesPerMonth: [RidesPerMonth!]!
+  recentRides: [Ride!]!
+  recentUsers: [AppUser!]!
+}
+
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!

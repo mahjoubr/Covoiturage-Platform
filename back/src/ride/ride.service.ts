@@ -7,9 +7,6 @@ import { Ride } from './entities/ride.entity';
 import { GenericService } from '../services/genericService';
 import { RideState } from './entities/ride.entity';
 import { PaginationResult, PaginationService } from 'src/services/paginationService';
-import { CreateRideInput } from './dto/create-ride.input';
-import { AppUser } from 'src/app-user/entities/app-user.entity';
-import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
@@ -109,5 +106,28 @@ async findByPassenger(passengerId: number): Promise<Ride[]> {
     .getMany();
 }
 
+  async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
+    const result = await this.rideRepo
+        .createQueryBuilder('ride')
+        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') // ensures month is a string like '2025-12'
+        .addSelect('COUNT(*)', 'count')
+        .groupBy('month')
+        .orderBy('month', 'DESC')
+        .limit(12)
+        .getRawMany();
+
+    return result.map(row => ({
+      month: row.month,                  // Make sure 'month' is a string
+      count: parseInt(row.count, 10),
+    }));
+  }
+
+
+  async findRecent(limit: number): Promise<Ride[]> {
+    return this.rideRepo.find({
+      order: { date: 'DESC' },
+      take: limit,
+    });
+  }
 
 }

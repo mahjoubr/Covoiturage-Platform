@@ -19,11 +19,10 @@ export class Ride {
   id: number;
 
   @Column({ type: 'date' })
-  @Field(() =>  GraphQLISODateTime) 
+  @Field(() => String)
   date: Date;
-
   @Column({ type: 'time' })
-  @Field() 
+  @Field()
   time: string;
 
   @Column()

@@ -45,6 +45,8 @@
     "graphql-iso-date": "^3.6.1",
     "graphql-scalars": "^1.24.2",
     "graphql-tools": "^9.0.18",
+    "graphql-fields": "^2.0.3",
+    "graphql-type-json": "^0.3.2",
     "graphql-upload": "^13.0.0",
     "multer": "^1.4.5-lts.2",
     "mysql2": "^3.14.0",
