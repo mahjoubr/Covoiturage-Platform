@@ -8,6 +8,8 @@ import { Repository } from 'typeorm';
 import { PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
+import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { ReviewPayload } from 'src/SSE/ReviewPayload';
 
 @Injectable()
 export class ReviewService extends GenericService {
@@ -15,7 +17,9 @@ export class ReviewService extends GenericService {
 
 
      constructor(@InjectRepository(Review) private readonly reviewRepository: Repository<Review>,private readonly paginationService: PaginationService,private readonly searchService: SearchService,
-        private readonly userService: AppUserService) {
+        private readonly userService: AppUserService,
+        private readonly eventStreamService: EventStreamService,
+      ) {
         super(reviewRepository)
         
      }
@@ -40,11 +44,30 @@ export class ReviewService extends GenericService {
         ride: { id: createReviewDto.rideId },               
       });
     
-      await this.reviewRepository.save(review);
+      const savedReview = await this.reviewRepository.save(review);
     
     
       await this.userService.updateUserRating(createReviewDto.reviewedUserId);
+      this.emitReviewNotification(createReviewDto, savedReview.id);
+
     
+    }
+
+
+   async  emitReviewNotification(createReviewDto: CreateReviewDto, reviewId: number) {
+      const { reviewedUserId, reviewerId, stars, comment } = createReviewDto;
+      const reviewer = await this.userService.findOne(reviewerId); 
+      const reviewPayload: ReviewPayload = {
+        reviewId,
+        reviewerId,
+        reviewerName: reviewer.firstName,  
+        reviewerLastName: reviewer.firstName, 
+        reviewContent: comment,
+        rating: stars,
+        date: new Date().toISOString().split('T')[0], 
+      };
+  
+      this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
     }
     
     async deleteReview(userid:number,id: number) {
@@ -59,7 +82,6 @@ export class ReviewService extends GenericService {
     
       await this.reviewRepository.remove(review);
     
-      // Update the user's rating after deleting the review
       await this.userService.updateUserRating(review.reviewedUser.id);
     }
 
