@@ -23,6 +23,6 @@ async function bootstrap() {
   const adminService = app.get(AdminService);
   await seedAdmin(adminService);
   app.use(graphqlUploadExpress());
-  await app.listen(process.env.PORT ?? 3000); // moved to the end
+await app.listen(process.env.PORT ?? 3000, '127.0.0.1'); // or 'localhost'
 }
 bootstrap();

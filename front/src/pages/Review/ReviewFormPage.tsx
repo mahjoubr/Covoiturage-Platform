@@ -23,7 +23,12 @@ const ReviewPage = () => {
         const result = await getReviewFormData(rideId, reviewedId);
         setData(result);
       } catch (err: any) {
-        setError(err);
+        const msg = err?.message || '';
+        if (msg.includes('Entities with IDs')) {
+          setError(new Error('User or ride not found'));
+        } else {
+          setError(new Error('An unexpected error occurred'));
+        }
       } finally {
         setLoading(false);
       }
@@ -37,7 +42,20 @@ const ReviewPage = () => {
   }
 
   if (loading) return <div>Loading review data...</div>;
-  if (error) return <div>Error loading review data: {error.message}</div>;
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto mt-10 p-6 bg-red-100 border border-red-300 text-red-800 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-2">Oops! Something went wrong</h2>
+        <p>{error.message}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   const reviewedUser = data?.reviewedUser;
   const ride = data?.ride;

@@ -15,6 +15,7 @@ import { PaginationResult } from 'src/services/paginationService';
 import { RidePaginationResult } from './dto/ride-pagination-result';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
+import { AppUserWithRole} from 'src/graphql/types/AppUserWithRole';
 
 @Resolver(() => Ride)
 export class RideResolver {
@@ -196,4 +197,19 @@ async getRidesByPassenger(@CurrentUser() user: AppUser): Promise<Ride[]> {
   const rides = await this.rideService.findByPassenger(user.id);
   return rides;
 }
+
+
+@Query(() => [AppUserWithRole], { name: 'getUsersForRide' })
+async getUsersForRide(
+  @Args('rideId', { type: () => Int }) rideId: number,
+): Promise<AppUserWithRole[]> {
+  this.logger.log(`Getting users for ride: ${rideId}`);
+  try {
+    return await this.rideService.getUsersForRide(rideId);
+  } catch (error) {
+    this.logger.error(`Error getting users for ride: ${error.message}`);
+    throw error;
+  }
 }
+}
+

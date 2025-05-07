@@ -49,8 +49,7 @@ const navItems: NavItem[] = [
   },{
     icon:<ReviewIcon/>,
     name:"Reviews",
-    subItems: [{ name: "My Reviews", path: "/reviewed-list", pro: false },
-    { name: "Received Reviews", path: "/received-reviews", pro: false }],
+   path:"/reviews",
 
   },
   {

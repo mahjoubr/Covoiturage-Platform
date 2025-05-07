@@ -147,6 +147,10 @@ import { useMutation, useQuery } from '@apollo/client';
 import { GET_JOIN_REQUESTS, GET_POST_BY_ID } from '../../graphQl/queries/posts';
 import { ACCEPT_REQUEST, GET_JOIN_REQUESTS_BY_RIDE } from '../../graphQl/queries/rides';
 import JoinRequestsModal from './joinRquestModal'; // Import the modal component
+import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { getRideUsers, RideUser } from '../../services/ridesService';
+import UsersPerRide from './UsersPerRide';
 interface User {
   id: number;
   name: string;
@@ -169,7 +173,27 @@ interface RideCardProps {
   };
 }
 
+
 const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
+  const [isReviewPopupOpen, setIsReviewPopupOpen] = useState(false);
+  const [rideUsers, setRideUsers] = useState<RideUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  const handleLeaveReviewClick = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const users = await getRideUsers(Number(ride.id));
+      setRideUsers(users);
+      setIsReviewPopupOpen(true);
+    } catch (error) {
+      console.error('Error fetching ride users:', error);
+      // Optionally show error to user
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+ 
     const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false); // State for modal visibility
     useEffect(() => {
       if (isJoinRequestsModalOpen) {
@@ -186,7 +210,8 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
     const { loading, error, data } = useQuery(GET_POST_BY_ID, {
       variables: { id: ride.post }
     });
-    
+    const navigate=useNavigate();
+
     const { data: joinRequestsData,refetch } = useQuery(GET_JOIN_REQUESTS_BY_RIDE, {
       variables: { rideId: Number(ride.id) }, // Make sure to pass the ride ID
       fetchPolicy: 'network-only',
@@ -330,6 +355,32 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
               </span>
             </button>
           )}
+
+
+          {/* Leave Review button - only shown for rides you took */}
+          {isRideYouTook && (
+            <button
+              onClick={handleLeaveReviewClick}
+              className="w-full bg-yellow-600 text-white px-4 py-3 rounded-md hover:bg-yellow-700 transition-colors dark:bg-yellow-500/20 dark:text-white/90 dark:hover:bg-yellow-500/30 font-medium flex items-center justify-center"
+            >
+              <span>Leave Review</span>
+              <Star className="ml-2" size={18} color="white" />
+            </button>
+          )}
+           <UsersPerRide 
+        isOpen={isReviewPopupOpen} 
+        onClose={() => setIsReviewPopupOpen(false)} 
+        users={rideUsers} 
+        rideId={ride.id}
+        
+      />
+
+      <JoinRequestsModal
+        rideId={ride.id}
+        isOpen={isJoinRequestsModalOpen}
+        onClose={() => setIsJoinRequestsModalOpen(false)}
+        joinRequests={joinRequests}
+      />
         </div>
       </div>
     </div>

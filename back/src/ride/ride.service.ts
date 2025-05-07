@@ -13,6 +13,9 @@ import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
+import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
+import { Role } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { App } from 'supertest/types';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -134,5 +137,30 @@ async findByUserId(userId: number): Promise<Ride[]> {
     .getMany();
 }
 
+async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
+  const ride = await this.rideRepo.findOne({
+    where: { id: rideId },
+    relations: ['driver', 'appUserRides', 'appUserRides.appUser'],
+  });
 
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  const users: AppUserWithRole[] = [];
+
+  // Add driver if exists
+  if (ride.driver) {
+    users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
+  }
+
+  // Add passengers
+  ride.appUserRides.forEach((appUserRide) => {
+    if (appUserRide.role === Role.PASSENGER && appUserRide.appUser) {
+      users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
+    }
+  });
+
+  return users;
+}
 }

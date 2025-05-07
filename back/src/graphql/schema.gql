@@ -72,7 +72,6 @@ type AppUserRide {
   ride: Ride!
 }
 
-"""The role of the user in the ride"""
 enum Role {
   DRIVER
   PASSENGER
@@ -98,6 +97,23 @@ type Ride {
   post: Post!
   driver: AppUser
   joinRequests: [JoinRequest!]
+}
+
+type AppUserWithRole {
+  id: Float!
+  email: String!
+  password: String!
+  role: String!
+  name: String!
+  lastName: String!
+  dateOfBirth: String
+  phoneNumber: String
+  imageUrl: String
+  posts: [Post!]!
+  reviews: [Review!]!
+  rating: Float!
+  appUserRides: [AppUserRide!]!
+  roleInRide: Role!
 }
 
 type RidePaginationResult {
@@ -156,6 +172,7 @@ type Query {
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
+  getUsersForRide(rideId: Int!): [AppUserWithRole!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult

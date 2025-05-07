@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { GET_RIDES_DRIVER_PAGINATED, GET_RIDES_PASSENGER_PAGINATED } from "../graphQl/queries/rides";
+import { GET_RIDE_USERS, GET_RIDES_DRIVER_PAGINATED, GET_RIDES_PASSENGER_PAGINATED } from "../graphQl/queries/rides";
 import { GET_Rides_BY_USER } from "../graphQl/queries/calendar";
 import client from "../graphQl/client";
 export const useRidesPaginatedByDriver = (page: number, limit: number) => {
@@ -43,5 +43,35 @@ export const useRidesPaginatedByDriver = (page: number, limit: number) => {
         data: null, 
         refetch: () => client.query({ query: GET_Rides_BY_USER }) 
       };
+    }
+
+
+
+
+    
+  };
+
+
+
+
+  export interface RideUser {
+    id: number;
+    name: string;
+    lastName: string;
+    imageUrl: string;
+    roleInRide: string;
+  }
+  
+  export const getRideUsers = async (rideId: number): Promise<RideUser[]> => {
+    try {
+      const { data } = await client.query({
+        query: GET_RIDE_USERS,
+        variables: { rideId }
+      });
+  
+      return data.getUsersForRide;
+    } catch (error) {
+      console.error('Error fetching ride users:', error);
+      return [];
     }
   };
