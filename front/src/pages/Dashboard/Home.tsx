@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <>
-      <div className="mt-12 rounded-2xl border border-stroke bg-gradient-to-br from-white via-blue-50 to-blue-100 p-10 shadow-2xl dark:from-gray-900 dark:via-gray-800 dark:to-boxdark dark:border-strokedark overflow-hidden relative isolate">
+      <div className="mt-6 rounded-2xl border border-stroke bg-gradient-to-br from-white via-blue-50 to-blue-100 p-10 shadow-2xl dark:from-gray-900 dark:via-gray-800 dark:to-boxdark dark:border-strokedark overflow-hidden relative isolate">
         {/* Vibrant background gradient elements */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary/20 dark:bg-primary/30 animate-blob mix-blend-multiply filter blur-3xl opacity-80 dark:opacity-40"></div>

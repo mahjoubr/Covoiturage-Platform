@@ -270,12 +270,16 @@ const RideCalendar: React.FC = () => {
                   stickyHeaderDates={true}
                   viewDidMount={(view) => setCurrentView(view.view.type)}
                   eventClassNames={(arg) => {
-                    const status = arg.event.extendedProps.status;
-                    return [
-                      status === RideStatus.NOT_STARTED ? 'bg-blue-100 border-blue-500 text-blue-800' :
-                      status === RideStatus.STARTED ? 'bg-yellow-100 border-yellow-500 text-yellow-800' :
-                      'bg-green-100 border-green-500 text-green-800'
-                    ];
+                    const status = arg.event.extendedProps.status as RideStatus;
+                    
+                    const baseClasses = "border p-1 rounded text-sm !text-black"; // Force black text for all
+                    const statusClasses: Record<RideStatus, string> = {
+                      [RideStatus.NOT_STARTED]: "bg-blue-200 border-blue-300",
+                      [RideStatus.STARTED]: "bg-pink-200 border-pink-300", 
+                      [RideStatus.CLOSED]: "bg-green-200 border-green-300"
+                    };
+                    
+                    return `${baseClasses} ${statusClasses[status] || "bg-gray-200 border-gray-300"}`;
                   }}
                 />
               </div>
@@ -298,5 +302,6 @@ const RideCalendar: React.FC = () => {
     </>
   );
 };
+
 
 export default RideCalendar;

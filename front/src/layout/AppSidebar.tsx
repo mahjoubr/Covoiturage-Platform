@@ -8,11 +8,10 @@ import {
   HorizontaLDots,
 
   UserCircleIcon,
-  ReviewIcon,
-  OtherUsersIcon
+
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon } from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star} from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -47,14 +46,13 @@ const navItems: NavItem[] = [
     icon: <CarIcon />,
     name: "Rides",
     path: "/rides",
-  },{
-    icon:<ReviewIcon/>,
-    name:"Reviews",
-   path:"/reviews",
-
+  }, {
+    icon: <Star/>,
+    name: "Reviews",
+    path: "/reviews",
   },
   {
-    icon:<OtherUsersIcon />,
+    icon: <Users/>,
     name: "App Users",
     path: "/users",
   },

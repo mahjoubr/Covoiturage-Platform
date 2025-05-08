@@ -43,7 +43,7 @@ const ReviewsPage = () => {
       emptyCtaText: "Find Rides to Review",
       emptyCtaLink: "/rides",
       loadingMessage: "Loading your feedback history...",
-      gradientColors: "bg-gradient-to-br from-blue-50 to-blue-100",
+      gradientColors: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800",
       accentColor: "blue",
       fetchFn: async (variables: { page: number, limit: number }) => {
         return getMyReviews(variables.page, variables.limit);
@@ -64,7 +64,7 @@ const ReviewsPage = () => {
       emptyCtaText: "Browse Your Rides",
       emptyCtaLink: "/rides",
       loadingMessage: "Loading your journey memories...",
-      gradientColors: "bg-gradient-to-br from-indigo-50 to-purple-100",
+      gradientColors: "bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800",
       accentColor: "indigo",
       fetchFn: async (variables: { page: number, limit: number }) => {
         const userId = await getCurrentUserId();
@@ -176,10 +176,10 @@ const handlePageChange = (newPage: number) => {
       <div className={`min-h-screen flex items-center justify-center ${currentConfig.gradientColors}`}>
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 relative">
-            <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-200 border-opacity-50`}></div>
-            <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-600 border-t-transparent animate-spin`}></div>
+          <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-200 border-opacity-50 dark:border-${currentConfig.accentColor}-500`}></div>
+          <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-600 border-t-transparent animate-spin dark:border-${currentConfig.accentColor}-700`}></div>
           </div>
-          <p className={`mt-4 text-${currentConfig.accentColor}-700 font-medium`}>{currentConfig.loadingMessage}</p>
+          <p className={`mt-4 text-${currentConfig.accentColor}-700 dark:text-${currentConfig.accentColor}-300 font-medium`}>{currentConfig.loadingMessage}</p>
         </div>
       </div>
     );
@@ -187,14 +187,14 @@ const handlePageChange = (newPage: number) => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-        <div className="bg-white p-8 rounded-xl shadow-xl border-l-4 border-red-500 max-w-md">
-          <div className="flex items-center mb-4">
-            <AlertTriangle size={24} className="text-red-500 mr-3" />
-            <h3 className="text-xl font-bold text-red-600">Oops! Something went wrong</h3>
-          </div>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:bg-gradient-to-br dark:from-red-900 dark:to-red-800">
+        <div className="bg-white p-8 rounded-xl shadow-xl border-l-4 border-red-500 max-w-md dark:bg-gray-800 dark:border-red-700">
+        <div className="flex items-center mb-4">
+        <AlertTriangle size={24} className="text-red-500 mr-3 dark:text-red-300" />
+        <h3 className="text-xl font-bold text-red-600 dark:text-red-300">Oops! Something went wrong</h3>
+        </div>
+        <p className="text-gray-600 mb-4 dark:text-gray-300">{error}</p>
+        <button
             onClick={() => window.location.reload()}
             className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all font-medium flex items-center justify-center"
           >
@@ -209,18 +209,18 @@ const handlePageChange = (newPage: number) => {
   
 
   return (
-    <div className={`min-h-screen ${currentConfig.gradientColors} py-12 px-4`}>
+    <div className={`min-h-screen ${currentConfig.gradientColors} py-12 px-4 dark:bg-gray-900`}>
       <div className="max-w-6xl mx-auto">
         {/* Tab Switcher */}
         <div className="flex justify-center mb-8">
-          <div className="flex bg-white rounded-lg shadow-md p-1">
+        <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
             <button
               onClick={() => setActiveView('my-reviews')}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeView === 'my-reviews'
                   ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-blue-50'
-              }`}
+                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                }`}
             >
               My Reviews
             </button>
@@ -229,8 +229,8 @@ const handlePageChange = (newPage: number) => {
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeView === 'received-reviews'
                   ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-indigo-50'
-              }`}
+                  : 'text-gray-700 hover:bg-indigo-50 dark:text-white dark:hover:bg-gray-700'
+                }`}
             >
               Received Reviews
             </button>
@@ -241,12 +241,12 @@ const handlePageChange = (newPage: number) => {
           <h1 className={`text-3xl font-bold ${
             activeView === 'received-reviews' 
               ? 'bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700' 
-              : `text-${currentConfig.accentColor}-900`
+              : `text-${currentConfig.accentColor}-900 dark:text-white`
           } mb-3`}>
             {currentConfig.title}
           </h1>
-          <p className={`text-${currentConfig.accentColor}-700 max-w-lg mx-auto`}>
-            {currentConfig.subtitle}
+          <p className={`text-${currentConfig.accentColor}-700 max-w-lg mx-auto dark:text-gray-300`}>
+          {currentConfig.subtitle}
           </p>
 
           {/* Stats */}
@@ -254,17 +254,19 @@ const handlePageChange = (newPage: number) => {
             {currentConfig.stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <div key={index} className="bg-white rounded-lg p-4 shadow-md flex items-center">
-                  <div className={`h-12 w-12 rounded-full bg-${stat.color}-100 flex items-center justify-center mr-4`}>
+                <div key={index}                className="bg-white rounded-lg p-4 shadow-md flex items-center dark:bg-gray-800"
+>
+                  <div                   className={`h-12 w-12 rounded-full bg-${stat.color}-100 flex items-center justify-center mr-4 dark:bg-${stat.color}-700`}
+                  >
                     <Icon 
                       size={20} 
-                      className={`text-${stat.color}-600`} 
+                      className={`text-${stat.color}-600 dark:text-${stat.color}-300`}
                       fill={stat.iconFilled ? "currentColor" : "none"} 
                     />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-800">
+                  <p className="text-gray-600 text-sm dark:text-gray-400">{stat.title}</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">
                       {stat.getValue(reviews)}
                     </p>
                   </div>
@@ -276,21 +278,22 @@ const handlePageChange = (newPage: number) => {
         {reviews.length === 0 ? (
   <div className="text-center max-w-md mx-auto px-6 mt-12">
     <div className="relative">
-      <div className="bg-white rounded-full h-32 w-32 flex items-center justify-center mx-auto mb-8 shadow-xl">
-        <div className={`absolute inset-0 rounded-full bg-gradient-to-br from-${currentConfig.accentColor}-100 to-${currentConfig.accentColor}-50 animate-pulse`}></div>
+    <div className="bg-white rounded-full h-32 w-32 flex items-center justify-center mx-auto mb-8 shadow-xl dark:bg-gray-700">
+    <div                 className={`absolute inset-0 rounded-full bg-gradient-to-br from-${currentConfig.accentColor}-100 to-${currentConfig.accentColor}-50 animate-pulse dark:bg-gradient-to-br from-${currentConfig.accentColor}-700 to-${currentConfig.accentColor}-600`}
+    ></div>
         <currentConfig.emptyIcon size={40} className={`text-${currentConfig.accentColor}-500 relative z-10`} />
       </div>
     </div>
-    <h2 className={`text-2xl font-bold text-${currentConfig.accentColor}-900 mb-3`}>
-      {currentConfig.emptyTitle}
+    <h2 className={`text-2xl font-bold text-${currentConfig.accentColor}-900 mb-3 dark:text-white`}>
+    {currentConfig.emptyTitle}
     </h2>
-    <p className={`text-${currentConfig.accentColor}-700 mb-8`}>
-      {currentConfig.emptyMessage}
+    <p className={`text-${currentConfig.accentColor}-700 mb-8 dark:text-gray-300`}>
+    {currentConfig.emptyMessage}
     </p>
     <Link
       to={currentConfig.emptyCtaLink}
-      className={`inline-block bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-700 text-white rounded-lg px-6 py-3 font-medium hover:from-${currentConfig.accentColor}-700 hover:to-${currentConfig.accentColor}-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5`}
-    >
+      className={`inline-block bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-700 text-white rounded-lg px-6 py-3 font-medium hover:from-${currentConfig.accentColor}-700 hover:to-${currentConfig.accentColor}-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 dark:bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-500`}
+      >
       {currentConfig.emptyCtaText}
     </Link>
   </div>
@@ -300,14 +303,14 @@ const handlePageChange = (newPage: number) => {
 
         {/* Filter Tabs */}
         <div className="flex justify-center mb-8">
-          <div className="flex bg-white rounded-lg shadow-md p-1">
-            <button
+        <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
+        <button
               onClick={() => setActiveTab('all')}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'all'
                   ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50'
-              }`}
+                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                }`}
             >
               All
             </button>
@@ -316,8 +319,8 @@ const handlePageChange = (newPage: number) => {
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'positive'
                   ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50'
-              }`}
+                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                }`}
             >
               Positive
             </button>
@@ -326,8 +329,8 @@ const handlePageChange = (newPage: number) => {
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'negative'
                   ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50'
-              }`}
+                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                }`}
             >
               Negative
             </button>
@@ -372,14 +375,14 @@ const handlePageChange = (newPage: number) => {
 )}
 
 
-{pagination.totalPages > 1 && (
+{pagination.totalPages >= 1 && (
   <div className="flex justify-center mt-8">
     <div className="flex items-center space-x-2">
       <button
         onClick={() => handlePageChange(pagination.page - 1)}
         disabled={pagination.page === 1}
-        className={`p-2 rounded-md ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
+        className={`p-2 rounded-md ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
+        >
         <ChevronLeft size={20} />
       </button>
       
@@ -402,8 +405,8 @@ const handlePageChange = (newPage: number) => {
             className={`w-10 h-10 rounded-md flex items-center justify-center ${
               pageNum === pagination.page
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
+                : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+              }`}
           >
             {pageNum}
           </button>
@@ -413,8 +416,8 @@ const handlePageChange = (newPage: number) => {
       <button
         onClick={() => handlePageChange(pagination.page + 1)}
         disabled={pagination.page === pagination.totalPages}
-        className={`p-2 rounded-md ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
+        className={`p-2 rounded-md ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
+        >
         <ChevronRight size={20} />
       </button>
     </div>
@@ -422,8 +425,8 @@ const handlePageChange = (newPage: number) => {
 )}
 
 {/* Page info */}
-<div className="text-center text-sm text-gray-600 mt-2">
-  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+<div className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
+Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
   {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
   {pagination.totalItems} reviews
 </div>

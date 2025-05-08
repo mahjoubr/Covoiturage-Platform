@@ -139,7 +139,8 @@ export class RideResolver {
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
     }));
   }
-  @Query(() => [Ride], { name: 'getRidesByDriver' })
+  
+@Query(() => [Ride], { name: 'getRidesByDriver' })
 @UseGuards(GqlAuthGuard)
 async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
   const rides = await this.rideService.findByDriver(user.id);
@@ -187,7 +188,7 @@ async getRidesByUserId(@CurrentUser() user: AppUser): Promise<Ride[]> {
   console.log(rides)
   return rides;
 }
-
+class="fc-event-title fc-sticky"
 
 @Query(() => [Ride], { name: 'getRidesByPassenger' })
 @UseGuards(GqlAuthGuard)

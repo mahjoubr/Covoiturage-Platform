@@ -54,10 +54,7 @@ export class PostResolver {
   @Query(() => Post, { name: 'getPostById' })
   async getPostById(@Args('id') id: string): Promise<Post> {
     const post = await this.postService.findOne(+id);
-    return {
-      ...post,
-      date: post.date instanceof Date ? post.date : new Date(post.date)
-    };
+   return post;
   }
   @Mutation(() => Post)
 async createPost(@Args('createPostInput') createPostInput: CreatePostInput): Promise<Post> {
