@@ -9,9 +9,10 @@ import { UserService } from 'src/user/user.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { AppUserModule } from 'src/app-user/app-user.module';
 import { ReviewResolver } from './review.resolver';
+import { RideModule } from 'src/ride/ride.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Review]),AppUserModule],
+  imports:[TypeOrmModule.forFeature([Review]),AppUserModule,RideModule],
   controllers: [ReviewController],
   providers: [ReviewService,PaginationService,SearchService , ReviewResolver],
   exports: [ReviewService],

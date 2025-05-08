@@ -1,4 +1,4 @@
-import { Review, Ride } from "../types";
+import { Review } from "../types";
 
 export interface CarpoolPost {
     id: string;
@@ -13,8 +13,32 @@ export interface CarpoolPost {
     price?: number;
     contactInfo?: string;
     comments? : Comment[];
+    postOwnerId: number;
+    status: string;
   }
-  
+
+export enum RideState {
+  NOT_STARTED = 'NotStarted',
+  STARTED = 'Started',
+  CLOSED = 'Closed',
+}
+
+export interface Ride {
+  id: number;
+  date: string;  // Date should be in string format (ISO 8601) when using GraphQLISODateTime
+  time: string;
+  departure: string;
+  arrival: string;
+  price: number;
+  nbPassengers: number;
+  state: RideState;
+  appUserRides: AppUserRide[];
+  driver:string;
+  post: CarpoolPost;
+  isYourRide: boolean;
+  isRideYouTook: boolean;
+}
+
   export interface CreatePostFormData {
     destination: string;
     departure: string;
@@ -31,7 +55,7 @@ export interface CarpoolPost {
     id: string;
     commenter: AppUser;
     text: string;
-    timestamp: Date;
+    date: Date;
     postId: string; 
   }
   export interface User {

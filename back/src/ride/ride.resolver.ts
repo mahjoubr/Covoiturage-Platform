@@ -3,16 +3,27 @@ import { Ride, RideState } from './entities/ride.entity';
 import { RideService } from './ride.service';
 import { CreateRideInput } from './dto/create-ride.input';
 import { UpdateRideInput } from './dto/update-ride.input';
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Post } from 'src/post/entities/post.entity';
+import { PostService } from 'src/post/post.service';
 import { PaginationResult } from 'src/services/paginationService';
 import { RidePaginationResult } from './dto/ride-pagination-result';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 
 @Resolver(() => Ride)
 export class RideResolver {
-  constructor(private readonly rideService: RideService) {}
+  
+    private readonly logger = new Logger('EventEmitter');
+  constructor(private readonly rideService: RideService,private readonly postrepo :PostService,
+        private readonly subscriptionService :SubscriptionService,
+      private readonly eventStreamService:EventStreamService,
+  ) {}
 
   @Query(() => [Ride], { name: 'getAllRides' })
   async findAll(): Promise<Ride[]> {
@@ -33,13 +44,32 @@ export class RideResolver {
   }
 
   @Mutation(() => Ride)
-  async createRide(@Args('createRideInput') createRideInput: CreateRideInput): Promise<Ride> {
+  async createRide(
+    @Args('createRideInput') createRideInput: CreateRideInput,
+    @Args('postId') postId: number,  // Accept the postId as a parameter
+  ): Promise<Ride> {
     if (createRideInput.date && typeof createRideInput.date === 'string') {
       createRideInput.date = new Date(createRideInput.date);
     }
     
-    return this.rideService.create(createRideInput);
+
+  
+  
+    // Find the post by the provided postId
+    const post = await this.postrepo.findOne(postId);
+  
+    if (!post) {
+      throw new Error('Post not found');
+    }
+  
+    // Create a new Ride and associate it with the found Post
+    const ride = await this.rideService.createRide(createRideInput, post);
+  
+    return ride;
   }
+  
+  
+  
   
 
   @Mutation(() => Ride)
@@ -58,6 +88,23 @@ export class RideResolver {
   async removeRide(@Args('id', { type: () => String }) id: String): Promise<boolean> {
     try {
       await this.rideService.remove(+id);
+        const subscribers = await this.subscriptionService.getSubscribers(+id, 'ride');
+          
+          for (const recipientId of subscribers) {
+              const event = {
+                type: EventType.RIDE_DELETE,
+                targetId: +id,
+                recipientId,
+                payload: {
+                  rideId: +id,
+                  userId: recipientId,
+                  timestamp: new Date().toISOString(),
+                },
+              };
+              this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+            this.eventStreamService.emitEvent(event);
+            this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+          }
       return true;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -65,6 +112,7 @@ export class RideResolver {
       }
       throw error;
     }
+    
   }
   
 

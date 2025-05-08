@@ -1,74 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send } from 'lucide-react';
-import { CarpoolPost,Comment } from '../../types/posts.ts';
+import { CarpoolPost, Comment } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
+import { useMutation } from '@apollo/client';
+import { CREATE_COMMENT } from '../../graphQl/queries/posts';
+import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
 
 
 interface ViewPostModalProps {
   isOpen: boolean;
   onClose: () => void;
   post: CarpoolPost | null;
+    userData: {
+      id?: string;
+      name?: string;
+      lastName?: string;
+    };
 }
 
 
-const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) => {
-  /*const postComments: Record<string, Comment[]> = (post?.comments ?? []).reduce((acc, comment) => {
-    acc[comment.id] = [comment]; 
-    return acc;
-  }, {} as Record<string, Comment[]>);*/
+const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,userData }) => {
   
-  
-
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
+    const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
+  const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
+  // Apollo mutation hook configuration
+  const [createComment] = useMutation(CREATE_COMMENT, {
+    onCompleted: (data) => {
+      const newCommentData :Comment = {
+        id:data.createComment.id,
+        text:data.createComment.text,
+        date :data.createComment.date,
+        commenter: data.createComment.commenter,
+        postId: data.createComment.post.id,
+      };
+      setComments(prevComments => [...prevComments, newCommentData]);
+      setNewComment('');
+      setSubmittingComment(false);
+    },
+    onError: (error) => {
+      console.error("Error creating comment:", error);
+      setSubmittingComment(false);
+    }
+  });
+  const isPostOwner = Number(post?.postOwnerId) === Number(userData?.id);
 
   useEffect(() => {
     if (post && isOpen) {
-      // Use post.comments directly instead of postComments
       setComments(post.comments || []);
       setRequestPending(false);
       setShowAlert(false);
+      setNewComment('');
     }
   }, [post, isOpen]);
 
   if (!isOpen || !post) return null;
 
-  const handleAddComment = () => {
-    if (!newComment.trim() || !post) return;
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !post || submittingComment) return;
     
-    const comment: Comment = {
-      id: Date.now().toString(), 
-      commenter: {
-        id: 1,
-        name: 'Test',
-        lastName: 'User',
-        email: 'testuser@example.com',
-        password: 'testpassword',
-        role: 'user',
-        dateOfBirth: '2000-01-01',
-        phoneNumber: '1234567890',
-        imageUrl: 'https://via.placeholder.com/150',
-        rating: 4.5,
-        posts: [],
-        reviews: [],
-        appUserRides: [],
-      },
-      text: newComment,
-      timestamp: new Date(),
-      postId: post.id
-    };
+    setSubmittingComment(true);
     
-    // Update local state
-    const updatedComments = [...comments, comment];
-    setComments(updatedComments);
-    
-    // Update "global" comments
-    post.comments?.concat(updatedComments);
-    
-    setNewComment('');
+    try {
+      // Call the GraphQL mutation
+      await createComment({
+        variables: {
+          input: {
+            postId: +post.id,
+            text: newComment
+            // The server uses the current user from auth token
+          }
+        }
+      });
+    } catch (error) {
+      // Error handling is done in the onError callback of the useMutation
+      console.error("Failed to create comment:", error);
+    }
   };
 
   // Format relative time for comments
@@ -92,28 +104,40 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
     return `${diffInDays}d ago`;
   };
   
-
   // Handle join ride button
-  const handleJoinRide = (e: React.MouseEvent) => {
+  const handleJoinRide =async  (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering other events
     
     if (requestPending) {
       setRequestPending(false);
       setShowAlert(true);
-      
+      await deleteJoinRequest({ variables: { postId: Number(post.id) } });
       // Auto-hide the alert after 3 seconds
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
     } else {
       setRequestPending(true);
+      await createJoinRequest({ variables: { postId: Number(post.id) } });
+      
     }
   };
+    const handleDeletePost = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      // Implement delete post functionality here
+      console.log("Delete post clicked for post ID:", post.id);
+    };
+  
+    const handleClosePost = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      // Implement close post functionality here
+      console.log("Close post clicked for post ID:", post.id);
+    };
+  
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-30 z-99999 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[80vh] relative">
-        {/* Alert overlay */}
         {showAlert && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="bg-black/50 dark:bg-gray-900/60 text-white text-sm px-6 py-3 rounded-md shadow-lg">
@@ -122,9 +146,8 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
         </div>
       )}
         
-        {/* Fixed Header */}
         <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Ride Details</h2>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Post Details</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -135,7 +158,6 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
           </button>
         </div>
         
-        {/* Scrollable Content */}
         <div className="p-3 overflow-y-auto flex-grow">
           <div className="mb-3">
             <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-2">{post.departure} → {post.destination}</h3>
@@ -222,11 +244,9 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
             </div>
           )}
           
-          {/* Comments Section */}
           <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comments</h4>
             
-            {/* Comment List */}
             <div className="space-y-3 mb-3 max-h-40 overflow-y-auto">
               {comments.length === 0 ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400 italic">No comments yet</p>
@@ -247,7 +267,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
                         </span>
                       </div>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatCommentTime(comment.timestamp)}
+                        {formatCommentTime(comment.date)}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-200">{comment.text}</p>
@@ -256,7 +276,6 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
               )}
             </div>
             
-            {/* Add Comment Form */}
             <div className="flex items-center mt-2">
               <input
                 type="text"
@@ -267,23 +286,33 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') handleAddComment();
                 }}
+                disabled={submittingComment}
               />
               <button
                 onClick={handleAddComment}
-                className="bg-blue-600 dark:bg-blue-500 text-white px-3 py-1.5 rounded-r-md hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors"
+                disabled={submittingComment || !newComment.trim()}
+                className={`${
+                  submittingComment || !newComment.trim() 
+                    ? 'bg-blue-400 dark:bg-blue-600 cursor-not-allowed'
+                    : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400'
+                } text-white px-3 py-1.5 rounded-r-md transition-colors`}
               >
-                <Send size={16} />
+                {submittingComment ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Send size={21.5} />
+                )}
               </button>
             </div>
           </div>
         </div>
         
-        {/* Fixed Footer */}
-        <div className="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex space-x-2">
+        <div className="flex justify-end p-2 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex space-x-2">
+          {!isPostOwner && post.status !== "closed" &&(
             <button
               onClick={handleJoinRide}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${
+              className={`py-1 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
                 requestPending
                   ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'
                   : 'bg-blue-100 dark:bg-brand-500/20 text-blue-700 dark:text-brand-400 border border-blue-200 dark:border-brand-500/20 hover:bg-blue-200 dark:hover:bg-brand-500/30'
@@ -291,18 +320,36 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post }) 
             >
               {requestPending ? 'Request Pending' : 'Join Ride'}
             </button>
-            <button
-              onClick={onClose}
-              className="px-3 py-1 text-xs bg-blue-600 dark:bg-blue-500 rounded-md font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              Close
-            </button>
-          </div>
+          )}
+                  
+          {isPostOwner && (
+            <div className="flex space-x-2">
+              <button
+                onClick={handleDeletePost}
+                className="py-1 px-4 rounded-md font-medium text-sm transition-all duration-300 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-200 dark:hover:bg-red-500/30"
+              >
+                Delete Post
+              </button>
+              
+              <button
+                onClick={handleClosePost}
+                className="py-1 px-4 rounded-md font-medium text-sm transition-all duration-300 bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-500/30 hover:bg-gray-200 dark:hover:bg-gray-500/30"
+              >
+                Close Post
+              </button>
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            className="px-3 py-1 text-xs bg-blue-600 dark:bg-blue-500 rounded-md font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+          >
+            Close
+          </button>
         </div>
+      </div>
       </div>
     </div>
   );
 };
 
 export default ViewPostModal;
-

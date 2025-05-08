@@ -1,7 +1,73 @@
-// src/graphQl/queries/reviewQueries.ts
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
+
+export const GET_REVIEW_FORM_DATA = gql`
+  query GetReviewFormData($rideId: Int!, $reviewedUserId: Int!) {
+    reviewFormData(rideId: $rideId, reviewedUserId: $reviewedUserId) {
+      reviewedUser {
+        id
+        name
+        imageUrl
+      }
+      ride {
+        id
+        departure
+        date
+        arrival
+        price
+        time
+      }
+    }
+  }
+`;
 
 export const GET_MY_REVIEWS = gql`
+  query GetMyReviews {
+    getMyReviews {
+      id
+      stars
+      comment
+      date
+      ride {
+        id
+        departure
+        arrival
+        date
+        time
+      }
+      reviewedUser {
+        id
+        name
+        lastName
+        imageUrl
+      }
+    }
+  }
+`;
+
+export const GET_USER_REVIEWS = gql`
+  query GetUserReviews($userId: Int!) {
+    getUserReviews(userId: $userId) {
+      id
+      stars
+      comment
+      date
+      ride {
+        id
+        departure
+        arrival
+        date
+        time
+      }
+      reviewer {
+        id
+        name
+        lastName
+        imageUrl
+      }
+    }
+  }
+`;
+export const GET_MY_REVIEWS1 = gql`
   query GetMyReviews {
     getMyReviews {
       id

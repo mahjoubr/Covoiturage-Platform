@@ -7,7 +7,4 @@ export class CreateCommentInput {
 
   @Field(() => Int)
   postId: number;
-
-  @Field(() => Int)
-  commenterId: number;
 }

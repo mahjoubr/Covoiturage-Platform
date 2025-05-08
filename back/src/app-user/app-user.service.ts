@@ -8,7 +8,6 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
 import { saveFile } from '../common/helpers/file-upload.helper';
-import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 @Injectable()
 export class AppUserService extends GenericService {
@@ -82,6 +81,20 @@ export class AppUserService extends GenericService {
   
     return this.appUserRepo.save(user);
   }
-  
+
+
+  async findRecent(limit: number): Promise<AppUser[]> {
+    return this.appUserRepo.find({
+      order: { id: 'DESC' },
+      take: limit,
+    });
+  }
+  // user.service.ts
+// user.service.ts
+async findById(id: number): Promise<AppUser | null> {
+  return this.appUserRepo.findOne({ where: { id } });
+}
+
+
 }
   

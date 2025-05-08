@@ -1,15 +1,30 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
-import { Post } from './entities/post.entity';
+import { Post, PostStatus } from './entities/post.entity';
 import { PostService } from './post.service';
+import { CreatePostInput } from './dto/post-graphql.dto';
+import { Ride, RideState } from 'src/ride/entities/ride.entity';
+import { Int } from 'type-graphql';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
+import { Logger } from '@nestjs/common';
+import { GraphQLJSONObject } from 'graphql-type-json';
+import { MatchingRideResult } from './dto/matching-ride-result.dto';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  private readonly logger = new Logger('EventEmitter');
+  constructor(private readonly postService: PostService,
+    @InjectRepository(Post) private readonly postRepository :Repository<Post>
+  ) {}
 
   @Query(() => [Post], { name: 'getPosts' })
   async getPosts(): Promise<Post[]> {
     const posts = await this.postService.findAll();
-    return posts.map(post => ({
+    
+    // Filter posts to only include those with OPEN status
+    const openPosts = posts.filter(post => post.status !== PostStatus.CLOSED);
+  
+    return openPosts.map(post => ({
       ...post,
       date: post.date instanceof Date ? post.date : new Date(post.date),
       relations: ['listRide']
@@ -24,4 +39,39 @@ export class PostResolver {
       date: post.date instanceof Date ? post.date : new Date(post.date)
     };
   }
+  @Mutation(() => Post)
+async createPost(@Args('createPostInput') createPostInput: CreatePostInput): Promise<Post> {
+  return this.postService.create(createPostInput);
+}
+@Query(() => MatchingRideResult, { name: 'matchingRide', nullable: true })
+async getMatchingRide(
+  @Args('postId', { type: () => Int }) postId: number
+): Promise<MatchingRideResult | null> {
+  return this.postService.findMatchingRideAndOwner(postId);
+}
+
+
+
+
+@Mutation(() => Boolean)
+async deletePost(@Args('id',{ type: () => Int }) id: number): Promise<boolean> {
+  try {
+    await this.postService.remove(id);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+
+  @Mutation(() => Boolean)
+  async closepost(
+    @Args('id',{ type: () => Int }) id: number,
+  ): Promise<boolean> {
+    await this.postService.close(id);
+    return true;
+
+  }
+
 }

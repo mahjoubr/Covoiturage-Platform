@@ -11,7 +11,8 @@ query {
         id
         postOwner {
           id
-          username
+          name
+          lastName
         }
       }
     }
@@ -25,11 +26,19 @@ query {
     departure
     arrival
     date
+    post {
+      id
+      postOwner {
+        id
+        name
+        lastName
+      }
+    }
     appUserRides {
       appUser {
         id
         name
-        lasname
+        lastName
       }
     }
   }
@@ -38,10 +47,9 @@ query {
 export const GET_USER = gql`
 query {
   getAppUserInfo {
-    
     id
     name
-    lasname
+    lastName
       
   }
 }
@@ -93,3 +101,69 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
   }
 }
 `;
+
+
+  export const CREATE_JOIN_REQUEST = gql`
+  mutation CreateJoinRequest($postId: Int!) {
+    createJoinRequest(postId: $postId) {
+      id
+      date
+      ride {
+        id
+        departure
+        arrival
+      }
+      user {
+        id
+        name
+        lastName
+      }
+    }
+  }
+`;
+
+export const DELETE_JOIN_REQUEST = gql`
+  mutation DeleteJoinRequest($postId: Int!) {
+    deleteJoinRequest(postId: $postId)
+  }
+`;
+
+
+export const GET_JOIN_REQUESTS_BY_RIDE = gql`
+  query GetJoinRequestsByRide($rideId: Int!) {
+    getJoinRequestsByRide(rideId: $rideId) {
+      id
+      user {
+        id
+        name
+        lastName
+        imageUrl
+      }
+    }
+  }
+`;
+
+export const DELETE_REQUEST = gql`
+  mutation DeleteJoinRequestById($id: Int!) {
+    deleteJoinRequestById(id: $id)
+  }
+`;
+
+export const ACCEPT_REQUEST = gql`
+mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
+  acceptJoinRequest(requestId:$requestId,rideId: $rideId, userId: $userId) {
+    id
+    role
+    appUser {
+      id
+      name
+      lastName
+    }
+    ride {
+      id
+      departure
+      arrival
+    }
+  }
+}
+  `;

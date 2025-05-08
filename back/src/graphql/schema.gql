@@ -36,13 +36,14 @@ type Post {
   comments: [Comment!]
   postOwner: AppUser!
   listRide: [Ride!]
+  status: String
 }
 
 type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: DateTime!
+  date: String!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -57,7 +58,7 @@ type AppUser {
   lastName: String!
   dateOfBirth: String
   phoneNumber: String
-  imageUrl: String!
+  imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
   rating: Float!
@@ -77,9 +78,16 @@ enum Role {
   PASSENGER
 }
 
-type Ride {
+type JoinRequest {
   id: Float!
   date: DateTime!
+  user: AppUser
+  ride: Ride
+}
+
+type Ride {
+  id: Float!
+  date: String!
   time: String!
   departure: String!
   arrival: String!
@@ -88,7 +96,8 @@ type Ride {
   state: String!
   appUserRides: [AppUserRide!]!
   post: Post!
-  driver: AppUser!
+  driver: AppUser
+  joinRequests: [JoinRequest!]
 }
 
 type RidePaginationResult {
@@ -98,15 +107,65 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
+type MatchingRideResult {
+  ride: Ride
+  postOwnerId: String
+}
+
+type UserInfo {
+  id: Float!
+  name: String!
+  lastName: String!
+  rating: Float!
+  phoneNumber: String!
+  imageUrl: String!
+}
+
+type RideDetails {
+  id: Float!
+  departure: String!
+  date: String!
+  arrival: String!
+  price: Float!
+  time: String!
+}
+
+type ReviewFormData {
+  reviewedUser: UserInfo!
+  ride: RideDetails!
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
   user: User!
 }
 
+type DashboardStatsType {
+  userCount: Int!
+  rideCount: Int!
+  postCount: Int!
+  reviewCount: Int!
+  reportCount: Int!
+  commentCount: Int!
+}
+
+type RidesPerMonth {
+  month: String!
+  count: Int!
+}
+
+type DashboardData {
+  stats: DashboardStatsType!
+  ridesPerMonth: [RidesPerMonth!]!
+  recentRides: [Ride!]!
+  recentUsers: [AppUser!]!
+}
+
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!
@@ -117,11 +176,19 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getPosts: [Post!]!
   getPostById(id: String!): Post!
+  matchingRide(postId: Int!): MatchingRideResult
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getAllReviews: [Review!]!
   getMyReviews: [Review!]!
   getAverageRating: Int!
+  getJoinRequestById(id: Float!): JoinRequest!
+  getAllJoinRequests: [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
+  getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
 }
 
 type Mutation {
@@ -129,10 +196,17 @@ type Mutation {
   login(input: LoginInput!): JwtAuthResponse!
   updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
   updatePhoto(updatePhotoInput: UploadPhotoInput!): AppUser!
-  createRide(createRideInput: CreateRideInput!): Ride!
+  createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
+  createPost(createPostInput: CreatePostInput!): Post!
+  deletePost(id: Int!): Boolean!
+  closepost(id: Int!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
+  createJoinRequest(postId: Int!): JoinRequest!
+  deleteJoinRequest(postId: Int!): Boolean!
+  deleteJoinRequestById(id: Int!): Boolean!
+  acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
 }
 
 input RegisterInput {
@@ -168,7 +242,6 @@ input CreateRideInput {
   price: Float!
   nbPassengers: Int!
   state: String = "NotStarted"
-  riderIds: [Int!]!
 }
 
 input UpdateRideInput {
@@ -179,11 +252,23 @@ input UpdateRideInput {
   price: Float
   nbPassengers: Int
   state: String
-  riderIds: [Int!]
+}
+
+input CreatePostInput {
+  destination: String!
+  departure: String!
+  date: DateTime!
+  time: String!
+  seatCount: Int!
+  frequency: String!
+  description: String
+  price: Float
+  contactInfo: String
+  listRide: [String!]!
+  postOwnerId: Float!
 }
 
 input CreateCommentInput {
   text: String!
   postId: Int!
-  commenterId: Int!
 }

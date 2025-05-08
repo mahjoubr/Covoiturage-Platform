@@ -7,27 +7,36 @@ import { Ride } from './entities/ride.entity';
 import { GenericService } from '../services/genericService';
 import { RideState } from './entities/ride.entity';
 import { PaginationResult, PaginationService } from 'src/services/paginationService';
-import { CreateRideInput } from './dto/create-ride.input';
-import { AppUser } from 'src/app-user/entities/app-user.entity';
-import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
+import { Post } from 'src/post/entities/post.entity';
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
   private readonly paginationService: PaginationService,
-  private userRepository: AppUserService,
-  private appUserRideRepo: AppUserRideService,
+  private userService: AppUserService,
+  private appUserRideService: AppUserRideService,
 
 ){
     
     super(rideRepo);
   }
+  async createRide(createRideInput: CreateRideDto, post: Post): Promise<Ride> {
+    // Create a new ride and associate it with the post
+    const ride = this.rideRepo.create({
+      ...createRideInput,
+      post, // Associate the ride with the post
+    });
+
+    // Save the ride in the database
+    return await this.rideRepo.save(ride);
+  }
   
   async findByState(state: RideState): Promise<Ride[]> {
     return this.rideRepo.find({
       where: { state },
-      relations: ['appUserRides'],
+      relations: ['appUserRides','post'],
     });
   }
 
@@ -97,6 +106,41 @@ async findByPassenger(passengerId: number): Promise<Ride[]> {
     .leftJoinAndSelect('allAppUserRides.appUser', 'eachPassenger')
     .getMany();
 }
+// ride.service.ts
+// ride.service.ts
+// ride.service.ts
+async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
+  const ride = await this.rideRepo.findOne({ where: { id: rideId } });
+  if (!ride) throw new Error('Ride not found');
 
+  const user = await this.userService.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  return this.appUserRideService.addPassenger(user, ride);
+}
+
+  async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
+    const result = await this.rideRepo
+        .createQueryBuilder('ride')
+        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') // ensures month is a string like '2025-12'
+        .addSelect('COUNT(*)', 'count')
+        .groupBy('month')
+        .orderBy('month', 'DESC')
+        .limit(12)
+        .getRawMany();
+
+    return result.map(row => ({
+      month: row.month,                  // Make sure 'month' is a string
+      count: parseInt(row.count, 10),
+    }));
+  }
+
+
+  async findRecent(limit: number): Promise<Ride[]> {
+    return this.rideRepo.find({
+      order: { date: 'DESC' },
+      take: limit,
+    });
+  }
 
 }

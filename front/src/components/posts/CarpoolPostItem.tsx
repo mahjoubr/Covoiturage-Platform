@@ -1,31 +1,111 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin, Calendar, Clock, Users, RotateCcw } from 'lucide-react';
 import { CarpoolPost } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
+import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE } from '../../graphQl/queries/posts.ts';
 
 interface CarpoolPostItemProps {
   post: CarpoolPost;
   onClick: (post: CarpoolPost) => void;
+  userData: {
+    id?: string;
+    name?: string;
+    lastName?: string;
+  };
 }
 
-const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick }) => {
+const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick ,userData}) => {
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
+  const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
+  const [deletePost] = useMutation(DELETE_POST, {
+      refetchQueries: [{ query: GET_POSTS }]
+    });
+  const [closePost] = useMutation(CLOSE_POST, {
+      refetchQueries: [{ query: GET_POSTS }]
+    });
 
-  const handleJoinRide = (e: React.MouseEvent) => {
+
+const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  
+  const { data: rideData, loading: userLoading, error: userError } = useQuery(GET_RIDE, {
+    variables:{postId:Number(post.id)},
+    skip: !isLoggedIn,
+    fetchPolicy: 'network-only',
+    //onCompleted: (data) => console.log('GET_ride completed:', data),
+   // onError: (error) => console.error('GET_ride error:', error)
+  });
+  const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
+    variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
+    skip: !isLoggedIn,
+    fetchPolicy: 'network-only',
+    //onCompleted: (data) => console.log('GET_ride completed:', data),
+    //onError: (error) => console.error('GET_ride error:', error)
+  });
+  //console.log(joinRequest);
+useEffect(() => {
+  if (joinRequest?.getJoinRequestsByRideUser) {
+    const hasRequests = Array.isArray(joinRequest.getJoinRequestsByRideUser) 
+      ? joinRequest.getJoinRequestsByRideUser.length > 0 
+      : !!joinRequest.getJoinRequestsByRideUser;
+    
+    setRequestPending(hasRequests);
+  } else {
+    setRequestPending(false);
+  }
+}, [joinRequest]);
+const handleJoinRide = async (e: React.MouseEvent) => {
+
     e.stopPropagation(); 
     
     if (requestPending) {
       setRequestPending(false);
       setShowAlert(true);
+      await deleteJoinRequest({ variables: { postId: Number(post.id) } });
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
     } else {
       setRequestPending(true);
+      await createJoinRequest({ variables: { postId: Number(post.id) } });
     }
   };
+
+  const handleDeletePost = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deletePost({ 
+      variables: { postId: Number(post.id) },
+      // Optional: Update cache or handle success/error
+      onCompleted: (data) => {
+        console.log("Post deleted successfully", data);
+        // Add any additional logic like refreshing the list
+      },
+      onError: (error) => {
+        console.error("Error deleting post:", error);
+      }
+    });
+  };
+  
+  const handleClosePost = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    closePost({ 
+      variables: { postId: Number(post.id) },
+      onCompleted: (data) => {
+        console.log("Post closed successfully", data);
+        // Add any additional logic here
+      },
+      onError: (error) => {
+        console.error("Error closing post:", error);
+      }
+    });
+  };
+
+  const isPostOwner = Number(rideData?.matchingRide?.postOwnerId) === Number(userData?.id);
 
   return (
     <div 
@@ -86,21 +166,39 @@ const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick }) => {
         </div>
       </div>
       
-      {/* Join Ride Button - Positioned at the bottom */}
-      <div className="mt-4">
-        <button
-          onClick={handleJoinRide}
-          className={`w-full py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
-            requestPending
-              ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'
-              : 'bg-blue-100 dark:bg-brand-500/20 text-blue-700 dark:text-brand-400 border border-blue-200 dark:border-brand-500/20 hover:bg-blue-200 dark:hover:bg-brand-500/30'
-          }`}
-        >
-          {requestPending ? 'Request Pending' : 'Join Ride'}
-        </button>
+      <div className="mt-4 space-y-2">
+      {!isPostOwner && (
+  <button
+    onClick={handleJoinRide}
+    className={`w-full py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
+      requestPending
+        ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'
+        : 'bg-blue-100 dark:bg-brand-500/20 text-blue-700 dark:text-brand-400 border border-blue-200 dark:border-brand-500/20 hover:bg-blue-200 dark:hover:bg-brand-500/30'
+    }`}
+  >
+    {requestPending ? 'Request Pending' : 'Join Ride'}
+  </button>
+)}
+        
+        {isPostOwner && (
+          <div className="flex space-x-2">
+            <button
+              onClick={handleDeletePost}
+              className="w-1/2 py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-200 dark:hover:bg-red-500/30"
+            >
+              Delete Post
+            </button>
+            
+            <button
+              onClick={handleClosePost}
+              className="w-1/2 py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-500/30 hover:bg-gray-200 dark:hover:bg-gray-500/30"
+            >
+              Close Post
+            </button>
+          </div>
+        )}
       </div>
       
-      {/* Semi-transparent Alert that overlays the card */}
       {showAlert && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="bg-black/50 dark:bg-gray-900/60 text-white text-sm px-6 py-3 rounded-md shadow-lg">

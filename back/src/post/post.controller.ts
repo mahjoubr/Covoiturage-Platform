@@ -7,10 +7,10 @@ import { UpdatePostDto } from './dto/update-post.dto';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @Post()
+  /*@Post()
   create(@Body() createPostDto: CreatePostDto) {
     return this.postService.create(createPostDto);
-  }
+  }*/
 
   @Get()
   findAll() {

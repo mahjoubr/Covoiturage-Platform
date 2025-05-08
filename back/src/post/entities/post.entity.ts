@@ -2,8 +2,13 @@ import { ObjectType, Field, Int, Float, ID, GraphQLISODateTime } from '@nestjs/g
 import { AppUser } from '../../app-user/entities/app-user.entity';
 import { Comment } from '../../comment/entities/comment.entity';
 import { Ride } from '../../ride/entities/ride.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import { JoinRequest } from 'src/join-request/entities/join-request.entity';
 
+export enum PostStatus{
+  OPEN='open',
+  CLOSED='closed'
+}
 @ObjectType()
 @Entity()
 export class Post {
@@ -58,4 +63,9 @@ export class Post {
   @Field(() => [Ride], { nullable: true })
   @OneToMany(() => Ride, ride => ride.post)
   listRide: Ride[];
+
+  @Field({ nullable: true })
+  @Column({ default: 'OPEN' })
+  status: PostStatus;
+
 }
