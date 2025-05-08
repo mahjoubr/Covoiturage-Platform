@@ -4,17 +4,23 @@ import { Drive, Ride } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import ReviewCarousel from "../components/UserProfile/ReviewCarousel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UserInfo from "../components/UserProfile/UserInfo";
 
     const UserProfiles = () => {
-
+      const navigate = useNavigate();
       const { id } = useParams();
       const userId = Number(id);
       const [page] = useState(1);
       const limit = 2;
+      useEffect(() => {
+        if (!id || !/^\d+$/.test(id)) {
+          navigate('/404', { replace: true });
+        }
+      }, [id, navigate]);
+      
       
       const {
         loading: loadingDriver,

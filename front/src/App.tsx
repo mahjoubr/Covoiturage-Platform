@@ -29,7 +29,6 @@ import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
 
 import NotificationPage from "./pages/Notification/NotificationPage";
 import UserProfile from "./pages/UserProfile";
-
 export default function App() {
   return (
     <React.Fragment>
@@ -43,8 +42,7 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile" element={<EditProfile />} />
             <Route path="/notifications" element={<NotificationPage />} />
-
-            <Route path="/profile/:id" element={<UserProfile />} />
+            <Route path="/profile/:id" element={ <UserProfile />  } />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
