@@ -8,6 +8,8 @@ import { ReviewService } from './review.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { Review } from './entities/review.entity';
+import { PaginationResult } from 'src/services/paginationService';
+import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResponse';
 
 @Resolver()
 export class ReviewResolver {
@@ -55,54 +57,21 @@ export class ReviewResolver {
   }
 
   @UseGuards(GqlAuthGuard)
-  @Query(() => [Review], { name: 'getMyReviews' })
-  async getMyReviews(@CurrentUser() user: AppUser): Promise<Review[]> {
-    console.log('hi everyone its me again \n \n\n');
+  @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
+  async getMyReviews(
+    @CurrentUser() user: AppUser,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findByReviewerId(user.id, page, limit);
+  }
   
-    return this.reviewService.findByReviewerId(user.id);
-  }
-
-  /*
-  @UseGuards(GqlAuthGuard)
-  @Query(() => [ReviewItem], { name: 'getMyReviews' })
-  async getMyReviews(@CurrentUser() user: AppUser) {
-    const reviews = await this.reviewService.findByReviewerId(user.id);
-
-    const results= reviews.map((r) => ({
-      id:        r.id,
-      rating:    r.stars,
-      comment:   r.comment,
-      createdAt: r.date,
-
-      ride: {
-        id:        r.ride.id,
-        departure: r.ride.departure,
-        arrival:   r.ride.arrival,
-        date:      r.ride.date,
-        time:      r.ride.time,
-        price:     Number(r.ride.price),
-      },
-
-      reviewedUser: {
-        id:       r.reviewedUser.id,
-        name:     r.reviewedUser.name,
-        lastName: r.reviewedUser.lastName,
-        imageUrl: r.reviewedUser.imageUrl,
-        // omit phoneNumber / rating if you don't need them here
-      },
-    }));
-
-    console.log('results:', results);
-    return results;
-  }
-  */
-
-
-  @Query(() => [Review], { name: 'getUserReviews' })
+  @Query(() => PaginatedReviewsResponse, { name: 'getUserReviews' })
   getUserReviews(
     @Args('userId', { type: () => Int }) userId: number,
-  ): Promise<Review[]> {
-    console.log('userId:', userId);
-    return this.reviewService.findByReviewedUserId(userId);
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findByReviewedUserId(userId, page, limit);
   }
 }

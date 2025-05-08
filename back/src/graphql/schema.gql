@@ -134,6 +134,12 @@ type PostPaginatedResponse {
   currentPage: Float!
 }
 
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
 type UserInfo {
   id: Float!
   name: String!
@@ -157,6 +163,13 @@ type ReviewFormData {
   ride: RideDetails!
 }
 
+type PaginatedReviewsResponse {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
@@ -166,9 +179,10 @@ type JwtAuthResponse {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
+  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!

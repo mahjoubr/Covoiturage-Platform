@@ -3,7 +3,7 @@ import { Plus, Search } from 'lucide-react';
 import CarpoolPostItem from './CarpoolPostItem.tsx';
 import CreatePostModal from './CreatePostModal.tsx';
 import ViewPostModal from './ViewPostModal.tsx';
-import { CarpoolPost, CreatePostFormData } from '../../types/posts.ts';
+import { CarpoolPost} from '../../types/posts.ts';
 import '../../styles/posts.css';
 import { useQuery } from '@apollo/client';
 import { GET_POSTS } from '../../graphQl/queries/posts.ts';

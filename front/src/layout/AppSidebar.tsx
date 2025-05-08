@@ -8,7 +8,8 @@ import {
   HorizontaLDots,
 
   UserCircleIcon,
-  ReviewIcon
+  ReviewIcon,
+  OtherUsersIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { CarIcon, NewspaperIcon } from "lucide-react";
@@ -24,7 +25,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    path:"/",
   },
   {
     icon: <CalenderIcon />,
@@ -51,6 +52,11 @@ const navItems: NavItem[] = [
     name:"Reviews",
    path:"/reviews",
 
+  },
+  {
+    icon:<OtherUsersIcon />,
+    name: "App Users",
+    path: "/users",
   },
   {
     icon:<ChatIcon />,

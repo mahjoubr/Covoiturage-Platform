@@ -61,7 +61,7 @@ export interface RidePost {
   isRideYouTook: boolean;
   postId: string;
 }
-  }
+  
   export interface Sender {
     id: string;
     name: string;

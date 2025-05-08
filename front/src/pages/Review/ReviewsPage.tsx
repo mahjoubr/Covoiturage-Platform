@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import {
   AlertTriangle, Send, ThumbsUp, Users, Star, MessageSquare
 } from 'lucide-react';
@@ -16,7 +18,12 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
- 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 6, 
+    totalItems: 0,
+    totalPages: 1
+  });
   const [editingReview, setEditingReview] = useState<{
     id: number;
     stars: number;
@@ -38,7 +45,9 @@ const ReviewsPage = () => {
       loadingMessage: "Loading your feedback history...",
       gradientColors: "bg-gradient-to-br from-blue-50 to-blue-100",
       accentColor: "blue",
-      fetchFn: getMyReviews,
+      fetchFn: async (variables: { page: number, limit: number }) => {
+        return getMyReviews(variables.page, variables.limit);
+      },
       variant: "author" as 'author',
       stats: [
         { title: "Total Feedback", icon: Send, color: "blue", getValue: (reviews: Review[]) => reviews.length, iconFilled: false },
@@ -57,10 +66,10 @@ const ReviewsPage = () => {
       loadingMessage: "Loading your journey memories...",
       gradientColors: "bg-gradient-to-br from-indigo-50 to-purple-100",
       accentColor: "indigo",
-      fetchFn: async () => {
+      fetchFn: async (variables: { page: number, limit: number }) => {
         const userId = await getCurrentUserId();
         if (!userId) throw new Error('User ID is null');
-        return getReceivedReviews(userId);
+        return getReceivedReviews(userId, variables.page, variables.limit);
       },
       variant: "recipient" as 'recipient',
       stats: [
@@ -75,13 +84,28 @@ const ReviewsPage = () => {
 
 
 
+const handlePageChange = (newPage: number) => {
+  if (newPage >= 1 && newPage <= pagination.totalPages) {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  }
+};
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const data = await currentConfig.fetchFn();
-        setReviews(data);
+        const response = await currentConfig.fetchFn({
+          page: pagination.page,
+          limit: pagination.limit
+        });
+        
+        setReviews(response.data);
+        setPagination(prev => ({
+          ...prev,
+          totalItems: response.totalItems,
+          totalPages: response.totalPages,
+          currentPage: response.currentPage
+        }));
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error fetching reviews');
@@ -89,9 +113,9 @@ const ReviewsPage = () => {
         setLoading(false);
       }
     };
-
+  
     fetchReviews();
-  }, [activeView]);
+  }, [activeView, pagination.page, activeTab]);
   const handleDeleteReview = (id: number) => {
     setReviewToDelete(id);
     setDeleteModalOpen(true);
@@ -121,13 +145,23 @@ const ReviewsPage = () => {
     }
   };
   
-  // Add this handler for when the update is successful:
-  const handleUpdateComplete = () => {
-    currentConfig.fetchFn()
-      .then(setReviews)
-      .catch(err => console.error('Error refreshing reviews:', err));
+  const handleUpdateComplete = async () => {
+    try {
+      const response = await currentConfig.fetchFn({
+        page: pagination.page,
+        limit: pagination.limit
+      });
+      setReviews(response.data);
+      setPagination(prev => ({
+        ...prev,
+        totalItems: response.totalItems,
+        totalPages: response.totalPages,
+        currentPage: response.currentPage
+      }));
+    } catch (err) {
+      console.error('Error refreshing reviews:', err);
+    }
   };
-
   
 
 
@@ -304,6 +338,8 @@ const ReviewsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {filteredReviews.map((review) => (
            // Make sure you're passing the handleDeleteReview function
+        
+        
         <ReviewCard
         key={review.id}
         review={review}
@@ -334,6 +370,63 @@ const ReviewsPage = () => {
     onUpdated={handleUpdateComplete}
   />
 )}
+
+
+{pagination.totalPages > 1 && (
+  <div className="flex justify-center mt-8">
+    <div className="flex items-center space-x-2">
+      <button
+        onClick={() => handlePageChange(pagination.page - 1)}
+        disabled={pagination.page === 1}
+        className={`p-2 rounded-md ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+      >
+        <ChevronLeft size={20} />
+      </button>
+      
+      {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
+        let pageNum;
+        if (pagination.totalPages <= 5) {
+          pageNum = i + 1;
+        } else if (pagination.page <= 3) {
+          pageNum = i + 1;
+        } else if (pagination.page >= pagination.totalPages - 2) {
+          pageNum = pagination.totalPages - 4 + i;
+        } else {
+          pageNum = pagination.page - 2 + i;
+        }
+        
+        return (
+          <button
+            key={pageNum}
+            onClick={() => handlePageChange(pageNum)}
+            className={`w-10 h-10 rounded-md flex items-center justify-center ${
+              pageNum === pagination.page
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            {pageNum}
+          </button>
+        );
+      })}
+
+      <button
+        onClick={() => handlePageChange(pagination.page + 1)}
+        disabled={pagination.page === pagination.totalPages}
+        className={`p-2 rounded-md ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+      >
+        <ChevronRight size={20} />
+      </button>
+    </div>
+  </div>
+)}
+
+{/* Page info */}
+<div className="text-center text-sm text-gray-600 mt-2">
+  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+  {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
+  {pagination.totalItems} reviews
+</div>
     </div>
   
 );

@@ -9,6 +9,7 @@ import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
 import { saveFile } from '../common/helpers/file-upload.helper';
 import { FileUpload } from 'graphql-upload/processRequest.mjs';
+import { SearchResult, SearchService } from 'src/services/searchService';
 
 @Injectable()
 export class AppUserService extends GenericService {
@@ -18,6 +19,7 @@ export class AppUserService extends GenericService {
     private readonly appUserRepo: Repository<AppUser>,
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
+    private readonly searchService: SearchService,
 
 
   ) {
@@ -88,6 +90,19 @@ async findById(id: number): Promise<AppUser | null> {
   return this.appUserRepo.findOne({ where: { id } });
 }
 
+
+async searchUsers(
+  searchTerm: string,
+  page: number,
+  limit: number
+): Promise<SearchResult<AppUser>> {
+  const queryBuilder = this.appUserRepo.createQueryBuilder("appUser");
+
+  return this.searchService.searchQuery(queryBuilder, searchTerm, [
+    "appUser.name",
+    "appUser.lastName",
+  ], page, limit);
+}
 
 }
   

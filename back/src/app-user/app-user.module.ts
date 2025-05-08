@@ -7,11 +7,12 @@ import { User } from 'src/user/entities/user.entity';
 
 import { Review } from 'src/review/entities/review.entity';
 import { AppUserResolver } from './app-user.resolver';
+import { SearchService } from 'src/services/searchService';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AppUser,User,Review])],
   controllers: [AppUserController],
-  providers: [AppUserService,AppUserResolver],
+  providers: [AppUserService,AppUserResolver,SearchService],
   exports: [AppUserService]
 })
 export class AppUserModule {}

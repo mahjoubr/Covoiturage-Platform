@@ -5,7 +5,7 @@ import { GenericService } from '../services/genericService';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Repository } from 'typeorm';
-import { PaginationService } from 'src/services/paginationService';
+import { PaginationResult, PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { EventStreamService } from 'src/SSE/sse-subscription.service';
@@ -121,20 +121,34 @@ export class ReviewService extends GenericService {
 
 
 
-      async findByReviewerId(userId: number): Promise<Review[]> {
-        return this.reviewRepository.find({
-          where: { reviewer: { id: userId } },
-          relations: ['reviewedUser', 'ride'],    // <- ensure this
-          order: { date: 'DESC' }
-        });
+      async findByReviewerId(
+        userId: number,
+        page: number = 1,
+        limit: number = 6
+      ): Promise<PaginationResult<Review>> {
+        const queryBuilder = this.reviewRepository
+          .createQueryBuilder('review')
+          .leftJoinAndSelect('review.reviewedUser', 'reviewedUser')
+          .leftJoinAndSelect('review.ride', 'ride')
+          .where('review.reviewer.id = :userId', { userId })
+          .orderBy('review.date', 'DESC');
+      
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
       }
       
-      async findByReviewedUserId(userId: number): Promise<Review[]> {
-        return this.reviewRepository.find({
-          where: { reviewedUser: { id: userId } },
-          relations: ['reviewer', 'ride'],       // <- and this
-          order: { date: 'DESC' }
-        });
+      async findByReviewedUserId(
+        userId: number,
+        page: number = 1,
+        limit: number = 6
+      ): Promise<PaginationResult<Review>> {
+        const queryBuilder = this.reviewRepository
+          .createQueryBuilder('review')
+          .leftJoinAndSelect('review.reviewer', 'reviewer')
+          .leftJoinAndSelect('review.ride', 'ride')
+          .where('review.reviewedUser.id = :userId', { userId })
+          .orderBy('review.date', 'DESC');
+      
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
       }
 
       async findByRideId (rideId: number) {
