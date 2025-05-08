@@ -154,8 +154,10 @@ async getRidesPaginatedByDriver(
   @CurrentUser() user: AppUser,
   @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
   @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  @Args('id', { type: () => Int, nullable: true }) id?: number,
 ): Promise<PaginationResult<Ride>> {
-  const result = await this.rideService.findPaginatedByDriver(user.id, page, limit);
+  const driverId = id ?? user.id;
+  const result = await this.rideService.findPaginatedByDriver(driverId, page, limit);
 
   result.data = result.data.map(ride => ({
     ...ride,
@@ -171,8 +173,10 @@ async getRidesPaginatedByPassenger(
   @CurrentUser() user: AppUser,
   @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
   @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  @Args('id', { type: () => Int, nullable: true }) id?: number,
 ): Promise<PaginationResult<Ride>> {
-  const result = await this.rideService.findPaginatedByPassenger(user.id, page, limit);
+  const riderId = id ?? user.id;
+  const result = await this.rideService.findPaginatedByPassenger(riderId, page, limit);
 
   result.data = result.data.map(ride => ({
     ...ride,

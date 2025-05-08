@@ -22,14 +22,13 @@ import ChatPage from "./pages/Chat/chatPage";
 import MyReviewsWithClient from "./pages/Review/ReviewedListPage";
 import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
-import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
 import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
-import UpdateReviewModal from "./pages/Review/updateReview";
 
 import NotificationPage from "./pages/Notification/NotificationPage";
+import UserProfile from "./pages/UserProfile";
 
 export default function App() {
   return (
@@ -42,11 +41,10 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/profile/Edit" element={<EditProfile />} />
-            <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/profile" element={<EditProfile />} />
             <Route path="/notifications" element={<NotificationPage />} />
 
-
+            <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />

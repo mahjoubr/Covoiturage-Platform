@@ -10,6 +10,8 @@ import { ReviewService } from './review.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { Review } from './entities/review.entity';
+import { PaginationResult } from 'src/services/paginationService';
+import {  ReviewPaginationResult } from './dto/ReviewPaginationResult';
 
 @Resolver()
 export class ReviewResolver {
@@ -23,15 +25,28 @@ export class ReviewResolver {
   getAllReviews(): Promise<Review[]> {
     return this.reviewService.findAll();
   }
+
+
+
   @UseGuards(GqlAuthGuard)
   @Query(() => [Review], { name: 'getMyReviews' })
-  getMyReviews(@CurrentUser() user: AppUser): Promise<Review[]> {
-    return this.reviewService.findByReviewedUserId(user.id);
+  async getMyReviews(@CurrentUser() user: AppUser): Promise<Review[]> {
+    console.log('hi everyone its me again \n \n\n');
+  
+    return this.reviewService.findByReviewerId(user.id);
   }
+
+
   @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRating' })
   getAverageRating(@CurrentUser() user: AppUser): Promise<number> {
     return this.reviewService.getAverageRating(user.id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => GraphQLInt, { name: 'getAverageRatingById' })
+  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number> {
+    return this.reviewService.getAverageRating(id);
   }
 
 
@@ -70,7 +85,17 @@ export class ReviewResolver {
     };
   }
 
-  
+  @UseGuards(GqlAuthGuard)
+  @Query(() => ReviewPaginationResult, { name: 'getPaginatedMyReviews' }) 
+  async getPaginatedReviews(
+    @CurrentUser() user: AppUser,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 10 }) limit: number,
+    @Args('sortField', { nullable: true, defaultValue: 'createdAt' }) sortField: string,
+    @Args('sortOrder', { nullable: true, defaultValue: 'DESC' }) sortOrder: 'ASC' | 'DESC',
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
+  }
 
   /*
   @UseGuards(GqlAuthGuard)

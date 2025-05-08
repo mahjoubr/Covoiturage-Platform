@@ -338,7 +338,7 @@ const MyReviewsWithClient: React.FC = () => {
               {/* Action Footer */}
               <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-between">
                 <Link
-                  to={`/users/${review.user.id}`}
+                  to={`/profile/${review.user.id}`}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   View Profile

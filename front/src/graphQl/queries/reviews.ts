@@ -67,24 +67,64 @@ export const GET_USER_REVIEWS = gql`
     }
   }
 `;
-export const GET_MY_REVIEWS1 = gql`
-  query GetMyReviews {
-    getMyReviews {
+
+
+export const GET_REVIEWS_BY_ID = gql`
+  query GetUserReviews($userId: Int!) {
+    getUserReviews(userId: $userId) {
       id
       stars
       comment
       date
       reviewer {
+        id
         name
         lastName
       }
-      
     }
   }
 `;
+
+
+export const GET_PAGINATED_REVIEWS_BY_USER = gql`
+  query GetPaginatedMyReviews(
+    $page: Int
+    $limit: Int
+    $sortField: String
+    $sortOrder: String
+  ) {
+    getPaginatedMyReviews(
+      page: $page
+      limit: $limit
+      sortField: $sortField
+      sortOrder: $sortOrder
+    ) {
+      data {
+        id
+        stars
+        comment
+        date
+        reviewer {
+          name
+          lastName
+        }
+      }
+
+    }
+  }
+`;
+
+
 
 export const GET_AVERAGE_RATING = gql`
   query GetAverageRating {
     getAverageRating 
   }
 `;
+
+export const GET_AVERAGE_RATING_BY_ID = gql`
+  query getAverageRatingById($id: Int!) {
+    getAverageRatingById(id: $id) 
+  }
+`;
+

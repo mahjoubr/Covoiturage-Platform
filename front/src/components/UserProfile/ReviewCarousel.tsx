@@ -1,18 +1,32 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@apollo/client';
-import { GET_MY_REVIEWS } from '../../graphQl/queries/reviews';
+import { GET_REVIEWS_BY_ID } from '../../graphQl/queries/reviews';
 import ReviewCard from './ReviewCard';
 
-export default function ReviewCarousel() {
+interface ReviewProps {
+  userId: number;
+}
+
+export default function ReviewCarousel({ userId}: ReviewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsToShow = 3;
 
-  const { loading, error, data } = useQuery(GET_MY_REVIEWS);
+  const { loading, error, data } = useQuery(GET_REVIEWS_BY_ID, {
+    variables: { userId: userId }, // Replace with the actual user ID );
+  });
   if (loading) return <p>Loading reviews...</p>;
   if (error) return <p>Error loading reviews: {error.message}</p>;
 
-  const reviews = data?.getMyReviews || [];
+  const reviews = data?.getUserReviews || [];
+
+  if (reviews.length === 0) {
+    return (
+      <div className="w-full text-center text-gray-500 dark:text-gray-500">
+        No reviews yet.
+      </div>
+    );
+  }
 
   const totalSlides = Math.ceil(reviews.length / itemsToShow);
 

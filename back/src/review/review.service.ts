@@ -5,7 +5,7 @@ import { GenericService } from '../services/genericService';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Repository } from 'typeorm';
-import { PaginationService } from 'src/services/paginationService';
+import { PaginationResult, PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
 
@@ -114,6 +114,31 @@ export class ReviewService extends GenericService {
       async findByReviewerIdAndRideId (reviewerId: number, rideId: number) {  
         return this.reviewRepository.find({ where: { reviewer: { id: reviewerId }, ride: { id: rideId } } });
       }
+      async findByReviewedUserId (reviewedUserId: number) {
+        return this.reviewRepository.find({ where: { reviewedUser: { id: reviewedUserId } },
+          relations: ['reviewer'],  });
+      }
+      async findPaginatedByReviewedUserId(
+        reviewedUserId: number,
+        page = 1,
+        limit = 10,
+        sortField: string = 'createdAt',
+        sortOrder: 'ASC' | 'DESC' = 'DESC',
+      ): Promise<PaginationResult<Review>> {
+        const qb = this.reviewRepository
+          .createQueryBuilder('review')
+          .leftJoinAndSelect('review.reviewer', 'reviewer')
+          .leftJoin('review.reviewedUser', 'reviewedUser')
+          .where('reviewedUser.id = :reviewedUserId', { reviewedUserId });
+        
+        // Add sorting
+        if (sortField) {
+          qb.orderBy(`review.${sortField}`, sortOrder);
+        }
+    
+        return this.paginationService.paginateQuery(qb, page, limit);
+      }
+    
 
       async getAverageRating(userId: number): Promise<number> {
         const reviews = await this.reviewRepository.find({

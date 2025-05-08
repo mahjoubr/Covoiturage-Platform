@@ -3,66 +3,45 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Label from "../form/Label";
 import StarRating from "./StarRating";
-import { fetchUserPhoto, uploadUserPhoto } from "../../services/userService";
+import { getUserById } from "../../services/userService";
 import { useEffect, useState } from "react";
 import { User } from "../../types"
-import FileInput from "../form/input/FileInput";
-import { useApolloClient, useQuery } from "@apollo/client";
-import { GET_AVERAGE_RATING } from "../../graphQl/queries/reviews";
+import {  useQuery } from "@apollo/client";
+import { GET_AVERAGE_RATING_BY_ID } from "../../graphQl/queries/reviews";
 import Input from "../form/input/InputField";
 
 interface UserMetaCardProps {
-  isReportable: boolean; 
-  isEditable: boolean;
+  userId: number;
 }
 
-export default function UserMetaCard({ isReportable, isEditable }: UserMetaCardProps) {
-  // Always initialize hooks at the top level, regardless of conditions
-  const editModal = useModal();    
+export default function UserInfo({ userId}: UserMetaCardProps) {
   const reportModal = useModal();
   const [user, setUser] = useState<User | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const client = useApolloClient();
-  
-  const { loading, error, data } = useQuery(GET_AVERAGE_RATING);
-
-  const getUserData = async () => {
-    try {
-      const fetchedUser = await fetchUserPhoto();
-      setUser(fetchedUser); 
-    } catch (error) {
-      console.error(error);
-    }
-  };
   
   useEffect(() => {
-    getUserData();
-  }, []);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
-    }
-  };
-  
-  const handleSave = async () => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64File = reader.result as string;            
-      await uploadUserPhoto(client, base64File);
+    const fetchUser = async () => {
+      try {
+        const fetchedUser = await getUserById(userId);
+        setUser(fetchedUser);
+      } catch (error) {
+        console.error("Failed to fetch user", error);
+      }
     };
 
-    reader.readAsDataURL(file);  
-    editModal.closeModal();
-    getUserData();
-  };
+    fetchUser();
+  }, [userId]);
 
-  if (loading) return <p>Loading...</p>;
+  // Fetch average rating by user ID
+  const { loading, error, data } = useQuery(GET_AVERAGE_RATING_BY_ID, {
+    variables: { id: userId },
+    skip: !userId,
+  });
+
+  if (!user) return <p>Loading user...</p>;
+  if (loading) return <p>Loading rating...</p>;
   if (error) return <p>Error loading rating: {error.message}</p>;
 
-  const rating = data?.getAverageRating ?? 0;
-        
+  const rating = data?.getAverageRatingById ?? 0;
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -80,35 +59,19 @@ export default function UserMetaCard({ isReportable, isEditable }: UserMetaCardP
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
                 {user?.name} {user?.lastName}
               </h4>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 xl:justify-start">
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                 <StarRating rating={rating} />
               </div>
-            </div>
+              <div style={{borderLeft: "1px solid ", height: "20px"}}></div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {user?.email}
+                </p>
+              </div>
+              </div>
+            
           </div>
-          {isEditable && (
-            <button
-              onClick={editModal.openModal} 
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
-            >
-              <svg
-                className="fill-current"
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
-                  fill=""
-                />
-              </svg>
-              update photo
-            </button>
-          )}
-          {isReportable && (
+          
             <button
               onClick={reportModal.openModal}
               className="dark:bg-error-500 dark:text-white dark:text-white bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500
@@ -116,41 +79,13 @@ export default function UserMetaCard({ isReportable, isEditable }: UserMetaCardP
             >
               Report
             </button>
-          )}
+          
         </div>
       </div>
 
-      {/* Always render the modals but conditionally control visibility */}
-      <Modal isOpen={editModal.isOpen && isEditable} onClose={editModal.closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Update your photo
-            </h4>
-          </div>
-          <form className="flex flex-col">
-            <div className="custom-scrollbar h-[100px] overflow-y-auto px-2 pb-3">
-              <div className="mt-7">
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2" style={{alignSelf:"center"}}>
-                  <div className="col-span-2 lg:col-span-1">
-                    <FileInput onChange={handleFileChange} />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={editModal.closeModal}>
-                Close
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
+      
 
-      <Modal isOpen={reportModal.isOpen && isReportable} onClose={reportModal.closeModal} className="max-w-[700px] m-4">
+      <Modal isOpen={reportModal.isOpen } onClose={reportModal.closeModal} className="max-w-[700px] m-4">
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">

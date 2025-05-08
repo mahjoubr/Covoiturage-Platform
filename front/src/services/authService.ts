@@ -24,12 +24,12 @@ export async function getCurrentUserId(): Promise<number | null> {
 }
 
 
-export async function signup(email: string, password: string, name: string, lastName: string) {
+export async function signup(email: string, password: string, name: string, lastName: string, phoneNumber: string) {
   try {
     const response = await client.mutate({
       mutation: REGISTER_MUTATION,
       variables: {
-        input: { email, password, name, lastName }
+        input: { email, password, name, lastName ,phoneNumber}
       }
     });
 

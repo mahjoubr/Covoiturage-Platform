@@ -262,7 +262,7 @@ const MyReceivedReviews: React.FC = () => {
                   </div>
                 </div>
                 <Link 
-                  to={`/users/${review.user.id}`} 
+                  to={`/profile/${review.user.id}`} 
                   className="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors"
                 >
                   <User size={16} />

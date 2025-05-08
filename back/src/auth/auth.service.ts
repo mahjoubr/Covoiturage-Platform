@@ -58,6 +58,7 @@ export class AuthService {
 
     const newUser = await this.appuserService.create({
       ...registerDto,
+      imageUrl: '/uploads/user.jpg',
       password: hashedPassword,
     });
 
