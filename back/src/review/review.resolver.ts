@@ -6,7 +6,6 @@ import { CurrentUser } from 'src/auth/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { GraphQLResolveInfo } from 'graphql';
-import graphqlFields from 'graphql-fields';
 import { ReviewService } from './review.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';

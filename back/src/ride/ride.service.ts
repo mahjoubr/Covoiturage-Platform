@@ -10,6 +10,7 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -21,7 +22,7 @@ export class RideService extends GenericService {
     
     super(rideRepo);
   }
-  async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
+  async createRide(createRideInput: CreateRideDto, post: Post): Promise<Ride> {
     // Create a new ride and associate it with the post
     const ride = this.rideRepo.create({
       ...createRideInput,

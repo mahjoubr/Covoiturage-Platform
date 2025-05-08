@@ -133,7 +133,6 @@ type RideDetails {
 type ReviewFormData {
   reviewedUser: UserInfo!
   ride: RideDetails!
-
 }
 
 type JwtAuthResponse {
@@ -167,9 +166,6 @@ type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
   getDashboardData: DashboardData!
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getRidesByState(state: String!): [Ride!]!
@@ -181,6 +177,9 @@ type Query {
   getPosts: [Post!]!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!
