@@ -1,0 +1,41 @@
+import { Injectable } from "@nestjs/common";
+import { ObjectLiteral, SelectQueryBuilder } from "typeorm";
+
+export interface SearchResult<T> {
+  data: T[];
+  totalItems: number;
+  currentPage: number;
+}
+
+@Injectable()
+export class SearchService {
+
+  constructor() {}
+
+  async searchQuery<T extends ObjectLiteral>(
+    queryBuilder: SelectQueryBuilder<T>,
+    searchTerm: string,
+    fields: string[] = [],
+    page = 1,
+    limit = 10,
+  ): Promise<SearchResult<T>> {
+   
+    const whereConditions = fields.map(field => {
+      return `${field} ILIKE :searchTerm`;
+    }).join(" OR ");
+
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await queryBuilder
+      .where(whereConditions, { searchTerm: `%${searchTerm}%` })
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      totalItems: total,
+      currentPage: page,
+    };
+  }
+}

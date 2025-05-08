@@ -41,6 +41,24 @@ export default function UserHistoryCard({ ride }: UserHistoryCardProps) {
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Time
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {ride.time}
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  State
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {ride.state}
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   Driver
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">

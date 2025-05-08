@@ -12,16 +12,11 @@ export class UpdateAppUserDto {
     lastName?: string;
   
     @IsOptional()
-    @IsDate()
-    dateOfBirth?: Date;
+    dateOfBirth?: string;
   
     @IsOptional()
     @IsPhoneNumber()
     phoneNumber?: string;
-  
-    @IsOptional()
-    @IsUrl()
-    imageUrl?: string;
   
     @IsOptional()
     @IsEmail()

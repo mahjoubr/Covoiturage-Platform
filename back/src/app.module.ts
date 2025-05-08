@@ -11,26 +11,58 @@ import { AppUserModule } from './app-user/app-user.module';
 import { AdminModule } from './admin/admin.module';
 import { AppUserRideModule } from './app-user-ride/app-user-ride.module';
 import { ReviewModule } from './review/review.module';
-import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { GraphqlModule } from './graphql/graphql.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import * as path from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ScheduleModule } from '@nestjs/schedule';
+import {EventStreamModule } from './SSE/sse.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { JoinRequestModule } from './join-request/join-request.module';
 
 @Module({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'mysql',           
-          host: 'localhost',       
-          port: 3306,              
-          username: 'user',        
-          password: '',    
-          database: 'covoiturage', 
-          entities: [__dirname + '/**/*.entity{.ts,.js}'], 
-          synchronize: true,     
-        }), AuthModule,
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: path.join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    ScheduleModule.forRoot(),
     
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'mysql',
+          host: configService.get('DB_HOST'),
+          port: configService.get<number>('DB_PORT', 3306),
+          username: configService.get('DB_USERNAME'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
+          logging: true,
+          autoLoadEntities: true,
+        };
+      },
+    }),
+     AuthModule,
+        GraphqlModule,
+      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule],
         controllers: [AppController],
-        providers: [AppService],
+        providers: [AppService, JwtStrategy],
 })
 export class AppModule {}
