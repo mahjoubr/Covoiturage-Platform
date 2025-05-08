@@ -3,9 +3,9 @@ import { MapPin, Calendar, Clock, Users, RotateCcw } from 'lucide-react';
 import { CarpoolPost } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
-import { useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
-import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE } from '../../graphQl/queries/posts.ts';
+import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE,IS_USER_IN_RIDE } from '../../graphQl/queries/posts.ts';
 
 interface CarpoolPostItemProps {
   post: CarpoolPost;
@@ -40,12 +40,24 @@ const token = localStorage.getItem('auth_token');
     //onCompleted: (data) => console.log('GET_ride completed:', data),
    // onError: (error) => console.error('GET_ride error:', error)
   });
+      const [checkIsPassenger, { data: isPassengerData }] = useLazyQuery(IS_USER_IN_RIDE);
+    
+    useEffect(() => {
+      if (rideData?.matchingRide?.ride?.id && userData?.id) {
+        checkIsPassenger({
+          variables: {
+            userId: Number(userData.id),
+            rideId: Number(rideData.matchingRide.ride.id),
+          },
+        });
+      }
+    }, [rideData, userData]);
   const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
     variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
     skip: !isLoggedIn,
     fetchPolicy: 'network-only',
-    //onCompleted: (data) => console.log('GET_ride completed:', data),
-    //onError: (error) => console.error('GET_ride error:', error)
+    onCompleted: (data) => console.log('GET_ride completed:', data),
+    onError: (error) => console.error('GET_ride error:', error)
   });
   //console.log(joinRequest);
 useEffect(() => {
@@ -170,6 +182,8 @@ const handleJoinRide = async (e: React.MouseEvent) => {
       {!isPostOwner && (
   <button
     onClick={handleJoinRide}
+    disabled={isPassengerData?.isUserInRide}
+    title={isPassengerData?.isUserInRide ? 'Already joined this ride' : ''}
     className={`w-full py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
       requestPending
         ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'

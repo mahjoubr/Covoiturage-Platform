@@ -153,7 +153,6 @@ export const ACCEPT_REQUEST = gql`
 mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
   acceptJoinRequest(requestId:$requestId,rideId: $rideId, userId: $userId) {
     id
-    role
     appUser {
       id
       name

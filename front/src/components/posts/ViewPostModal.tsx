@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send, Variable } from 'lucide-react';
 import { CarpoolPost, Comment } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
-import { useMutation } from '@apollo/client';
-import { CREATE_COMMENT } from '../../graphQl/queries/posts';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { CREATE_COMMENT, GET_RIDE, IS_USER_IN_RIDE,GET_JOIN_REQUESTS } from '../../graphQl/queries/posts';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
 
 
@@ -27,9 +27,42 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
-    const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
+  const { data: rideData} = useQuery(GET_RIDE, {
+    variables: { postId: Number(post?.id )},
+  });
+  console.log("ride",rideData);
+    const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
+      variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
+      fetchPolicy: 'network-only',
+      onCompleted: (data) => console.log('GET_ride completed:', data),
+      onError: (error) => console.error('GET_ride error:', error)
+    });
+    useEffect(() => {
+      if (joinRequest?.getJoinRequestsByRideUser) {
+        const hasRequests = Array.isArray(joinRequest.getJoinRequestsByRideUser) 
+          ? joinRequest.getJoinRequestsByRideUser.length > 0 
+          : !!joinRequest.getJoinRequestsByRideUser;
+        
+        setRequestPending(hasRequests);
+      } else {
+        setRequestPending(false);
+      }
+    }, [joinRequest]);
+    const [checkIsPassenger, { data: isPassengerData }] = useLazyQuery(IS_USER_IN_RIDE);
+  
+  useEffect(() => {
+    if (rideData?.matchingRide?.ride?.id && userData?.id) {
+      checkIsPassenger({
+        variables: {
+          userId: Number(userData.id),
+          rideId: Number(rideData.matchingRide.ride.id),
+        },
+      });
+    }
+  }, [rideData, userData]);
+  console.log("is", isPassengerData);
+  const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
   const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
-  // Apollo mutation hook configuration
   const [createComment] = useMutation(CREATE_COMMENT, {
     onCompleted: (data) => {
       const newCommentData :Comment = {
@@ -124,13 +157,11 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
   };
     const handleDeletePost = (e: React.MouseEvent) => {
       e.stopPropagation();
-      // Implement delete post functionality here
       console.log("Delete post clicked for post ID:", post.id);
     };
   
     const handleClosePost = (e: React.MouseEvent) => {
       e.stopPropagation();
-      // Implement close post functionality here
       console.log("Close post clicked for post ID:", post.id);
     };
   
@@ -290,7 +321,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
               />
               <button
                 onClick={handleAddComment}
-                disabled={submittingComment || !newComment.trim()}
+                disabled={submittingComment || !newComment.trim() || post.status=='closed'}
                 className={`${
                   submittingComment || !newComment.trim() 
                     ? 'bg-blue-400 dark:bg-blue-600 cursor-not-allowed'
@@ -312,6 +343,8 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
           {!isPostOwner && post.status !== "closed" &&(
             <button
               onClick={handleJoinRide}
+              disabled={isPassengerData?.isUserInRide}
+              title={isPassengerData?.isUserInRide ? 'Already joined this ride' : ''}
               className={`py-1 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
                 requestPending
                   ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'
