@@ -5,19 +5,20 @@ import { CreatePostInput } from './dto/post-graphql.dto';
 import { Ride, RideState } from 'src/ride/entities/ride.entity';
 import { Int } from 'type-graphql';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { Logger } from '@nestjs/common';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { MatchingRideResult } from './dto/matching-ride-result.dto';
+import { SearchService } from 'src/services/searchService';
+import { PostPaginatedResponse } from 'src/graphql/types/PostPaginatedResponse';
 
 @Resolver(() => Post)
 export class PostResolver {
   private readonly logger = new Logger('EventEmitter');
-  constructor(private readonly postService: PostService,
+  constructor(private readonly postService: PostService,private readonly searchService: SearchService,
     @InjectRepository(Post) private readonly postRepository :Repository<Post>
   ) {}
-
-  @Query(() => [Post], { name: 'getPosts' })
+  /*@Query(() => [Post], { name: 'getPosts' })
   async getPosts(): Promise<Post[]> {
     const posts = await this.postService.findAll();
     
@@ -29,15 +30,31 @@ export class PostResolver {
       date: post.date instanceof Date ? post.date : new Date(post.date),
       relations: ['listRide']
     }));
-  }
+  }*/
+
+    
+    @Query(() => PostPaginatedResponse, { name: 'getPosts' })
+    async getPosts(
+      @Args('searchTerm', { nullable: true }) searchTerm?: string,
+      @Args('page', { type: () =>Int, nullable: true }) page = 1,
+      @Args('limit', { type: () => Int, nullable: true }) limit = 10,
+    ): Promise<PostPaginatedResponse> {
+      console.log('Resolver executed with searchTerm:', searchTerm);
+  
+      const result = await this.postService.findAllWithSearch(searchTerm, page, limit);
+      console.log('Search result:', result);
+  
+      return {
+        data: result.data,
+        totalItems: result.totalItems,
+        currentPage: result.currentPage,
+      };
+    }
 
   @Query(() => Post, { name: 'getPostById' })
   async getPostById(@Args('id') id: string): Promise<Post> {
     const post = await this.postService.findOne(+id);
-    return {
-      ...post,
-      date: post.date instanceof Date ? post.date : new Date(post.date)
-    };
+   return post;
   }
   @Mutation(() => Post)
 async createPost(@Args('createPostInput') createPostInput: CreatePostInput): Promise<Post> {

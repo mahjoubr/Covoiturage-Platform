@@ -6,6 +6,8 @@ import { AppUserService } from 'src/app-user/app-user.service';
 import { LoginDto } from 'src/user/dto/login.dto';
 import { JwtAuthResponse } from './dto/jwt-auth-response.dto';
 import { UserService } from 'src/user/user.service';
+import { Subscription } from 'rxjs';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +15,7 @@ export class AuthService {
     private appuserService: AppUserService,
     private userService: UserService,
     private jwtService: JwtService,
+    private readonly subscriptionService:SubscriptionService
   ) {}
 
   async validateUser(loginDto: LoginDto): Promise<any> {
@@ -39,6 +42,8 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id ,role: user.role};
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    await this.subscriptionService.subscribe(user.id, user.id, 'review');  // Subscribing to review events for the user
+    console.log('User subscribed to review events:', user.id);
     return {
       accessToken,
       refreshToken,  

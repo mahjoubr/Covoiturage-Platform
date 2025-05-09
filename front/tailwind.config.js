@@ -43,6 +43,9 @@ export default {
           900: "#262E89",
           950: "#161950",
         },
+        transitionProperty: {
+        'transform-opacity': 'transform, opacity',
+      },
         "blue-light": {
           25: "#F5FBFF",
           50: "#F0F9FF",
