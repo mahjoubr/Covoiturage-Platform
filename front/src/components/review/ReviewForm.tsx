@@ -47,21 +47,21 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
       {isSubmitted ? (
         <div className="text-center py-4">
-          <CheckCircle className="mx-auto text-green-500 mb-2" size={32} />
-          <h3 className="text-lg font-semibold text-green-700">Thank you for your review!</h3>
-          <p className="text-green-600">Your feedback helps improve our service.</p>
+          <CheckCircle className="mx-auto text-green-500 dark:text-green-400 mb-2" size={32} />
+          <h3 className="text-lg font-semibold text-green-700 dark:text-green-300">Thank you for your review!</h3>
+          <p className="text-green-600 dark:text-green-400">Your feedback helps improve our service.</p>
         </div>
       ) : (
         <>
-          <h3 className="text-lg font-semibold mb-4">Rate Your Experience</h3>
+          <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Rate Your Experience</h3>
 
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
               <div className="mb-4 md:mb-0 md:w-1/3">
-                <label className="block text-gray-700 mb-2">Rating</label>
+                <label className="block text-gray-700 dark:text-gray-300 mb-2">Rating</label>
                 <div className="flex space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -81,7 +81,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
               </div>
 
               <div className="md:w-2/3">
-                <label htmlFor="comment" className="block text-gray-700 mb-2">
+                <label htmlFor="comment" className="block text-gray-700 dark:text-gray-300 mb-2">
                   Comment
                 </label>
                 <textarea
@@ -90,7 +90,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share your experience with this ride..."
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-300 focus:border-blue-500 dark:focus:border-blue-300 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+
                   rows={3}
                 />
               </div>
@@ -102,8 +103,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
                 disabled={isSubmitting || stars === 0}
                 className={`w-full py-3 px-4 rounded-md text-white font-medium ${
                   stars === 0
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
                 }`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Review'}

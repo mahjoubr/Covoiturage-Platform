@@ -10,8 +10,6 @@ export interface SearchResult<T> {
 @Injectable()
 export class SearchService {
 
-  constructor() {}
-
   async searchQuery<T extends ObjectLiteral>(
     queryBuilder: SelectQueryBuilder<T>,
     searchTerm: string,
@@ -21,7 +19,7 @@ export class SearchService {
   ): Promise<SearchResult<T>> {
    
     const whereConditions = fields.map(field => {
-      return `${field} ILIKE :searchTerm`;
+      return `${field} LIKE :searchTerm`;
     }).join(" OR ");
 
     const skip = (page - 1) * limit;
