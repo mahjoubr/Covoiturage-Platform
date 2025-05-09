@@ -22,7 +22,10 @@ export async function getCurrentUserId(): Promise<number | null> {
   console.log("the id is", user?.id);
   return user?.id || null;
 }
-
+export async function getCurrentUser(): Promise<any> {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user;
+}
 
 export async function signup(email: string, password: string, name: string, lastName: string) {
   try {

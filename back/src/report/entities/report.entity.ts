@@ -1,3 +1,4 @@
+// src/report/entities/report.entity.ts
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -5,44 +6,52 @@ import {
     ManyToOne,
     CreateDateColumn,
 } from 'typeorm';
-import { AppUser } from 'src/app-user/entities/app-user.entity';
-import { Ride } from 'src/ride/entities/ride.entity';
-import { ReportSubjectType } from 'src/enums/report-subject-type.enum';
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { AppUser } from '../../app-user/entities/app-user.entity';
+import { Ride } from '../../ride/entities/ride.entity';
+import { ReportSubjectType } from '../../enums/report-subject-type.enum';
+import { ReportStatus } from '../../enums/report-status.enum';
 
-@ObjectType() // Expose this class as a GraphQL type
+@ObjectType()
 @Entity()
 export class Report {
+    @Field(() => Int)
     @PrimaryGeneratedColumn()
-    @Field() // Expose this field in GraphQL
     id: number;
 
+    @Field(() => String)
     @Column({ type: 'enum', enum: ReportSubjectType })
-    @Field(() => String) // Enums are exposed as Strings in GraphQL
     subjectType: ReportSubjectType;
 
-    @ManyToOne(() => AppUser, { nullable: true })
-    @Field(() => AppUser, { nullable: true }) // Nullable if not always set
-    reportedUser?: AppUser;
-
-    @ManyToOne(() => Ride, { nullable: true })
-    @Field(() => Ride, { nullable: true }) // Nullable if not always set
-    reportedRide?: Ride;
-
-    @ManyToOne(() => AppUser)
-    @Field(() => AppUser) // Reporter (always required)
+    @Field(() => AppUser)
+    @ManyToOne(() => AppUser, { nullable: false })
     reporter: AppUser;
 
-    @Column({ type: 'text' })
-    @Field() // Expose reason for the report
+    @Field(() => AppUser)
+    @ManyToOne(() => AppUser, { nullable: false })
+    reportedUser: AppUser;
+
+    @Field(() => Ride, { nullable: true })
+    @ManyToOne(() => Ride, { nullable: true })
+    reportedRide?: Ride;
+
+    @Field()
+    @Column('text')
     reason: string;
 
-    @Column({ type: 'text', nullable: true })
-    @Field({ nullable: true }) // Optional URL for proof
+    @Field({ nullable: true })
+    @Column('text', { nullable: true })
+    proofPath?: string;
+
+    @Field({ nullable: true })
+    @Column('text', { nullable: true })
     proofUrl?: string;
 
+    @Field(() => ReportStatus)
+    @Column({ type: 'enum', enum: ReportStatus, default: ReportStatus.PENDING })
+    status: ReportStatus;
+
+    @Field(() => Date)
     @CreateDateColumn()
-    @Field(() => Date) // Expose creation date
     createdAt: Date;
 }
-

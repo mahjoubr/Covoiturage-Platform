@@ -43,6 +43,15 @@ export class RideResolver {
     };
   }
 
+  @Query(() => [Ride])
+  async getCommonRides(
+      @Args('userId1', { type: () => Int }) userId1: number,
+      @Args('userId2', { type: () => Int }) userId2: number,
+  ): Promise<Ride[]> {
+    return this.rideService.findCommonRides(userId1, userId2);
+  }
+
+
   @Mutation(() => Ride)
   async createRide(
     @Args('createRideInput') createRideInput: CreateRideInput,

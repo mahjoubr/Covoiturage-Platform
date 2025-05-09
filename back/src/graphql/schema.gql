@@ -112,6 +112,12 @@ type MatchingRideResult {
   postOwnerId: String
 }
 
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
 type UserInfo {
   id: Float!
   name: String!
@@ -133,13 +139,41 @@ type RideDetails {
 type ReviewFormData {
   reviewedUser: UserInfo!
   ride: RideDetails!
-
 }
 
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
   user: User!
+}
+
+type Report {
+  id: Int!
+  subjectType: ReportSubjectType!
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportSubjectType {
+  BEHAVIOR
+  LATE_ARRIVAL
+  NO_SHOW
+  DANGEROUS_DRIVING
+  RIDE
+  OTHER
+  VEHICLE_MALFUNCTION
+  IMPROPER_CONDUCT
+  POOR_COMMUNICATION
+  TRAFFIC_VIOLATION
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 type DashboardStatsType {
@@ -166,12 +200,12 @@ type DashboardData {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
+  getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
+  getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
@@ -181,6 +215,10 @@ type Query {
   getPosts: [Post!]!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews: [Review!]!
+  getUserReviews(userId: Int!): [Review!]!
+  getMyReports: [Report!]!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!

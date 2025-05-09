@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client';
 import { Get_DashboardData } from '../../graphQl/queries/dashboardData';
 
-import EcommerceMetrics from "../../components/dashboard/EcommerceMetrics";
+import DashboardMetrics from "../../components/dashboard/DashboardMetrics.tsx";
 import MonthlyRidesChart from "../../components/dashboard/MonthlyRidesChart.tsx";
 import PageMeta from "../../components/common/PageMeta";
 import RecentRides from "../../components/dashboard/RecentRides.tsx";
@@ -46,23 +46,31 @@ export default function Home() {
                 title="Dashboard | Ridesharing Application"
                 description="Main dashboard of the ridesharing application"
             />
-            <div className="mt-6">
-                <div className="grid grid-cols-12 gap-1 md:gap-1">
-                    <div className="col-span-12 flex flex-col space-y-4">
-                        {/* Pass stats to EcommerceMetrics component */}
-                        <EcommerceMetrics stats={stats} />
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-10">
+                <div className="grid grid-cols-12 gap-6">
+                    <div className="col-span-12 flex flex-col space-y-6">
+                        {/* Pass stats to DashboardMetrics component */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md dark:shadow-lg dark:shadow-gray-700/20">
+                            <DashboardMetrics stats={stats} />
+                        </div>
 
                         {/* Pass rides per month data to MonthlyRidesChart component */}
-                        <MonthlyRidesChart data={ridesPerMonth} />
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md dark:shadow-lg dark:shadow-gray-700/20">
+                            <MonthlyRidesChart data={ridesPerMonth} />
+                        </div>
                     </div>
 
-                    <div className="col-span-12  mt-4">
+                    <div className="col-span-12 mt-2">
                         {/* Pass recent rides data to RecentRides component */}
-                        <RecentRides rides={recentRides} />
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md dark:shadow-lg dark:shadow-gray-700/20">
+                            <RecentRides rides={recentRides} />
+                        </div>
                     </div>
-                    <div className="col-span-12 mt-4">
+                    <div className="col-span-12 mt-2">
                         {/* Pass recent users data to RecentUsers component */}
-                        <RecentUsers users={recentUsers} />
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md dark:shadow-lg dark:shadow-gray-700/20">
+                            <RecentUsers users={recentUsers} />
+                        </div>
                     </div>
                 </div>
             </div>

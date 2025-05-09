@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+// src/report/report.controller.ts
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  Body,
+  BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { Express } from 'express';
+
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
 
-@Controller('report')
+@Controller('reports')
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Post()
-  create(@Body() createReportDto: CreateReportDto) {
-    return this.reportService.create(createReportDto);
-  }
+  @UseInterceptors(
+      FileInterceptor('proof', {
+        storage: diskStorage({
+          destination: './uploads/proofs',
+          filename: (_req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+          },
+        }),
+      }),
+  )
+  async createReport(
+      @UploadedFile() file: Express.Multer.File,
+      @Body() createReportDto: CreateReportDto,
+  ) {
+    console.log("controller atteint");
+    const proofPath = file ? file.path : null;
 
-  @Get()
-  findAll() {
-    return this.reportService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reportService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReportDto: UpdateReportDto) {
-    return this.reportService.update(+id, updateReportDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reportService.remove(+id);
+    // Call the service with or without the file path
+    return this.reportService.createReport(createReportDto, proofPath);
   }
 }

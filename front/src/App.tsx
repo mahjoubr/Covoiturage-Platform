@@ -27,9 +27,11 @@ import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
 import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
-import UpdateReviewModal from "./pages/Review/updateReview";
 
 import NotificationPage from "./pages/Notification/NotificationPage";
+import ReportPage from "./pages/Report/ReportPage.tsx";
+import UsersPage from "./pages/Users/UsersPage.tsx";
+import MyReportsPage from "./pages/Report/MyReportsPage.tsx";
 
 export default function App() {
   return (
@@ -45,8 +47,9 @@ export default function App() {
             <Route path="/profile/Edit" element={<EditProfile />} />
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/notifications" element={<NotificationPage />} />
-
-
+            <Route path={"/report"} element={<ReportPage />} />
+            <Route path="/Users" element={<UsersPage />} />
+            <Route path={"/myReports"} element={<MyReportsPage />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
