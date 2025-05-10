@@ -7,8 +7,8 @@ import { Report } from './entities/report.entity';
 import { CreateReportDto } from './dto/create-report.dto';
 import { AppUser } from '../app-user/entities/app-user.entity';
 import { Ride } from '../ride/entities/ride.entity';
-import { GenericService } from 'src/services/genericService';
-import {ReportStatus} from "src/enums/report-status.enum";
+import { GenericService } from '../services/genericService';
+import {ReportStatus} from "../enums/report-status.enum";
 
 @Injectable()
 export class ReportService extends GenericService {
@@ -55,8 +55,10 @@ export class ReportService extends GenericService {
     }
     async findByReporter(userId: number): Promise<Report[]> {
         return this.reportRepo.find({
-            where: {reporter: {id: userId}},
-            order: {createdAt: 'DESC'},
+            where: { reporter: { id: userId } },
+            relations: ['reporter', 'reportedUser', 'reportedRide'],
+            order: { createdAt: 'DESC' },
         });
     }
+
 }

@@ -149,25 +149,15 @@ type JwtAuthResponse {
 
 type Report {
   id: Int!
-  subjectType: ReportSubjectType!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
   reason: String!
   proofPath: String
   proofUrl: String
   status: ReportStatus!
   createdAt: DateTime!
-}
-
-enum ReportSubjectType {
-  BEHAVIOR
-  LATE_ARRIVAL
-  NO_SHOW
-  DANGEROUS_DRIVING
-  RIDE
-  OTHER
-  VEHICLE_MALFUNCTION
-  IMPROPER_CONDUCT
-  POOR_COMMUNICATION
-  TRAFFIC_VIOLATION
 }
 
 enum ReportStatus {

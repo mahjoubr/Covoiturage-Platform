@@ -3,8 +3,8 @@ import { Resolver, Query } from '@nestjs/graphql';
 import { ReportService } from './report.service';
 import { CurrentUser } from '../auth/user.decorator'; // adjust path if needed
 import { AppUser } from '../app-user/entities/app-user.entity';
-import { Report } from '../graphql/types/Report';
 import {UseGuards} from "@nestjs/common";
+import {Report} from "src/report/entities/report.entity";
 import {GqlAuthGuard} from "src/auth/guards/auth.Guard";
 
 @Resolver(() => Report)

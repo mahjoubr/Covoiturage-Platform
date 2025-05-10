@@ -25,3 +25,51 @@ export interface ReportFormProps {
         email: string;
     };
 }
+
+export interface User {
+    id: string;
+    name: string;
+    lastName: string;
+    imageUrl: string;
+}
+
+export interface Ride {
+    id: string;
+    departure: string;
+    arrival: string;
+    date: string;
+    time: string;
+}
+
+export interface Report {
+    id: string;
+    subjectType: string;
+    reason: string;
+    proofPath: string;
+    proofUrl: string;
+    status: string;
+    createdAt: string;
+    reporter: User;
+    reportedUser: User ;
+    reportedRide?: Ride | null;
+}
+
+export interface ReportDetailsProps {
+    report: Report;
+    onClose: () => void;
+}
+export type StatusType = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface StatusConfig {
+    icon: React.ReactNode;
+    lightClass: string;
+    darkClass: string;
+    label: string;
+}
+
+export type StatusConfigMap = {
+    [key in StatusType | 'default']: StatusConfig;
+};
+
+
+
