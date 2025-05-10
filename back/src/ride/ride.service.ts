@@ -10,8 +10,11 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
-import {CreateRideInput} from "src/ride/dto/create-ride.input";
-import {AppUserRide} from "src/app-user-ride/entities/app-user-ride.entity";
+
+import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
+import { Role } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { App } from 'supertest/types';
+
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -166,4 +169,43 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
     });
   }
 
+async findByUserId(userId: number): Promise<Ride[]> {
+  return this.rideRepo
+    .createQueryBuilder('ride')
+    .leftJoinAndSelect('ride.appUserRides', 'appUserRide')
+    .leftJoinAndSelect('appUserRide.appUser', 'appUser')
+    .leftJoinAndSelect('ride.driver', 'driver')
+    .leftJoinAndSelect('ride.post', 'post')
+    .leftJoinAndSelect('ride.joinRequests', 'joinRequests')
+    .where('appUser.id = :userId', { userId }) // User is a passenger
+    .orWhere('driver.id = :userId', { userId }) // User is a driver
+    .getMany();
+}
+
+async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
+  const ride = await this.rideRepo.findOne({
+    where: { id: rideId },
+    relations: ['driver', 'appUserRides', 'appUserRides.appUser'],
+  });
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  const users: AppUserWithRole[] = [];
+
+  // Add driver if exists
+  if (ride.driver) {
+    users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
+  }
+
+  // Add passengers
+  ride.appUserRides.forEach((appUserRide) => {
+    if (appUserRide.role === Role.PASSENGER && appUserRide.appUser) {
+      users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
+    }
+  });
+
+  return users;
+}
 }

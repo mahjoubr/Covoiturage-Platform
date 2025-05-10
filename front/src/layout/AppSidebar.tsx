@@ -7,11 +7,11 @@ import {
   GridIcon,
   HorizontaLDots,
   UserCircleIcon,
-  ReviewIcon,
-    OtherUsersIcon
+
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon,  CircleAlertIcon} from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -56,12 +56,15 @@ const navItems: NavItem[] = [
     icon: <CarIcon />,
     name: "Rides",
     path: "/rides",
-  },{
-    icon:<ReviewIcon/>,
-    name:"Reviews",
-    subItems: [{ name: "My Reviews", path: "/reviewed-list", pro: false },
-    { name: "Received Reviews", path: "/received-reviews", pro: false }],
-
+  }, {
+    icon: <Star/>,
+    name: "Reviews",
+    path: "/reviews",
+  },
+  {
+    icon: <Users/>,
+    name: "App Users",
+    path: "/users",
   },
   {
     icon:<ChatIcon />,

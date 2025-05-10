@@ -15,6 +15,7 @@ import { PaginationResult } from 'src/services/paginationService';
 import { RidePaginationResult } from './dto/ride-pagination-result';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
+import { AppUserWithRole} from 'src/graphql/types/AppUserWithRole';
 
 @Resolver(() => Ride)
 export class RideResolver {
@@ -147,15 +148,12 @@ export class RideResolver {
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
     }));
   }
-  @Query(() => [Ride], { name: 'getRidesByDriver' })
+  
+@Query(() => [Ride], { name: 'getRidesByDriver' })
 @UseGuards(GqlAuthGuard)
 async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
   const rides = await this.rideService.findByDriver(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
-}
+  return rides;}
 
 @Query(() => RidePaginationResult, { name: 'getRidesPaginatedByDriver' })
 @UseGuards(GqlAuthGuard)
@@ -191,15 +189,37 @@ async getRidesPaginatedByPassenger(
   return result;
 }
 
-
+@Query(() => [Ride], { name: 'getRidesByUserId' })
+@UseGuards(GqlAuthGuard)
+async getRidesByUserId(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByUserId resolver")
+  const rides = await this.rideService.findByUserId(user.id);
+  console.log(rides)
+  return rides;
+}
+class="fc-event-title fc-sticky"
 
 @Query(() => [Ride], { name: 'getRidesByPassenger' })
 @UseGuards(GqlAuthGuard)
 async getRidesByPassenger(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByPassenger resolver")
+  console.log(user.id)
   const rides = await this.rideService.findByPassenger(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
+  return rides;
+}
+
+
+@Query(() => [AppUserWithRole], { name: 'getUsersForRide' })
+async getUsersForRide(
+  @Args('rideId', { type: () => Int }) rideId: number,
+): Promise<AppUserWithRole[]> {
+  this.logger.log(`Getting users for ride: ${rideId}`);
+  try {
+    return await this.rideService.getUsersForRide(rideId);
+  } catch (error) {
+    this.logger.error(`Error getting users for ride: ${error.message}`);
+    throw error;
+  }
 }
 }
+

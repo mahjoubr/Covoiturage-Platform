@@ -9,11 +9,12 @@ import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { AppUserModule } from 'src/app-user/app-user.module';
 import { RideModule } from 'src/ride/ride.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { SearchService } from 'src/services/searchService';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Post, Ride, AppUser]),AppUserModule,forwardRef(() => RideModule),SubscriptionModule],
   controllers: [PostController],
-  providers: [PostService,PostResolver],
+  providers: [PostService,PostResolver,SearchService],
   exports: [PostService],
 })
 export class PostModule {}

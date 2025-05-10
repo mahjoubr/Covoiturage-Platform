@@ -23,7 +23,12 @@ const ReviewPage = () => {
         const result = await getReviewFormData(rideId, reviewedId);
         setData(result);
       } catch (err: any) {
-        setError(err);
+        const msg = err?.message || '';
+        if (msg.includes('Entities with IDs')) {
+          setError(new Error('User or ride not found'));
+        } else {
+          setError(new Error('An unexpected error occurred'));
+        }
       } finally {
         setLoading(false);
       }
@@ -37,16 +42,29 @@ const ReviewPage = () => {
   }
 
   if (loading) return <div>Loading review data...</div>;
-  if (error) return <div>Error loading review data: {error.message}</div>;
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto mt-10 p-6 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-2">Oops! Something went wrong</h2>
+        <p>{error.message}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-red-500 dark:bg-red-700 text-white rounded hover:bg-red-600 dark:hover:bg-red-800"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   const reviewedUser = data?.reviewedUser;
   const ride = data?.ride;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Ride Details</h1>
+    <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-lg shadow-md mt-6">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">Ride Details</h1>
 
-      <div className="bg-gray-50 rounded-lg p-6 mb-6">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
         <div className="flex items-center mb-4">
           <div className="mr-4">
             <img
@@ -56,11 +74,11 @@ const ReviewPage = () => {
             />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Ride with {reviewedUser?.name || 'N/A'}</h3>
-            <p className="text-gray-500 text-sm">{ride?.date || 'N/A'}</p>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Ride with {reviewedUser?.name || 'N/A'}</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{ride?.date || 'N/A'}</p>
             <button
               onClick={() => navigate(`/users/${reviewedId}`)}
-              className="mt-2 text-sm text-blue-600 hover:underline"
+              className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
             >
               View {reviewedUser?.name}'s profile
             </button>
@@ -69,20 +87,20 @@ const ReviewPage = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-gray-500 text-sm">Departure</p>
-            <p className="font-medium">{ride?.departure || 'N/A'}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Departure</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{ride?.departure || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Arrival</p>
-            <p className="font-medium">{ride?.arrival || 'N/A'}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Arrival</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{ride?.arrival || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Price</p>
-            <p className="font-medium text-lg">${ride?.price?.toFixed(2) || '0.00'}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Price</p>
+            <p className="font-medium text-lg text-gray-800 dark:text-gray-200">${ride?.price?.toFixed(2) || '0.00'}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Time</p>
-            <p className="font-medium">{ride?.time || 'N/A'}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Time</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{ride?.time || 'N/A'}</p>
           </div>
         </div>
       </div>

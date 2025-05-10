@@ -21,48 +21,59 @@ export const GET_REVIEW_FORM_DATA = gql`
 `;
 
 export const GET_MY_REVIEWS = gql`
-  query GetMyReviews {
-    getMyReviews {
-      id
-      stars
-      comment
-      date
-      ride {
+  query GetMyReviews($page: Int, $limit: Int) {
+    getMyReviews(page: $page, limit: $limit) {
+      data {
         id
-        departure
-        arrival
+        stars
+        comment
         date
-        time
+        ride {
+          id
+          departure
+          arrival
+          date
+          time
+        }
+        reviewedUser {
+          id
+          name
+          lastName
+          imageUrl
+        }
       }
-      reviewedUser {
-        id
-        name
-        lastName
-        imageUrl
-      }
+      totalItems
+      totalPages
+      currentPage
     }
   }
 `;
+
 export const GET_USER_REVIEWS = gql`
-  query GetUserReviews($userId: Int!) {
-    getUserReviews(userId: $userId) {
-      id
-      stars
-      comment
-      date
-      ride {
+  query GetUserReviews($userId: Int!, $page: Int, $limit: Int) {
+    getUserReviews(userId: $userId, page: $page, limit: $limit) {
+      data {
         id
-        departure
-        arrival
+        stars
+        comment
         date
-        time
+        ride {
+          id
+          departure
+          arrival
+          date
+          time
+        }
+        reviewer {
+          id
+          name
+          lastName
+          imageUrl
+        }
       }
-      reviewer {
-        id
-        name
-        lastName
-        imageUrl
-      }
+      totalItems
+      totalPages
+      currentPage
     }
   }
 `;
