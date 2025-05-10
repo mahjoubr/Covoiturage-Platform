@@ -7,12 +7,14 @@ import { Ride } from '../ride/entities/ride.entity';
 import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
 import {ReportResolver} from "src/report/report.resolver";
+import {SearchService} from "src/services/searchService";
+import {PaginationService} from "src/services/paginationService";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Report, AppUser, Ride]),
   ],
-  providers: [ReportResolver,ReportService],
+  providers: [ReportResolver,ReportService, SearchService,PaginationService],
   controllers: [ReportController],
   exports: [ReportService],
 

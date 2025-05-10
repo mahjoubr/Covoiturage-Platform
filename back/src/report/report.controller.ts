@@ -5,7 +5,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Body,
-  BadRequestException,
+  BadRequestException, Put, Param, ParseIntPipe, Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -35,10 +35,26 @@ export class ReportController {
       @UploadedFile() file: Express.Multer.File,
       @Body() createReportDto: CreateReportDto,
   ) {
-    console.log("controller atteint");
     const proofPath = file ? file.path : null;
 
     // Call the service with or without the file path
     return this.reportService.createReport(createReportDto, proofPath);
+  }
+  @Put(':id')
+  async handleAction(
+      @Param('id', ParseIntPipe) id: number,
+      @Query('action') action: 'approve' | 'decline'
+  ) {
+    if (action === 'approve') {
+
+      return this.reportService.approve(id);
+    }
+    if (action === 'decline') {
+      return this.reportService.decline(id);
+    }
+    if (action === 'delete') {
+        return this.reportService.remove(id);
+    }
+    throw new BadRequestException(`Invalid action "${action}"`);
   }
 }

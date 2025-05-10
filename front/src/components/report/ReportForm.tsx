@@ -1,13 +1,13 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { useQuery } from '@apollo/client';
+import React, {ChangeEvent, FormEvent, useState} from 'react';
+import {useQuery} from '@apollo/client';
 import axios from 'axios';
-import { GET_COMMON_RIDES } from '../../graphQl/queries/commonRides';
-import { CommonRide } from '../../types/report';
-import { ReportSubjectType } from "../../enums/ReportSubjectType.ts";
+import {GET_COMMON_RIDES} from '../../graphQl/queries/commonRides';
+import {CommonRide} from '../../types/report';
+import {ReportSubjectType} from "../../enums/ReportSubjectType.ts";
+import {useNavigate} from "react-router";
 
 interface ReportFormProps {
     reporterId: number;
-    reporterName: string;
     reporterEmail: string;
     reportedUser: {
         id: number;
@@ -26,7 +26,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
     const [selectedRideId, setSelectedRideId] = useState<number | undefined>(undefined);
     const [subjectType, setSubjectType] = useState<ReportSubjectType>(ReportSubjectType.BEHAVIOR);
     const [step, setStep] = useState<number>(1);
-
+    const navigate = useNavigate();
     const { data, loading } = useQuery<{ getCommonRides: CommonRide[] }>(
         GET_COMMON_RIDES,
         {
@@ -71,10 +71,16 @@ const ReportForm: React.FC<ReportFormProps> = ({
                 withCredentials: true,
             });
 
-            alert('Report submitted successfully');
+            navigate('/users')
         } catch (err) {
             console.error(err);
-            alert('Failed to submit report.');
+            setSubjectType(ReportSubjectType.BEHAVIOR);
+            setReason('');
+            setSelectedRideId(undefined);
+            setProof(null);
+
+            setStep(1);
+
         }
     };
 

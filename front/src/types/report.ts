@@ -42,7 +42,7 @@ export interface Ride {
 }
 
 export interface Report {
-    id: string;
+    id: number;
     subjectType: string;
     reason: string;
     proofPath: string;
@@ -53,10 +53,17 @@ export interface Report {
     reportedUser: User ;
     reportedRide?: Ride | null;
 }
+export interface ReportPaginated{
+    data: Report[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+}
 
 export interface ReportDetailsProps {
     report: Report;
     onClose: () => void;
+    onChange?: () => void;
 }
 export type StatusType = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 

@@ -32,9 +32,10 @@ const getTimeAgo = (dateString: string): string => {
 interface ReportCardProps {
     report: Report;
     onViewDetails?: (report: Report) => void;
+    onRefresh?: () => void;
 }
 
-export const ReportCard: React.FC<ReportCardProps> = ({ report, onViewDetails }) => {
+export const ReportCard: React.FC<ReportCardProps> = ({ report, onViewDetails , onRefresh }) => {
     const statusCfg = getStatusConfig(report.status);
     const [showDetails, setShowDetails] = useState(false);
 
@@ -113,6 +114,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onViewDetails })
                          <ReportDetails
                              report={report}
                              onClose={() => setShowDetails(false)}
+                             onChange={onRefresh}
                          />
                     </div>
                 </div>

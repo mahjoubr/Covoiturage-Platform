@@ -14,7 +14,6 @@ interface LocationState {
 
 interface CurrentUser {
     id: number;
-    name: string;
     email: string;
 }
 
@@ -52,7 +51,6 @@ const ReportPage: React.FC = () => {
                 const userData = await getCurrentUser();
                 setCurrentUser({
                     id,
-                    name: userData.name,
                     email: userData.email,
                 });
             } catch (error) {
@@ -144,7 +142,6 @@ const ReportPage: React.FC = () => {
                     <div className="p-6">
                         <ReportForm
                             reporterId={currentUser.id}
-                            reporterName={currentUser.name}
                             reporterEmail={currentUser.email}
                             reportedUser={reportedUser}
                         />

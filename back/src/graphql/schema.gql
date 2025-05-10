@@ -166,6 +166,20 @@ enum ReportStatus {
   REJECTED
 }
 
+type ReportPagination {
+  """Liste des rapports de la page courante"""
+  data: [Report!]!
+
+  """Nombre total d’éléments disponibles"""
+  totalItems: Int!
+
+  """Nombre total de pages"""
+  totalPages: Int!
+
+  """Page courante"""
+  currentPage: Int!
+}
+
 type DashboardStatsType {
   userCount: Int!
   rideCount: Int!
@@ -208,7 +222,7 @@ type Query {
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews: [Review!]!
   getUserReviews(userId: Int!): [Review!]!
-  getMyReports: [Report!]!
+  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!

@@ -15,7 +15,7 @@ export class SearchService {
       searchTerm: string,
       fields: string[] = [],
       page = 1,
-      limit = 10,
+      limit = 3,
   ): Promise<SearchResult<T>> {
 
     const whereConditions = fields.map(field => {

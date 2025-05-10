@@ -15,7 +15,7 @@ constructor() { }
 async paginateQuery<T extends ObjectLiteral>(
     queryBuilder: SelectQueryBuilder<T>,
     page = 1,
-    limit = 10,
+    limit = 3,
   ): Promise<PaginationResult<T>> {
     const skip = (page - 1) * limit;
     const [data, total] = await queryBuilder
