@@ -40,3 +40,21 @@ export const MESSAGE_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const GET_CHATS=gql`
+  query GetChats($userId: Int!) {
+    getChats(userId: $userId) {
+      id
+      name
+      messages {
+        id
+        text
+        createdAt
+        sender {
+          id
+          name
+        }
+      }
+    }
+  }
+`;

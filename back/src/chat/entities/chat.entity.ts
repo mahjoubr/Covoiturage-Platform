@@ -2,22 +2,29 @@ import { Message } from 'src/message/entities/message.entity';
 import { Entity, OneToMany,ManyToOne, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
+import { ObjectType } from 'type-graphql';
+import { Field } from '@nestjs/graphql';
 
-
+@ObjectType()
 @Entity()
 export class Chat {
+  @Field(() => Number)  
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Field(() => [Message])
   @OneToMany(()=>Message,message=>message.chat)
   messages: Message[];
 
+  @Field(() => User)
   @ManyToOne(() => User, { eager: true })
   driver: User;
 
+  @Field(() => User)
   @ManyToOne(() => User, { eager: true })
   rider: User;
   
+  @Field(() => Ride)
   @OneToOne(() => Ride, { eager: true })  
   @JoinColumn()
   ride: Ride;

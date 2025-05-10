@@ -8,6 +8,7 @@ import { Chat } from './entities/chat.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
 import { MessageModule } from 'src/message/message.module';
+import { ChatResolver } from './chat.resolver';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { MessageModule } from 'src/message/message.module';
     MessageModule
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway],
+  providers: [ChatService, ChatGateway,ChatResolver],
 })
 export class ChatModule {}
