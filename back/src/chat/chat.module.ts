@@ -9,13 +9,24 @@ import { User } from 'src/user/entities/user.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
 import { MessageModule } from 'src/message/message.module';
 import { ChatResolver } from './chat.resolver';
+import { UserService } from 'src/user/user.service';
+import { RideService } from 'src/ride/ride.service';
+import { Message } from 'src/message/entities/message.entity';
+import { PaginationService } from 'src/services/paginationService';
+import { AppUserRideModule } from 'src/app-user-ride/app-user-ride.module';
+import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
+import { AppUserService } from 'src/app-user/app-user.service';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { Review } from 'src/review/entities/review.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chat, User, Ride]),
-    MessageModule
+    TypeOrmModule.forFeature([Chat, User, Ride,Message,AppUser,Review]),
+    MessageModule,
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway,ChatResolver],
+  providers: [ChatService, ChatGateway,ChatResolver,UserService,
+     MessageService,RideService,PaginationService,AppUserRideService,AppUserService],
 })
 export class ChatModule {}

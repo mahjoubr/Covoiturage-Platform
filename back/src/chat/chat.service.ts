@@ -7,14 +7,15 @@ import { Chat } from './entities/chat.entity';
 import { Repository } from 'typeorm';
 import { Ride } from 'src/ride/entities/ride.entity';
 import { MessageService } from 'src/message/message.service';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
 
 @Injectable()
 export class ChatService {
   constructor( @InjectRepository(Chat)
   private chatRepository: Repository<Chat>,
 
-  @InjectRepository(User)
-  private userRepository: Repository<User>,
+  @InjectRepository(AppUser)
+  private userRepository: Repository<AppUser>,
 
   @InjectRepository(Ride)
   private rideRepository: Repository<Ride>,
@@ -45,6 +46,19 @@ export class ChatService {
     }
     
   }
+  async findByRideId(rideId: number) {
+    const chat = await this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.driver', 'driver')
+      .leftJoinAndSelect('chat.rider', 'rider')
+      .leftJoinAndSelect('chat.ride', 'ride')
+      .where('ride.id = :rideId', { rideId })
+      .getOne();
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+    return chat;
+  }
   async getMessagesByRideId(id: number) {
     const chat = await this.chatRepository
       .createQueryBuilder('chat')
@@ -67,14 +81,15 @@ export class ChatService {
     return this.chatRepository.find({ relations: ['driver', 'rider'] });
   }
   findByUserId(userId: number) {
-    return this.chatRepository
-      .createQueryBuilder('chat')
-      .leftJoinAndSelect('chat.driver', 'driver')
-      .leftJoinAndSelect('chat.rider', 'rider')
-      .where('driver.id = :userId OR rider.id = :userId', { userId })
-      .getMany();
-  }
-
+  return this.chatRepository
+    .createQueryBuilder('chat')
+    .leftJoinAndSelect('chat.driver', 'driver')
+    .leftJoinAndSelect('chat.rider', 'rider')
+    .leftJoinAndSelect('chat.messages', 'messages') 
+    .leftJoinAndSelect('messages.sender', 'sender') 
+    .where('driver.id = :userId OR rider.id = :userId', { userId })
+    .getMany();
+}
   findOne(id: number) {
     return this.chatRepository.findOne({ where: { id }, relations: ['driver', 'rider'] });
   }

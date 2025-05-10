@@ -6,13 +6,14 @@ import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { User } from 'src/user/entities/user.entity';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectRepository(Message) private messageRepository: Repository<Message>,
     @InjectRepository(Chat) private chatRepository: Repository<Chat>,
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(AppUser) private userRepository: Repository<AppUser>,
   ) {
 
   }

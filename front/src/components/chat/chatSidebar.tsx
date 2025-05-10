@@ -8,24 +8,28 @@ import { Chat, ChatSidebarProps,User ,Ride,Message} from '../../types/chat.ts';
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile }) => {
    const [page, setPage] = useState(1);
-     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-       const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-     
-   
-    const [limit] = useState(20);
+   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+   const [limit] = useState(20);
 
-  /*const token = localStorage.getItem('auth_token');
-  const isLoggedIn = !!token;*/
+  const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  console.log("isLoggedIn", isLoggedIn);
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+  const userId = user?.id;
+  console.log("userId", userId);
+  console.log("accessToken", token);
 
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_APPUSER_INFO);
-
-const userId = userData?.getAppUserInfo?.id;
-
+  
 const { loading: loadingChats, error: errorChats, data: chatsData, refetch } = useQuery(GET_CHATS, {
-  variables: { userId },
-  skip: !userId, // Wait until userId is available
+  variables: { userId: Number(userId) },
+  skip: !isLoggedIn, // Wait until userId is available
   fetchPolicy: "network-only",
 });
+  console.log("chatsData", chatsData);
+  console.log("loadingChats", loadingChats);
+  console.log("errorChats", errorChats);
 const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
   id: chat.id,
   messages: chat.messages ?? [],
@@ -34,8 +38,8 @@ const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
   ride: chat.ride,
 })) ?? [];
 
-  if (userLoading || loadingChats) return <div>Loading chats...</div>;
-if (userError || errorChats) return <div>Error loading chats.</div>;
+  if (loadingChats) return <div>Loading chats...</div>;
+if ( errorChats) return <div>Error loading chats.</div>;
 
   const handleChatClick = (chat : Chat) => {
       setSelectedChat(chat);

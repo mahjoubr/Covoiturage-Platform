@@ -45,6 +45,39 @@ export const GET_CHATS=gql`
   query GetChats($userId: Int!) {
     getChats(userId: $userId) {
       id
+      messages {
+        id
+        text
+        createdAt
+        sender {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const GET_CHAT=gql`
+  query GetChat($chatId: Int!) {
+    getChat(chatId: $chatId) {
+      id
+      messages {
+        id
+        text
+        createdAt
+        sender {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+export const GET_CHAT_BY_RIDE_ID=gql`
+  query GetChatByRideId($rideId: Int!) {
+    getChatByRideId(rideId: $rideId) {
+      id
       name
       messages {
         id
@@ -54,6 +87,43 @@ export const GET_CHATS=gql`
           id
           name
         }
+      }
+    }
+  }
+`;
+export const CREATE_CHAT=gql`
+ mutation CreateChat($createChatInput: CreateChatInput!) {
+  createChat(createChatInput: $createChatInput) {
+    id
+    RiderId
+    DriverId
+    RideId
+    messages {
+      id
+      text
+      createdAt
+      sender {
+        id
+        name
+      }
+    }
+  }
+}
+`;
+export const REMOVE_CHAT=gql`
+  mutation RemoveChat($chatId: Int!) {
+    removeChat(chatId: $chatId)
+  }
+`;
+export const GET_CHAT_MESSAGES_SUBSCRIPTION = gql`
+  subscription OnChatMessagesAdded($chatId: Int!) {
+    chatMessagesAdded(chatId: $chatId) {
+      id
+      text
+      createdAt
+      sender {
+        id
+        name
       }
     }
   }
