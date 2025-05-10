@@ -124,7 +124,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
           price: ride.price || 0,
           nbPassengers: ride.nbPassengers || 0,
           state: ride.state || RideState.NOT_STARTED,
-          appUserRides: [],
+          appUserRides: ride.appUserRides || [],
           driver: ride.post?.driverName
         });
       });

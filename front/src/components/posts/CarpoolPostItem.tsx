@@ -6,7 +6,7 @@ import '../../styles/posts.css';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
 import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE,IS_USER_IN_RIDE } from '../../graphQl/queries/posts.ts';
-
+import { Link } from 'react-router-dom';
 interface CarpoolPostItemProps {
   post: CarpoolPost;
   onClick: (post: CarpoolPost) => void;
@@ -33,12 +33,10 @@ const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick ,userDa
 const token = localStorage.getItem('auth_token');
   const isLoggedIn = !!token;
   
-  const { data: rideData, loading: userLoading, error: userError } = useQuery(GET_RIDE, {
+  const { data: rideData} = useQuery(GET_RIDE, {
     variables:{postId:Number(post.id)},
     skip: !isLoggedIn,
-    fetchPolicy: 'network-only',
-    //onCompleted: (data) => console.log('GET_ride completed:', data),
-   // onError: (error) => console.error('GET_ride error:', error)
+    fetchPolicy: 'network-only'
   });
       const [checkIsPassenger, { data: isPassengerData }] = useLazyQuery(IS_USER_IN_RIDE);
     
@@ -59,6 +57,9 @@ const token = localStorage.getItem('auth_token');
     onCompleted: (data) => console.log('GET_ride completed:', data),
     onError: (error) => console.error('GET_ride error:', error)
   });
+  const handleNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the modal trigger
+  };
   //console.log(joinRequest);
 useEffect(() => {
   if (joinRequest?.getJoinRequestsByRideUser) {
@@ -157,13 +158,18 @@ const handleJoinRide = async (e: React.MouseEvent) => {
         </div>
         
         <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-white/[0.03]">
-          <div className="flex items-center">
+          <Link
+            to={`/profile/${post.postOwnerId}`} 
+            className="flex items-center no-underline text-inherit hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-md"
+            onClick={handleNameClick}
+          >
             <div className="w-8 h-8 bg-blue-100 dark:bg-brand-500/15 rounded-full flex items-center justify-center text-blue-700 dark:text-brand-400 font-medium">
               {post.driverName.charAt(0)}
             </div>
-            <span className="ml-2 text-sm font-medium dark:text-gray-300">{post.driverName}</span>
-          </div>
-          
+            <span className="ml-2 text-sm font-medium dark:text-gray-300">
+              {post.driverName}
+            </span>
+          </Link>  
           <div className="flex space-x-4">
             <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
               <Users size={16} className="mr-1 text-gray-500 dark:text-gray-500" />

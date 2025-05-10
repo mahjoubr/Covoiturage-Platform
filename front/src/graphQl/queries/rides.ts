@@ -15,6 +15,13 @@ query {
           lastName
         }
       }
+      appUserRides {
+      appUser {
+        id
+        name
+        lastName
+      } 
+      }
     }
   }
 `;
@@ -89,7 +96,7 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
       time
       state
       driver{
-      
+        id
         name
         lastName
       

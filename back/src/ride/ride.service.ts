@@ -49,18 +49,17 @@ export class RideService extends GenericService {
     });
   }
 
-async findByDriver(driverId: number): Promise<Ride[]> {
-  return this.rideRepo.find({
-    where: {
-      post: {
-        postOwner: {
-          id: driverId,
-        },
-      },
-    },
-    relations: ['post', 'post.postOwner', 'appUserRides'],
-  });
-}
+  async findByDriver(driverId: number): Promise<Ride[]> {
+    return this.rideRepo
+      .createQueryBuilder('ride')
+      .leftJoinAndSelect('ride.post', 'post')
+      .leftJoinAndSelect('post.postOwner', 'postOwner')
+      .leftJoinAndSelect('ride.appUserRides', 'appUserRide')
+      .leftJoinAndSelect('appUserRide.appUser', 'appUser')
+      .where('postOwner.id = :driverId', { driverId })
+      .getMany();
+  }
+  
 async findPaginatedByDriver(
   driverId: number,
   page = 1,

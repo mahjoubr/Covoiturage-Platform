@@ -76,7 +76,7 @@ export class RideSchedulerService {
             const newRideInput: CreateRideInput = {
               ...rideWithoutPassengers,
               date: nextDate,
-              time: ride.post?.time, // Make sure time is set explicitly
+              time: ride.post?.time, 
               state: RideState.NOT_STARTED,
             };
 

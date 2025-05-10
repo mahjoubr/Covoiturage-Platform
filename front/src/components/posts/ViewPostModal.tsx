@@ -6,7 +6,7 @@ import '../../styles/posts.css';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { CREATE_COMMENT, GET_RIDE, IS_USER_IN_RIDE,GET_JOIN_REQUESTS } from '../../graphQl/queries/posts';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
-
+import { Link } from 'react-router-dom';
 
 interface ViewPostModalProps {
   isOpen: boolean;
@@ -192,12 +192,17 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
         <div className="p-3 overflow-y-auto flex-grow">
           <div className="mb-3">
             <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-2">{post.departure} → {post.destination}</h3>
+            <Link
+            to={`/profile/${post.postOwnerId}`} 
+            className="flex items-center no-underline text-inherit hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-md"
+          >
             <div className="flex items-center mb-1">
               <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium mr-2 dark:bg-blue-600 dark:text-blue-200">
                 {post.driverName.charAt(0)}
               </div>
               <span className="font-medium text-gray-800 dark:text-gray-100">{post.driverName}</span>
             </div>
+            </Link>
           </div>
           
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -285,6 +290,10 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
                 comments.map((comment) => (
                   <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
                     <div className="flex justify-between items-center mb-1">
+                      <Link
+                        to={`/profile/${comment.commenter.id}`} 
+                        className="flex items-center no-underline text-inherit hover:bg-gray-90 dark:hover:bg-gray-700 p-1 rounded-md"
+                      >
                       <div className="flex items-center">
                         <div className="w-5 h-5 bg-blue-100 dark:bg-blue-600 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-200 text-xs font-medium">
                         {comment.commenter?.name
@@ -297,6 +306,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
                           : "Unknown"}
                         </span>
                       </div>
+                      </Link>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatCommentTime(comment.date)}
                       </span>
