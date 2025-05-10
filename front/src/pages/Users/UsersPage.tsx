@@ -2,6 +2,10 @@ import { useQuery } from "@apollo/client";
 import { useState } from "react";
 import { GET_USERS } from "../../graphQl/queries/users";
 import { Flag } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+
+
+  
 
 const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,11 +16,10 @@ const UsersPage = () => {
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
-  const handleReportUser = (userId:number) => {
-    console.log(`Reporting user with ID: ${userId}`);
-    // Add actual reporting logic here
-  };
-
+  const handleReportUser = (userId: number) => {
+        navigate('/report', { state: { reportedUserId: userId } });
+  }
+  const navigate = useNavigate();
   // Subtle card accent colors
   const cardAccents = [
     "border-blue-400",

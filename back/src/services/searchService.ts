@@ -11,13 +11,13 @@ export interface SearchResult<T> {
 export class SearchService {
 
   async searchQuery<T extends ObjectLiteral>(
-    queryBuilder: SelectQueryBuilder<T>,
-    searchTerm: string,
-    fields: string[] = [],
-    page = 1,
-    limit = 10,
+      queryBuilder: SelectQueryBuilder<T>,
+      searchTerm: string,
+      fields: string[] = [],
+      page = 1,
+      limit = 3,
   ): Promise<SearchResult<T>> {
-   
+
     const whereConditions = fields.map(field => {
       return `${field} LIKE :searchTerm`;
     }).join(" OR ");
@@ -25,10 +25,10 @@ export class SearchService {
     const skip = (page - 1) * limit;
 
     const [data, total] = await queryBuilder
-      .where(whereConditions, { searchTerm: `%${searchTerm}%` })
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
+        .where(whereConditions, { searchTerm: `%${searchTerm}%` })
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount();
 
     return {
       data,

@@ -7,9 +7,11 @@ import { NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { UploadPhotoInput } from './dto/update-photo.input';
+
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { SearchResult } from 'src/services/searchService';
 import { AppUserSearchResult } from 'src/graphql/types/AppUserSearchResult';
+
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => AppUser)
@@ -44,6 +46,7 @@ async updatePhoto(
   const file = await updatePhotoInput.file;
   return this.appUserService.uploadPhoto(user.id, file);
 }
+
 @Query(() => AppUserSearchResult)
   async getUsers(
     @Args("searchTerm", { type: () => String }) searchTerm: string,
@@ -52,6 +55,11 @@ async updatePhoto(
   ): Promise<SearchResult<AppUser>> {
     return this.appUserService.searchUsers(searchTerm, page, limit);
   }
-
+  @Query(() => AppUser, { name: 'getUserById', nullable: true })
+  async getUserById(
+      @Args('id', { type: () => Int }) id: number,
+  ): Promise<AppUser> {
+    return this.appUserService.findById(id);
+  }
 
 }

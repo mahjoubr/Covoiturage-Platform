@@ -67,14 +67,8 @@ type AppUser {
 
 type AppUserRide {
   id: Float!
-  role: Role!
   appUser: AppUser!
   ride: Ride!
-}
-
-enum Role {
-  DRIVER
-  PASSENGER
 }
 
 type JoinRequest {
@@ -114,6 +108,11 @@ type AppUserWithRole {
   rating: Float!
   appUserRides: [AppUserRide!]!
   roleInRide: Role!
+}
+
+enum Role {
+  DRIVER
+  PASSENGER
 }
 
 type RidePaginationResult {
@@ -176,6 +175,39 @@ type JwtAuthResponse {
   user: User!
 }
 
+type Report {
+  id: Int!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type ReportPagination {
+  """Liste des rapports de la page courante"""
+  data: [Report!]!
+
+  """Nombre total d’éléments disponibles"""
+  totalItems: Int!
+
+  """Nombre total de pages"""
+  totalPages: Int!
+
+  """Page courante"""
+  currentPage: Int!
+}
+
 type DashboardStatsType {
   userCount: Int!
   rideCount: Int!
@@ -201,9 +233,11 @@ type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
+  getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
+  getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
@@ -218,6 +252,7 @@ type Query {
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!

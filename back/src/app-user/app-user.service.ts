@@ -8,8 +8,10 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '../user/entities/user.entity';
 import { Review } from '../review/entities/review.entity';
 import { saveFile } from '../common/helpers/file-upload.helper';
+
 import { FileUpload } from 'graphql-upload/processRequest.mjs';
 import { SearchResult, SearchService } from 'src/services/searchService';
+
 
 @Injectable()
 export class AppUserService extends GenericService {
@@ -92,11 +94,14 @@ export class AppUserService extends GenericService {
       take: limit,
     });
   }
-  // user.service.ts
-// user.service.ts
-async findById(id: number): Promise<AppUser | null> {
-  return this.appUserRepo.findOne({ where: { id } });
-}
+
+  async findById(id: number): Promise<AppUser> {
+    const user = await this.appUserRepo.findOneBy({ id });
+    if (!user) throw new NotFoundException(`User ${id} not found`);
+    return user;
+  }
+
+ 
 
 
 async searchUsers(
