@@ -110,8 +110,8 @@ type RidePaginationResult {
 type Chat {
   id: Float!
   messages: [Message!]!
-  driver: User!
-  rider: User!
+  driver: AppUser!
+  rider: AppUser!
   ride: Ride!
 }
 
