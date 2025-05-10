@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import {EventStreamModule } from './SSE/sse.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { JoinRequestModule } from './join-request/join-request.module';
+import {ReportModule} from "src/report/report.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { JoinRequestModule } from './join-request/join-request.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     ServeStaticModule.forRoot({
       rootPath: path.join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
@@ -59,9 +61,23 @@ import { JoinRequestModule } from './join-request/join-request.module';
         };
       },
     }),
-     AuthModule,
-        GraphqlModule,
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule],
+      AuthModule,
+      GraphqlModule,
+      RideModule,
+      PostModule,
+      CommentModule,
+      MessageModule,
+      ChatModule,
+      ReviewModule,
+      UserModule,
+      AppUserModule,
+      AdminModule,
+      AppUserRideModule,
+      EventStreamModule,
+      SubscriptionModule,
+      JoinRequestModule,
+      ReportModule,
+  ],
         controllers: [AppController],
         providers: [AppService, JwtStrategy],
 })

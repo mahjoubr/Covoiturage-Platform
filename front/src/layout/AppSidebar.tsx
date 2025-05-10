@@ -6,12 +6,12 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-
   UserCircleIcon,
 
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon ,Users,Star} from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -35,6 +35,16 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon:<OtherUsersIcon />,
+    name: "App Users",
+    path: "/users",
+  },
+  {
+    icon:<CircleAlertIcon/>,
+    name: "Reports",
+    path: "/myReports",
   },
   {
 
@@ -61,7 +71,7 @@ const navItems: NavItem[] = [
     name: "Chat",
     path: "/chat",
   },
- 
+
 ];
 
 
@@ -84,7 +94,7 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
- 
+
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
@@ -308,7 +318,7 @@ const AppSidebar: React.FC = () => {
                     : "justify-start"
                 }`}
               >
-                
+
               </h2>
             </div>
           </div>

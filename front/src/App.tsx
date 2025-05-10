@@ -26,6 +26,9 @@ import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
 
+import ReportPage from "./pages/Report/ReportPage.tsx";
+import MyReportsPage from "./pages/Report/MyReportsPage.tsx";
+
 import NotificationPage from "./pages/Notification/NotificationPage";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
@@ -47,8 +50,8 @@ export default function App() {
             <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
 
-            
-
+            <Route path={"/report"} element={<ReportPage />} />
+            <Route path={"/myReports"} element={<MyReportsPage />} />
 
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
