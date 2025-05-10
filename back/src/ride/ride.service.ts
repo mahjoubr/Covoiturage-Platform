@@ -11,8 +11,9 @@ import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
-import { Role } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { AppUserRide, Role } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { App } from 'supertest/types';
+import { CreateRideInput } from './dto/create-ride.input';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
