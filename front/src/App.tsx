@@ -23,16 +23,11 @@ import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
-
-
 import ReportPage from "./pages/Report/ReportPage.tsx";
 import MyReportsPage from "./pages/Report/MyReportsPage.tsx";
-import MyReceivedReviews from "./pages/Review/RecievedReviewsListPage";
-
 import NotificationPage from "./pages/Notification/NotificationPage";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
-import UsersPage from "./pages/Users/UsersPage";
 import UserProfile from "./pages/UserProfile";
 export default function App() {
   return (
@@ -46,7 +41,6 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/profile" element={<EditProfile />} />
-            <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/profile/:id" element={ <UserProfile />  } />            <Route path={"/report"} element={<ReportPage />} />
             <Route path={"/myReports"} element={<MyReportsPage />} />
