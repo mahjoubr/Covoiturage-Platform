@@ -6,84 +6,122 @@ import {
     TableRow,
 } from "../ui/table";
 import { User } from "../../types.tsx";
-import { Mail, UserIcon } from "lucide-react";
+import {
+    ExternalLink
+} from "lucide-react";
+import  { useState } from "react";
+import {useNavigate} from "react-router";
 
 interface Props {
     users: User[];
 }
 
-// New Default image URL (working placeholder)
-const DEFAULT_IMAGE = "https://ui-avatars.com/api/?name=User&background=random&color=fff";
+// Enhanced avatar placeholder with brand colors
+const getAvatarPlaceholder = (name: string): string => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=ffffff&size=128`;
+};
 
 export default function RecentUsers({ users }: Props) {
+    const [searchQuery] = useState("");
+    const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+    const navigate = useNavigate();
+
+    const toggleUserSelection = (index: number): void => {
+        setSelectedUsers(prev =>
+            prev.includes(index)
+                ? prev.filter(i => i !== index)
+                : [...prev, index]
+        );
+    };
+
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 shadow-sm">
-            <div className="flex flex-col gap-2 mb-5 sm:flex-row sm:items-center sm:justify-between">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-                    Recent Users
-                </h3>
-                <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400">
-                    Showing latest 5 users
-                </span>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] shadow-lg">
+            {/* Enhanced Header Section */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">Recent Users</h3>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button       onClick={() => navigate('/users')}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-md text-xs font-medium transition-colors">
+                            <ExternalLink size={14} />
+                            <span>View All Users</span>
+                        </button>
+
+                    </div>
+                </div>
             </div>
 
-            <div className="max-w-full overflow-x-auto">
-                <Table>
-                    <TableHeader className="border-gray-100 dark:border-gray-800 border-b">
-                        <TableRow>
-                            <TableCell isHeader className="py-3 text-theme-xs font-medium text-start text-gray-500 dark:text-gray-400">
+            {/* Table with fixed column widths and better alignment */}
+            <div className="max-w-full overflow-x-auto p-2">
+                <Table className="table-fixed">
+                    <TableHeader className="bg-gray-50 dark:bg-gray-800/20">
+                        <TableRow className="border-none">
+                            <TableCell isHeader className="w-24 py-4 px-4 font-medium text-gray-500 dark:text-gray-400 text-center">
                                 Avatar
                             </TableCell>
-                            <TableCell isHeader className="py-3 text-theme-xs font-medium text-start text-gray-500 dark:text-gray-400">
+                            <TableCell isHeader className="w-1/5 py-4 px-4 font-medium text-gray-500 dark:text-gray-400 text-left">
                                 First Name
                             </TableCell>
-                            <TableCell isHeader className="py-3 text-theme-xs font-medium text-start text-gray-500 dark:text-gray-400">
+                            <TableCell isHeader className="w-1/5 py-4 px-4 font-medium text-gray-500 dark:text-gray-400 text-left">
                                 Last Name
                             </TableCell>
-                            <TableCell isHeader className="py-3 text-theme-xs font-medium text-start text-gray-500 dark:text-gray-400">
+                            <TableCell isHeader className="w-2/5 py-4 px-4 font-medium text-gray-500 dark:text-gray-400 text-left">
                                 Email
                             </TableCell>
                         </TableRow>
                     </TableHeader>
 
                     <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {users.slice(0, 5).map((user, index) => (
-                            <TableRow
-                                key={index}
-                                className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                            >
-                                <TableCell className="py-4">
-                                    <div className="relative">
-                                        <img
-                                            src={user.imageUrl?.trim() ? user.imageUrl : DEFAULT_IMAGE}
-                                            alt={`${user.name} ${user.lastName}`}
-                                            className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
-                                        />
-                                        {!user.imageUrl?.trim() && (
-                                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
-                                        )}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="py-4 text-theme-sm font-medium text-gray-800 dark:text-white/90">
-                                    <div className="flex items-center gap-1.5">
-                                        <UserIcon size={14} className="text-gray-400" />
-                                        <span>{user.name}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="py-4 text-theme-sm text-gray-800 dark:text-white/90">
-                                    {user.lastName}
-                                </TableCell>
-                                <TableCell className="py-4 text-theme-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center gap-1.5">
-                                        <Mail size={14} className="text-gray-400" />
-                                        <span>{user.email}</span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {filteredUsers.slice(0, 5).map((user, index) => {
+                            const isSelected = selectedUsers.includes(index);
+
+                            return (
+                                <TableRow
+                                    key={index}
+                                    className={`
+                                        transition-colors cursor-pointer
+                                        ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}
+                                        hover:bg-gray-50 dark:hover:bg-gray-800/30
+                                    `}
+                                >
+                                    <TableCell className="w-24 py-4 px-4 align-middle" onClick={() => toggleUserSelection(index)}>
+                                        <div className="relative flex justify-center">
+                                            <img
+                                                src={user.imageUrl?.trim() ? user.imageUrl : getAvatarPlaceholder(`${user.name} ${user.lastName}`)}
+                                                alt={`${user.name} ${user.lastName}`}
+                                                className={`
+                                                    w-10 h-10 rounded-full object-cover 
+                                                    ${isSelected ? 'ring-2 ring-indigo-500' : 'border border-gray-200 dark:border-gray-700'}
+                                                `}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="w-1/5 py-4 px-4 text-sm font-medium text-gray-800 dark:text-white/90 text-left" onClick={() => toggleUserSelection(index)}>
+                                        {user.name}
+                                    </TableCell>
+                                    <TableCell className="w-1/5 py-4 px-4 text-sm text-gray-800 dark:text-white/90 text-left" onClick={() => toggleUserSelection(index)}>
+                                        {user.lastName}
+                                    </TableCell>
+                                    <TableCell className="w-2/5 py-4 px-4 text-sm text-gray-500 dark:text-gray-400 text-left" onClick={() => toggleUserSelection(index)}>
+                                        {user.email}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </div>
+
+
         </div>
     );
 }

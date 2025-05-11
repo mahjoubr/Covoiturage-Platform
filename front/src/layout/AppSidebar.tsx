@@ -6,12 +6,12 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-
   UserCircleIcon,
-  ReviewIcon
+
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon } from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -37,6 +37,16 @@ const navItems: NavItem[] = [
     path: "/profile",
   },
   {
+    icon:<OtherUsersIcon />,
+    name: "App Users",
+    path: "/users",
+  },
+  {
+    icon:<CircleAlertIcon/>,
+    name: "Reports",
+    path: "/myReports",
+  },
+  {
 
     icon: <NewspaperIcon />,
     name: "Posts",
@@ -46,19 +56,22 @@ const navItems: NavItem[] = [
     icon: <CarIcon />,
     name: "Rides",
     path: "/rides",
-  },{
-    icon:<ReviewIcon/>,
-    name:"Reviews",
-    subItems: [{ name: "My Reviews", path: "/reviewed-list", pro: false },
-    { name: "Received Reviews", path: "/received-reviews", pro: false }],
-
+  }, {
+    icon: <Star/>,
+    name: "Reviews",
+    path: "/reviews",
+  },
+  {
+    icon: <Users/>,
+    name: "App Users",
+    path: "/users",
   },
   {
     icon:<ChatIcon />,
     name: "Chat",
     path: "/chat",
   },
- 
+
 ];
 
 
@@ -81,7 +94,7 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
- 
+
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
@@ -305,7 +318,7 @@ const AppSidebar: React.FC = () => {
                     : "justify-start"
                 }`}
               >
-                
+
               </h2>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-
+/*
 export const GET_POSTS = gql`
   query {
   getPosts {
@@ -29,7 +29,41 @@ export const GET_POSTS = gql`
       }
   }
 }
-
+`;
+*/
+export const GET_POSTS = gql`
+  query GetPosts($searchTerm: String, $page: Int, $limit: Int) {
+    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+      data {
+        id
+        destination
+        departure
+        date
+        time
+        seatCount
+        frequency
+        description
+        price
+        contactInfo
+        status
+        postOwner {
+          id
+          name
+          lastName
+        }
+        comments {
+          text
+          date
+          commenter {
+            name
+            lastName
+          }
+        }
+      }
+      totalItems
+      currentPage
+    }
+  }
 `;
 
 export const GET_POST_BY_ID = gql`

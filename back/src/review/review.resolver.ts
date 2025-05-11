@@ -3,15 +3,15 @@ import { ReviewFormData, UserInfo, RideDetails, ReviewItem} from '../graphql/typ
 import { AppUserService } from 'src/app-user/app-user.service';
 import { RideService } from '../ride/ride.service';
 import { CurrentUser } from 'src/auth/user.decorator';
-import { User } from 'src/user/entities/user.entity';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { GraphQLInt, GraphQLResolveInfo } from 'graphql';
 import { ReviewService } from './review.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { Review } from './entities/review.entity';
-import { PaginationResult } from 'src/services/paginationService';
 import {  ReviewPaginationResult } from './dto/ReviewPaginationResult';
+import { PaginationResult } from 'src/services/paginationService';
+import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResponse';
 
 @Resolver()
 export class ReviewResolver {
@@ -28,13 +28,7 @@ export class ReviewResolver {
 
 
 
-  @UseGuards(GqlAuthGuard)
-  @Query(() => [Review], { name: 'getMyReviews' })
-  async getMyReviews(@CurrentUser() user: AppUser): Promise<Review[]> {
-    console.log('hi everyone its me again \n \n\n');
-  
-    return this.reviewService.findByReviewerId(user.id);
-  }
+
 
 
   @UseGuards(GqlAuthGuard)
@@ -96,7 +90,14 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
   }
-
+  @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
+  async getMyReviews(
+    @CurrentUser() user: AppUser,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findByReviewerId(user.id, page, limit);
+  }
   /*
   @UseGuards(GqlAuthGuard)
   @Query(() => [ReviewItem], { name: 'getMyReviews' })
@@ -136,8 +137,9 @@ export class ReviewResolver {
   @Query(() => [Review], { name: 'getUserReviews' })
   getUserReviews(
     @Args('userId', { type: () => Int }) userId: number,
-  ): Promise<Review[]> {
-    console.log('userId:', userId);
-    return this.reviewService.findByReviewedUserId(userId);
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findByReviewedUserId(userId, page, limit);
   }
 }
