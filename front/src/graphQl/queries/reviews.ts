@@ -49,6 +49,24 @@ export const GET_MY_REVIEWS = gql`
   }
 `;
 
+
+
+export const GET_REVIEWS_BY_ID = gql`
+  query GetUserReviews($userId: Int!) {
+    getUserReviews(userId: $userId) {
+      id
+      stars
+      comment
+      date
+      reviewer {
+        id
+        name
+        lastName
+         }
+  }
+`;
+
+
 export const GET_USER_REVIEWS = gql`
   query GetUserReviews($userId: Int!, $page: Int, $limit: Int) {
     getUserReviews(userId: $userId, page: $page, limit: $limit) {
@@ -74,23 +92,6 @@ export const GET_USER_REVIEWS = gql`
       totalItems
       totalPages
       currentPage
-    }
-  }
-`;
-
-
-export const GET_REVIEWS_BY_ID = gql`
-  query GetUserReviews($userId: Int!) {
-    getUserReviews(userId: $userId) {
-      id
-      stars
-      comment
-      date
-      reviewer {
-        id
-        name
-        lastName
-      }
     }
   }
 `;

@@ -172,6 +172,14 @@ type ReviewPaginationResult {
   currentPage: Int!
 }
 
+type PaginatedReviewsResponse {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
@@ -235,6 +243,7 @@ type DashboardData {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+
   getAppUserById(id: Int!): AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
@@ -258,13 +267,13 @@ type Query {
   getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
+
   getAllReviews: [Review!]!
-  getMyReviews: [Review!]!
   getAverageRating: Int!
   getAverageRatingById(id: Int!): Int!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
-  getUserReviews(userId: Int!): [Review!]!
+
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews: [Review!]!
   getUserReviews(userId: Int!): [Review!]!

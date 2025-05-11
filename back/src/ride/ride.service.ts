@@ -12,6 +12,7 @@ import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 
+
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { App } from 'supertest/types';

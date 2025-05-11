@@ -80,6 +80,7 @@ export class ReviewResolver {
   }
 
   @UseGuards(GqlAuthGuard)
+
   @Query(() => ReviewPaginationResult, { name: 'getPaginatedMyReviews' }) 
   async getPaginatedReviews(
     @CurrentUser() user: AppUser,
@@ -90,6 +91,7 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
   }
+
   @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
   async getMyReviews(
     @CurrentUser() user: AppUser,
@@ -98,6 +100,7 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findByReviewerId(user.id, page, limit);
   }
+
   /*
   @UseGuards(GqlAuthGuard)
   @Query(() => [ReviewItem], { name: 'getMyReviews' })
@@ -134,7 +137,8 @@ export class ReviewResolver {
   */
 
 
-  @Query(() => [Review], { name: 'getUserReviews' })
+
+  @Query(() => PaginatedReviewsResponse, { name: 'getUserReviews' })
   getUserReviews(
     @Args('userId', { type: () => Int }) userId: number,
     @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,

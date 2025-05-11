@@ -29,6 +29,7 @@ import NotificationPage from "./pages/Notification/NotificationPage";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
 import UserProfile from "./pages/UserProfile";
+
 export default function App() {
   return (
     <React.Fragment>
@@ -43,6 +44,10 @@ export default function App() {
             <Route path="/profile" element={<EditProfile />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/profile/:id" element={ <UserProfile />  } />            <Route path={"/report"} element={<ReportPage />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/notifications" element={<NotificationPage />} />
+
+            <Route path={"/report"} element={<ReportPage />} />
             <Route path={"/myReports"} element={<MyReportsPage />} />
 
             <Route path="/calendar" element={<Calendar />} />
