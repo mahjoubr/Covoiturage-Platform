@@ -8,6 +8,8 @@ import { GqlAuthGuard } from '../auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { UploadPhotoInput } from './dto/update-photo.input';
 
+
+
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { SearchResult } from 'src/services/searchService';
 import { AppUserSearchResult } from 'src/graphql/types/AppUserSearchResult';
@@ -36,6 +38,19 @@ export class AppUserResolver {
       appUser.imageUrl = appUser.imageUrl ? `${baseUrl}${appUser.imageUrl}` : null;
       
       return appUser;
+  }
+
+  @Query(() => AppUser, { name: 'getAppUserById' })
+  async getAppUserById(@Args('id', { type: () => Int }) id: number): Promise<AppUser | null> {
+    const appUser= await this.appUserService.findOne(id);
+    if (!appUser) {
+      throw new NotFoundException('User not found');
+    }
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000/'; 
+
+    appUser.imageUrl = appUser.imageUrl ? `${baseUrl}${appUser.imageUrl}` : null;
+    
+    return appUser;
   }
 
   @Mutation(() => AppUser)

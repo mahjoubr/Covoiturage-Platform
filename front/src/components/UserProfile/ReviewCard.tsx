@@ -6,7 +6,8 @@ interface ReviewCardProps {
 }
 
 export default function ReviewCard({ review }: ReviewCardProps) {
-
+  const dateObj = new Date(review.date);
+  const formattedDate = dateObj.toLocaleDateString('en-CA')
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -16,10 +17,10 @@ export default function ReviewCard({ review }: ReviewCardProps) {
               <div>
                
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {review.reviewer.username}
+                  {review.reviewer.name} {review.reviewer.lastName}
                 </p>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  {review.date}
+                  {formattedDate}
                 </p>
               </div>
 

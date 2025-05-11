@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA, GET_USER_REVIEWS } from '../graphQl/queries/reviews';
+import { GET_MY_REVIEWS,  GET_REVIEW_FORM_DATA, GET_USER_REVIEWS } from '../graphQl/queries/reviews';
 import { GetReviewFormDataResponse } from '../types/reviewFormData';
 
 import client from "../graphQl/client";

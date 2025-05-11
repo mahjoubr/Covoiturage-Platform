@@ -10,6 +10,10 @@ export class RegisterInput {
   @Field()
   @IsNotEmpty()
   lastName: string;
+
+  @Field()
+  @IsNotEmpty()
+  phoneNumber: string;
   
   @Field()
   @IsNotEmpty()

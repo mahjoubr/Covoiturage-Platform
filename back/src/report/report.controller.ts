@@ -6,6 +6,7 @@ import {
   UploadedFile,
   Body,
   BadRequestException, Put, Param, ParseIntPipe, Query,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -14,8 +15,11 @@ import { Express } from 'express';
 
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
+import {GqlAuthGuard} from "src/auth/guards/auth.Guard";
 
 @Controller('reports')
+@Controller('reports')
+@UseGuards(GqlAuthGuard)
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
