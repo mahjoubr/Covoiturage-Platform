@@ -13,6 +13,11 @@ import { SearchResult } from 'src/services/searchService';
 import { AppUserSearchResult } from 'src/graphql/types/AppUserSearchResult';
 
 
+import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
+import { SearchResult } from 'src/services/searchService';
+import { AppUserSearchResult } from 'src/graphql/types/AppUserSearchResult';
+
+
 @UseGuards(GqlAuthGuard)
 @Resolver(() => AppUser)
 export class AppUserResolver {
@@ -68,6 +73,11 @@ async updatePhoto(
   ): Promise<SearchResult<AppUser>> {
     return this.appUserService.searchUsers(searchTerm, page, limit);
   }
-
+  @Query(() => AppUser, { name: 'getUserById', nullable: true })
+  async getUserById(
+      @Args('id', { type: () => Int }) id: number,
+  ): Promise<AppUser> {
+    return this.appUserService.findById(id);
+  }
 
 }

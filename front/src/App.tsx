@@ -13,6 +13,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar/calendar";
+import Calendar from "./pages/Calendar/calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -23,12 +24,17 @@ import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
+
+
 import ReportPage from "./pages/Report/ReportPage.tsx";
 import MyReportsPage from "./pages/Report/MyReportsPage.tsx";
+
 import NotificationPage from "./pages/Notification/NotificationPage";
+
+import UserProfile from "./pages/UserProfile";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
-import UserProfile from "./pages/UserProfile";
+
 export default function App() {
   return (
     <React.Fragment>
@@ -41,6 +47,7 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/profile" element={<EditProfile />} />
+            <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/profile/:id" element={ <UserProfile />  } />            
             <Route path={"/report"} element={<ReportPage />} />
@@ -50,6 +57,10 @@ export default function App() {
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />
+
+
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />
 

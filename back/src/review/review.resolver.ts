@@ -134,7 +134,7 @@ export class ReviewResolver {
   */
 
 
-  @Query(() => [Review], { name: 'getUserReviews' })
+  @Query(() => PaginatedReviewsResponse, { name: 'getUserReviews' })
   getUserReviews(
     @Args('userId', { type: () => Int }) userId: number,
     @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,

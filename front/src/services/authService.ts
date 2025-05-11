@@ -34,6 +34,18 @@ export async function getCurrentUser(): Promise<CurrentUser> {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
     return user;
 }
+export interface CurrentUser {
+  id: number;
+  email: string;
+  role: 'admin' | 'user';
+  __typename?: 'User';
+}
+
+
+export async function getCurrentUser(): Promise<CurrentUser> {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user;
+}
 
 export async function signup(email: string, password: string, name: string, lastName: string, phoneNumber: string) {
   try {

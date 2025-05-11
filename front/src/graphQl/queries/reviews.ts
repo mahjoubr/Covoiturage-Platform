@@ -45,9 +45,34 @@ export const GET_MY_REVIEWS = gql`
       totalItems
       totalPages
       currentPage
+  query GetMyReviews($page: Int, $limit: Int) {
+    getMyReviews(page: $page, limit: $limit) {
+      data {
+        id
+        stars
+        comment
+        date
+        ride {
+          id
+          departure
+          arrival
+          date
+          time
+        }
+        reviewedUser {
+          id
+          name
+          lastName
+          imageUrl
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
     }
   }
 `;
+
 
 export const GET_USER_REVIEWS = gql`
   query GetUserReviews($userId: Int!, $page: Int, $limit: Int) {

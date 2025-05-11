@@ -13,6 +13,10 @@ import { FileUpload } from 'graphql-upload/processRequest.mjs';
 import { SearchResult, SearchService } from 'src/services/searchService';
 
 
+import { FileUpload } from 'graphql-upload/processRequest.mjs';
+import { SearchResult, SearchService } from 'src/services/searchService';
+
+
 @Injectable()
 export class AppUserService extends GenericService {
   constructor(
@@ -101,7 +105,7 @@ export class AppUserService extends GenericService {
     return user;
   }
 
-  
+ 
 
 
 async searchUsers(

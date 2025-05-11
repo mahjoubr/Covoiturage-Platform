@@ -33,6 +33,12 @@ const CarpoolPostList: React.FC = () => {
       limit
     },
     fetchPolicy: 'network-only'
+    variables: {
+      searchTerm: debouncedSearchTerm,
+      page,
+      limit
+    },
+    fetchPolicy: 'network-only'
   });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -61,6 +67,20 @@ const CarpoolPostList: React.FC = () => {
     onCompleted: (data) => console.log('GET_USER completed:', data),
     onError: (error) => console.error('GET_USER error:', error)
   });
+
+  // Debounce search term to avoid too many requests
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchTerm]);
 
   // Debounce search term to avoid too many requests
   useEffect(() => {
@@ -115,6 +135,7 @@ const CarpoolPostList: React.FC = () => {
   const userInfo = userData?.getAppUserInfo || {};
 
   const transformPosts = (): CarpoolPost[] => {
+    // Check if getPosts exists and if it has the expected structure
     // Check if getPosts exists and if it has the expected structure
     if (!data?.getPosts) return [];
 
@@ -177,6 +198,31 @@ const CarpoolPostList: React.FC = () => {
     setIsViewModalOpen(true);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleLoadMore = () => {
+    // Check if we have pagination data
+    if (data?.getPosts?.currentPage) {
+      if (data.getPosts.currentPage < Math.ceil(data.getPosts.totalItems / limit)) {
+        setPage(prevPage => prevPage + 1);
+      }
+    } else {
+      // If no pagination data, just increment the page and let the backend handle it
+      setPage(prevPage => prevPage + 1);
+    }
+  };
+
+  // Handle both paginated and non-paginated responses
+  const totalPosts = data?.getPosts?.totalItems || 0;
+  const currentPostsCount = filteredPosts.length;
+  // If we have pagination data, use it; otherwise, show the load more button if we got a full page
+  const hasMorePosts = data?.getPosts?.totalItems ? 
+    currentPostsCount < totalPosts : 
+    currentPostsCount === limit;
+
+  if (loading && page === 1) return <p>Loading...</p>;
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };

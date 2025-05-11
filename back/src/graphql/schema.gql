@@ -67,7 +67,6 @@ type AppUser {
 
 type AppUserRide {
   id: Float!
-  role: Role!
   appUser: AppUser!
   ride: Ride!
 }
@@ -140,6 +139,18 @@ type AppUserSearchResult {
   currentPage: Float!
 }
 
+type PostPaginatedResponse {
+  data: [Post!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
 type UserInfo {
   id: Float!
   name: String!
@@ -181,6 +192,39 @@ type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
   user: User!
+}
+
+type Report {
+  id: Int!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type ReportPagination {
+  """Liste des rapports de la page courante"""
+  data: [Report!]!
+
+  """Nombre total d’éléments disponibles"""
+  totalItems: Int!
+
+  """Nombre total de pages"""
+  totalPages: Int!
+
+  """Page courante"""
+  currentPage: Int!
 }
 
 type Report {

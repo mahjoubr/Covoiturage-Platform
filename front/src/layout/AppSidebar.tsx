@@ -8,8 +8,10 @@ import {
   HorizontaLDots,
   UserCircleIcon,
 
+
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+
 import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
 
 
@@ -37,7 +39,7 @@ const navItems: NavItem[] = [
     path: "/profile",
   },
   {
-    icon:<OtherUsersIcon />,
+    icon:<Users />,
     name: "App Users",
     path: "/users",
   },
