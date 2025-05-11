@@ -33,9 +33,10 @@ const { loading: loadingChats, error: errorChats, data: chatsData, refetch } = u
 const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
   id: chat.id,
   messages: chat.messages ?? [],
-  driver: chat.driver,
-  rider: chat.rider,
-  ride: chat.ride,
+  driver: chat.driver ?? { id: 0, name: '', lastName: '' },
+  rider: chat.rider ?? { id: 0, name: '', lastName: '' },
+  ride: chat.ride   ?? { id: 0, startLocation: '', endLocation: '' },
+  createdAt: chat.createdAt ?? '',
 })) ?? [];
 
   if (loadingChats) return <div>Loading chats...</div>;

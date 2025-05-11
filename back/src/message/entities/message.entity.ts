@@ -4,7 +4,8 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { User } from 'src/user/entities/user.entity';
-import { F } from '@faker-js/faker/dist/airline-BUL6NtOJ';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
+
 
 @ObjectType()
 @Entity()
@@ -25,7 +26,7 @@ export class Message {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(() => User)
-  @ManyToOne(() => User)
-  sender: User;
+  @Field(() => AppUser)
+  @ManyToOne(() => AppUser)
+  sender: AppUser;
 }

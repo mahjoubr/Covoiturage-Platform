@@ -120,7 +120,7 @@ type Message {
   text: String!
   chat: Chat!
   createdAt: DateTime!
-  sender: User!
+  sender: AppUser!
 }
 
 type JwtAuthResponse {
