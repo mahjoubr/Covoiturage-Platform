@@ -28,6 +28,7 @@ export const GET_MY_REVIEWS = gql`
         stars
         comment
         date
+
         ride {
           id
           departure
@@ -41,34 +42,11 @@ export const GET_MY_REVIEWS = gql`
           lastName
           imageUrl
         }
-      }
+      
       totalItems
       totalPages
       currentPage
-  query GetMyReviews($page: Int, $limit: Int) {
-    getMyReviews(page: $page, limit: $limit) {
-      data {
-        id
-        stars
-        comment
-        date
-        ride {
-          id
-          departure
-          arrival
-          date
-          time
-        }
-        reviewedUser {
-          id
-          name
-          lastName
-          imageUrl
-        }
-      }
-      totalItems
-      totalPages
-      currentPage
+  }
     }
   }
 `;
@@ -104,21 +82,6 @@ export const GET_USER_REVIEWS = gql`
 `;
 
 
-export const GET_REVIEWS_BY_ID = gql`
-  query GetUserReviews($userId: Int!) {
-    getUserReviews(userId: $userId) {
-      id
-      stars
-      comment
-      date
-      reviewer {
-        id
-        name
-        lastName
-      }
-    }
-  }
-`;
 
 
 export const GET_PAGINATED_REVIEWS_BY_USER = gql`

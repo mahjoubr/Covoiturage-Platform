@@ -71,11 +71,6 @@ type AppUserRide {
   ride: Ride!
 }
 
-enum Role {
-  DRIVER
-  PASSENGER
-}
-
 type JoinRequest {
   id: Float!
   date: DateTime!
@@ -115,6 +110,11 @@ type AppUserWithRole {
   roleInRide: Role!
 }
 
+enum Role {
+  DRIVER
+  PASSENGER
+}
+
 type RidePaginationResult {
   data: [Ride!]!
   totalItems: Int!
@@ -125,18 +125,6 @@ type RidePaginationResult {
 type MatchingRideResult {
   ride: Ride
   postOwnerId: String
-}
-
-type PostPaginatedResponse {
-  data: [Post!]!
-  totalItems: Float!
-  currentPage: Float!
-}
-
-type AppUserSearchResult {
-  data: [AppUser!]!
-  totalItems: Float!
-  currentPage: Float!
 }
 
 type PostPaginatedResponse {
@@ -227,39 +215,6 @@ type ReportPagination {
   currentPage: Int!
 }
 
-type Report {
-  id: Int!
-  subjectType: String!
-  reporter: AppUser!
-  reportedUser: AppUser!
-  reportedRide: Ride
-  reason: String!
-  proofPath: String
-  proofUrl: String
-  status: ReportStatus!
-  createdAt: DateTime!
-}
-
-enum ReportStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-
-type ReportPagination {
-  """Liste des rapports de la page courante"""
-  data: [Report!]!
-
-  """Nombre total d’éléments disponibles"""
-  totalItems: Int!
-
-  """Nombre total de pages"""
-  totalPages: Int!
-
-  """Page courante"""
-  currentPage: Int!
-}
-
 type DashboardStatsType {
   userCount: Int!
   rideCount: Int!
@@ -286,6 +241,7 @@ type Query {
   getAppUserInfo: AppUser!
   getAppUserById(id: Int!): AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
+  getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
@@ -307,7 +263,7 @@ type Query {
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): [Review!]!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!

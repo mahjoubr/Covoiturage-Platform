@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@apollo/client';
-import { GET_REVIEWS_BY_ID } from '../../graphQl/queries/reviews';
+import { GET_USER_REVIEWS } from '../../graphQl/queries/reviews';
 import ReviewCard from './ReviewCard';
 
 interface ReviewProps {
@@ -12,13 +12,16 @@ export default function ReviewCarousel({ userId}: ReviewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsToShow = 3;
 
-  const { loading, error, data } = useQuery(GET_REVIEWS_BY_ID, {
-    variables: { userId: userId }, // Replace with the actual user ID );
+  const { loading, error, data } = useQuery(GET_USER_REVIEWS, {
+    variables: { userId: userId ,
+       page: 1,
+      limit: 6,
+    }, 
   });
   if (loading) return <p>Loading reviews...</p>;
   if (error) return <p>Error loading reviews: {error.message}</p>;
 
-  const reviews = data?.getUserReviews || [];
+  const reviews = data?.getUserReviews?.data || [];
 
   if (reviews.length === 0) {
     return (

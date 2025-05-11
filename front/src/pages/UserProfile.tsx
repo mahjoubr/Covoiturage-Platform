@@ -82,10 +82,7 @@ import UserInfo from "../components/UserProfile/UserInfo";
                           ) : (
                             <p className="text-gray-500 " >No drives</p>
                           )
-                          }
-                            {drives.map((drive, index) => (
-                          <UserDriveCard key={index} drive={drive} />
-                        ))}
+                        }
                 </div>
     
       <div className="w-1/2">

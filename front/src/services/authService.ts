@@ -30,10 +30,7 @@ export interface CurrentUser {
 }
 
 
-export async function getCurrentUser(): Promise<CurrentUser> {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user;
-}
+
 export interface CurrentUser {
   id: number;
   email: string;

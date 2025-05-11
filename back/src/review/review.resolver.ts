@@ -90,6 +90,8 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
   }
+
+  
   @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
   async getMyReviews(
     @CurrentUser() user: AppUser,
@@ -142,4 +144,5 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findByReviewedUserId(userId, page, limit);
   }
+  
 }

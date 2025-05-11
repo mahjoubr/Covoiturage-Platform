@@ -77,34 +77,6 @@ export const useRidesPaginatedByDriver = (page: number, limit: number,id?: numbe
   };
 
 
-  export const useRidesByUser = async () => {
-    try {
-      console.log("Fetching rides by user...");
-      const { loading, error, data } = await client.query({
-        query: GET_Rides_BY_USER,
-        fetchPolicy: 'network-only',
-      });
-      console.log("Rides by user fetched successfully:", data);
-      return { 
-        loading, 
-        error, 
-        data, 
-        refetch: () => client.query({ query: GET_Rides_BY_USER }) 
-      };
-    } catch (error) {
-      return { 
-        loading: false, 
-        error, 
-        data: null, 
-        refetch: () => client.query({ query: GET_Rides_BY_USER }) 
-      };
-    }
-
-
-
-
-    
-  };
 
 
 
@@ -117,16 +89,4 @@ export const useRidesPaginatedByDriver = (page: number, limit: number,id?: numbe
     roleInRide: string;
   }
   
-  export const getRideUsers = async (rideId: number): Promise<RideUser[]> => {
-    try {
-      const { data } = await client.query({
-        query: GET_RIDE_USERS,
-        variables: { rideId }
-      });
-  
-      return data.getUsersForRide;
-    } catch (error) {
-      console.error('Error fetching ride users:', error);
-      return [];
-    }
-  };
+ 

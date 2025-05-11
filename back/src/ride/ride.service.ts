@@ -143,31 +143,6 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   }
 
 
-
-
-
-  async findCommonRides(userId1: number, userId2: number): Promise<Ride[]> {
-    return this.rideRepo
-        .createQueryBuilder('ride')
-        .leftJoin('ride.appUserRides', 'aur1')
-        .leftJoin('ride.appUserRides', 'aur2')
-        .leftJoin('aur1.appUser', 'user1')
-        .leftJoin('aur2.appUser', 'user2')
-        .where(
-            `(aur1.role = 'passenger' AND user1.id = :userId1) OR (ride.driverId = :userId1)`,
-            { userId1 }
-        )
-        .andWhere(
-            `(aur2.role = 'passenger' AND user2.id = :userId2) OR (ride.driverId = :userId2)`,
-            { userId2 }
-        )
-        .getMany();
-  }
-
-
-
-
-
   async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
     const result = await this.rideRepo
         .createQueryBuilder('ride')

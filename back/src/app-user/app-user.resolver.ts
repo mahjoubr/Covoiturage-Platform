@@ -8,9 +8,6 @@ import { GqlAuthGuard } from '../auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { UploadPhotoInput } from './dto/update-photo.input';
 
-import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
-import { SearchResult } from 'src/services/searchService';
-import { AppUserSearchResult } from 'src/graphql/types/AppUserSearchResult';
 
 
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';

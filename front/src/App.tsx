@@ -13,7 +13,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar/calendar";
-import Calendar from "./pages/Calendar/calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -34,6 +33,7 @@ import NotificationPage from "./pages/Notification/NotificationPage";
 import UserProfile from "./pages/UserProfile";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
+import UsersPage from "./pages/Users/UsersPage.tsx";
 
 export default function App() {
   return (
