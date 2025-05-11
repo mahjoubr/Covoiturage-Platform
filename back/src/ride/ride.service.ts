@@ -10,7 +10,6 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
-import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 
 
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
