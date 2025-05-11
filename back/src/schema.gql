@@ -26,7 +26,7 @@ type Post {
   id: ID!
   destination: String!
   departure: String!
-  date: String!
+  date: DateTime!
   time: String!
   seatCount: Int!
   frequency: String!
@@ -36,14 +36,14 @@ type Post {
   comments: [Comment!]
   postOwner: AppUser!
   listRide: [Ride!]
-  status: String
+  chatId: Int
 }
 
 type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: String!
+  date: DateTime!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -58,7 +58,7 @@ type AppUser {
   lastName: String!
   dateOfBirth: String
   phoneNumber: String
-  imageUrl: String
+  imageUrl: String!
   posts: [Post!]!
   reviews: [Review!]!
   rating: Float!
@@ -67,8 +67,15 @@ type AppUser {
 
 type AppUserRide {
   id: Float!
+  role: Role!
   appUser: AppUser!
   ride: Ride!
+}
+
+"""The role of the user in the ride"""
+enum Role {
+  DRIVER
+  PASSENGER
 }
 
 type JoinRequest {
@@ -80,7 +87,7 @@ type JoinRequest {
 
 type Ride {
   id: Float!
-  date: String!
+  date: DateTime!
   time: String!
   departure: String!
   arrival: String!
@@ -93,28 +100,6 @@ type Ride {
   joinRequests: [JoinRequest!]
 }
 
-type AppUserWithRole {
-  id: Float!
-  email: String!
-  password: String!
-  role: String!
-  name: String!
-  lastName: String!
-  dateOfBirth: String
-  phoneNumber: String
-  imageUrl: String
-  posts: [Post!]!
-  reviews: [Review!]!
-  rating: Float!
-  appUserRides: [AppUserRide!]!
-  roleInRide: Role!
-}
-
-enum Role {
-  DRIVER
-  PASSENGER
-}
-
 type RidePaginationResult {
   data: [Ride!]!
   totalItems: Int!
@@ -122,51 +107,20 @@ type RidePaginationResult {
   currentPage: Int!
 }
 
-type MatchingRideResult {
-  ride: Ride
-  postOwnerId: String
-}
-
-type PostPaginatedResponse {
-  data: [Post!]!
-  totalItems: Float!
-  currentPage: Float!
-}
-
-type AppUserSearchResult {
-  data: [AppUser!]!
-  totalItems: Float!
-  currentPage: Float!
-}
-
-type UserInfo {
+type Chat {
   id: Float!
-  name: String!
-  lastName: String!
-  rating: Float!
-  phoneNumber: String!
-  imageUrl: String!
+  messages: [Message!]!
+  driver: AppUser!
+  rider: AppUser!
+  ride: Ride!
 }
 
-type RideDetails {
-  id: Float!
-  departure: String!
-  date: String!
-  arrival: String!
-  price: Float!
-  time: String!
-}
-
-type ReviewFormData {
-  reviewedUser: UserInfo!
-  ride: RideDetails!
-}
-
-type PaginatedReviewsResponse {
-  data: [Review!]!
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+type Message {
+  id: Int!
+  text: String!
+  chat: Chat!
+  createdAt: DateTime!
+  sender: AppUser!
 }
 
 type JwtAuthResponse {
@@ -175,90 +129,38 @@ type JwtAuthResponse {
   user: User!
 }
 
-type Report {
-  id: Int!
-  subjectType: String!
-  reporter: AppUser!
-  reportedUser: AppUser!
-  reportedRide: Ride
-  reason: String!
-  proofPath: String
-  proofUrl: String
-  status: ReportStatus!
-  createdAt: DateTime!
-}
-
-enum ReportStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-
-type ReportPagination {
-  """Liste des rapports de la page courante"""
-  data: [Report!]!
-
-  """Nombre total d’éléments disponibles"""
-  totalItems: Int!
-
-  """Nombre total de pages"""
-  totalPages: Int!
-
-  """Page courante"""
-  currentPage: Int!
-}
-
-type DashboardStatsType {
-  userCount: Int!
-  rideCount: Int!
-  postCount: Int!
-  reviewCount: Int!
-  reportCount: Int!
-  commentCount: Int!
-}
-
-type RidesPerMonth {
-  month: String!
-  count: Int!
-}
-
-type DashboardData {
-  stats: DashboardStatsType!
-  ridesPerMonth: [RidesPerMonth!]!
-  recentRides: [Ride!]!
-  recentUsers: [AppUser!]!
+type Notification {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
-  getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
-  getUserById(id: Int!): AppUser
-  getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
-  getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
   getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
-  getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
-  getUsersForRide(rideId: Int!): [AppUserWithRole!]!
-  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
+  getPosts: [Post!]!
   getPostById(id: String!): Post!
-  matchingRide(postId: Int!): MatchingRideResult
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
+  matchingRide(postId: Int!): Ride
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
+  getChatMessages(chatId: Int!): [Message!]!
+  messages: [Message!]!
+  message(id: Int!): Message!
+  getChats(userId: Int!): [Chat!]!
+  getChat(chatId: Int!): Chat!
+  getChatByRideId(rideId: Int!): Chat!
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
-  getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
+  notification(id: Int!): Notification!
 }
 
 type Mutation {
@@ -270,13 +172,19 @@ type Mutation {
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
   createPost(createPostInput: CreatePostInput!): Post!
-  deletePost(id: Int!): Boolean!
-  closepost(id: Int!): Boolean!
+  deletePost(id: Float!): Boolean!
+  updatePost(id: Float!, status: String!): Post!
   createComment(input: CreateCommentInput!): Comment!
+  createMessage(createMessageInput: CreateMessageInput!): Message!
+  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
+  removeMessage(id: Int!): Boolean!
+  CreateChat(createChatInput: CreateChatInput!): Chat
+  RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
-  deleteJoinRequestById(id: Int!): Boolean!
-  acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
+  removeNotification(id: Int!): Notification!
 }
 
 input RegisterInput {
@@ -341,4 +249,34 @@ input CreatePostInput {
 input CreateCommentInput {
   text: String!
   postId: Int!
+}
+
+input CreateMessageInput {
+  text: String!
+  chatId: Int!
+  senderId: Int!
+}
+
+input UpdateMessageInput {
+  text: String
+  chatId: Int
+  senderId: Int
+  id: Int!
+}
+
+input CreateChatInput {
+  driverId: Int!
+  riderId: Int!
+  rideId: Int!
+}
+
+input CreateNotificationInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateNotificationInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
