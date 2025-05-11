@@ -1,5 +1,5 @@
 
-import { CarpoolPost,Comment } from '../types/posts.ts';
+import { CarpoolPost } from '../types/posts.ts';
 import { RidePost } from '../types';
 export const mockCarpoolPosts: CarpoolPost[] = [
   {

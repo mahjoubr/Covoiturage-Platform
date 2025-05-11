@@ -111,5 +111,12 @@ return fullJoinRequest;
       }
     });
   }
+  // join-request.service.ts
+  async deleteById(id: number): Promise<boolean> {
+    const result = await this.repo.delete(id);
+    return !!result?.affected && result.affected > 0;
+  }
+  
+
   
 }

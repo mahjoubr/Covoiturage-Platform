@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-
+/*
 export const GET_POSTS = gql`
   query {
   getPosts {
@@ -13,7 +13,9 @@ export const GET_POSTS = gql`
       description
       price
       contactInfo
+      status
       postOwner {
+        id
         name
         lastName
       }
@@ -27,7 +29,41 @@ export const GET_POSTS = gql`
       }
   }
 }
-
+`;
+*/
+export const GET_POSTS = gql`
+  query GetPosts($searchTerm: String, $page: Int, $limit: Int) {
+    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+      data {
+        id
+        destination
+        departure
+        date
+        time
+        seatCount
+        frequency
+        description
+        price
+        contactInfo
+        status
+        postOwner {
+          id
+          name
+          lastName
+        }
+        comments {
+          text
+          date
+          commenter {
+            name
+            lastName
+          }
+        }
+      }
+      totalItems
+      currentPage
+    }
+  }
 `;
 
 export const GET_POST_BY_ID = gql`
@@ -43,6 +79,7 @@ export const GET_POST_BY_ID = gql`
       description
       price
       contactInfo
+      status
       postOwner {
         id
         name
@@ -103,7 +140,10 @@ export const CREATE_COMMENT = gql`
 export const GET_RIDE = gql`
 query GetMatchingRide($postId: Int!) {
   matchingRide(postId: $postId) {
-    id
+    ride {
+      id
+    }
+    postOwnerId
   }
 }
   `;
@@ -117,3 +157,14 @@ query GetMatchingRide($postId: Int!) {
 
 
 
+export const DELETE_POST = gql`
+  mutation DeletePost($postId: Int!) {
+    deletePost(id: $postId)
+  }
+`;
+
+export const CLOSE_POST = gql`
+  mutation closepost($postId: Int!) {
+    closepost(id: $postId)
+  }
+`;

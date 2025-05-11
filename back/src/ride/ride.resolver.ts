@@ -3,7 +3,7 @@ import { Ride, RideState } from './entities/ride.entity';
 import { RideService } from './ride.service';
 import { CreateRideInput } from './dto/create-ride.input';
 import { UpdateRideInput } from './dto/update-ride.input';
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { CurrentUser } from 'src/auth/user.decorator';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
@@ -13,10 +13,18 @@ import { Post } from 'src/post/entities/post.entity';
 import { PostService } from 'src/post/post.service';
 import { PaginationResult } from 'src/services/paginationService';
 import { RidePaginationResult } from './dto/ride-pagination-result';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
+import { AppUserWithRole} from 'src/graphql/types/AppUserWithRole';
 
 @Resolver(() => Ride)
 export class RideResolver {
-  constructor(private readonly rideService: RideService,private readonly postrepo :PostService) {}
+  
+    private readonly logger = new Logger('EventEmitter');
+  constructor(private readonly rideService: RideService,private readonly postrepo :PostService,
+        private readonly subscriptionService :SubscriptionService,
+      private readonly eventStreamService:EventStreamService,
+  ) {}
 
   @Query(() => [Ride], { name: 'getAllRides' })
   async findAll(): Promise<Ride[]> {
@@ -35,6 +43,15 @@ export class RideResolver {
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
     };
   }
+
+  @Query(() => [Ride])
+  async getCommonRides(
+      @Args('userId1', { type: () => Int }) userId1: number,
+      @Args('userId2', { type: () => Int }) userId2: number,
+  ): Promise<Ride[]> {
+    return this.rideService.findCommonRides(userId1, userId2);
+  }
+
 
   @Mutation(() => Ride)
   async createRide(
@@ -81,6 +98,23 @@ export class RideResolver {
   async removeRide(@Args('id', { type: () => String }) id: String): Promise<boolean> {
     try {
       await this.rideService.remove(+id);
+        const subscribers = await this.subscriptionService.getSubscribers(+id, 'ride');
+          
+          for (const recipientId of subscribers) {
+              const event = {
+                type: EventType.RIDE_DELETE,
+                targetId: +id,
+                recipientId,
+                payload: {
+                  rideId: +id,
+                  userId: recipientId,
+                  timestamp: new Date().toISOString(),
+                },
+              };
+              this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+            this.eventStreamService.emitEvent(event);
+            this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+          }
       return true;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -88,6 +122,7 @@ export class RideResolver {
       }
       throw error;
     }
+    
   }
   
 
@@ -113,15 +148,12 @@ export class RideResolver {
       date: ride.date instanceof Date ? ride.date : new Date(ride.date)
     }));
   }
-  @Query(() => [Ride], { name: 'getRidesByDriver' })
+  
+@Query(() => [Ride], { name: 'getRidesByDriver' })
 @UseGuards(GqlAuthGuard)
 async getRidesByDriver(@CurrentUser() user: AppUser): Promise<Ride[]> {
   const rides = await this.rideService.findByDriver(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
-}
+  return rides;}
 
 @Query(() => RidePaginationResult, { name: 'getRidesPaginatedByDriver' })
 @UseGuards(GqlAuthGuard)
@@ -157,15 +189,37 @@ async getRidesPaginatedByPassenger(
   return result;
 }
 
-
+@Query(() => [Ride], { name: 'getRidesByUserId' })
+@UseGuards(GqlAuthGuard)
+async getRidesByUserId(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByUserId resolver")
+  const rides = await this.rideService.findByUserId(user.id);
+  console.log(rides)
+  return rides;
+}
+class="fc-event-title fc-sticky"
 
 @Query(() => [Ride], { name: 'getRidesByPassenger' })
 @UseGuards(GqlAuthGuard)
 async getRidesByPassenger(@CurrentUser() user: AppUser): Promise<Ride[]> {
+  console.log("inside getRidesByPassenger resolver")
+  console.log(user.id)
   const rides = await this.rideService.findByPassenger(user.id);
-  return rides.map(ride => ({
-    ...ride,
-    date: ride.date instanceof Date ? ride.date : new Date(ride.date)
-  }));
+  return rides;
+}
+
+
+@Query(() => [AppUserWithRole], { name: 'getUsersForRide' })
+async getUsersForRide(
+  @Args('rideId', { type: () => Int }) rideId: number,
+): Promise<AppUserWithRole[]> {
+  this.logger.log(`Getting users for ride: ${rideId}`);
+  try {
+    return await this.rideService.getUsersForRide(rideId);
+  } catch (error) {
+    this.logger.error(`Error getting users for ride: ${error.message}`);
+    throw error;
+  }
 }
 }
+

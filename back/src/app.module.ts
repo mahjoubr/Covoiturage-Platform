@@ -11,9 +11,8 @@ import { AppUserModule } from './app-user/app-user.module';
 import { AdminModule } from './admin/admin.module';
 import { AppUserRideModule } from './app-user-ride/app-user-ride.module';
 import { ReviewModule } from './review/review.module';
-import { User } from './user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql/graphql.module';
 import { PassportModule } from '@nestjs/passport';
@@ -25,13 +24,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import {EventStreamModule } from './SSE/sse.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { JoinRequestModule } from './join-request/join-request.module';
+import {ReportModule} from "src/report/report.module";
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ChatGateway } from './chat/chat.gateway';
 import { NotificationModule } from './notification/notification.module';
 
 @Module({
-      
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -41,9 +40,10 @@ import { NotificationModule } from './notification/notification.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     ServeStaticModule.forRoot({
-      rootPath: path.join(process.cwd(), 'uploads'), 
-      serveRoot: '/uploads',  
+      rootPath: path.join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
     }),
     ScheduleModule.forRoot(),
     
@@ -51,7 +51,6 @@ import { NotificationModule } from './notification/notification.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-       
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
@@ -66,8 +65,23 @@ import { NotificationModule } from './notification/notification.module';
         };
       },
     }),
-     AuthModule,
-     GraphQLModule.forRoot<ApolloDriverConfig>({
+      AuthModule,
+      
+      RideModule,
+      PostModule,
+      CommentModule,
+      MessageModule,
+      ChatModule,
+      ReviewModule,
+      UserModule,
+      AppUserModule,
+      AdminModule,
+      AppUserRideModule,
+      EventStreamModule,
+      SubscriptionModule,
+      JoinRequestModule,
+      ReportModule,
+      GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
       installSubscriptionHandlers: true,
@@ -77,7 +91,12 @@ import { NotificationModule } from './notification/notification.module';
       },*/
     }),
         
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule, NotificationModule],
+      RideModule, PostModule, 
+      CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, 
+      ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule, NotificationModule],
+  
+     
+     
         controllers: [AppController],
         providers: [AppService, JwtStrategy,ChatGateway],
 })

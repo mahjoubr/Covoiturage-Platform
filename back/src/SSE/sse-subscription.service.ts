@@ -1,11 +1,16 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { ReviewPayload } from './ReviewPayload';
 
 export enum EventType{
   POST_UPDATED='update_post',
   NEW_COMMENT= 'new_comment',
-  JOIN_REQUEST= 'join_request'
+  JOIN_REQUEST= 'join_request',
+  JOIN_ACCEPT= 'join_accepted',
+  RIDE_DELETE='ride_deleted',
+  RIDE_START='ride_started',
+  REVIEW_ADDED='review_added',
 }
 
 export interface StreamEvent {
@@ -69,4 +74,19 @@ export class EventStreamService implements OnModuleInit {
   getActiveRecipients(): number[] {
     return Array.from(this.activeConnections.keys());
   }
+
+
+  emitReviewEvent(
+    targetId: number,
+    payload: ReviewPayload
+  ): void {
+    this.emitEvent({
+      type: EventType.REVIEW_ADDED,
+      targetId,
+      recipientId: targetId,  // Recipient is the user being reviewed
+      payload
+    });
+  }
+  
+  
 }

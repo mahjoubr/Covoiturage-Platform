@@ -1,0 +1,79 @@
+import { gql } from "@apollo/client";
+
+export const GET_REVIEW_FORM_DATA = gql`
+  query GetReviewFormData($rideId: Int!, $reviewedUserId: Int!) {
+    reviewFormData(rideId: $rideId, reviewedUserId: $reviewedUserId) {
+      reviewedUser {
+        id
+        name
+        imageUrl
+      }
+      ride {
+        id
+        departure
+        date
+        arrival
+        price
+        time
+      }
+    }
+  }
+`;
+
+export const GET_MY_REVIEWS = gql`
+  query GetMyReviews($page: Int, $limit: Int) {
+    getMyReviews(page: $page, limit: $limit) {
+      data {
+        id
+        stars
+        comment
+        date
+        ride {
+          id
+          departure
+          arrival
+          date
+          time
+        }
+        reviewedUser {
+          id
+          name
+          lastName
+          imageUrl
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
+    }
+  }
+`;
+
+export const GET_USER_REVIEWS = gql`
+  query GetUserReviews($userId: Int!, $page: Int, $limit: Int) {
+    getUserReviews(userId: $userId, page: $page, limit: $limit) {
+      data {
+        id
+        stars
+        comment
+        date
+        ride {
+          id
+          departure
+          arrival
+          date
+          time
+        }
+        reviewer {
+          id
+          name
+          lastName
+          imageUrl
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
+    }
+  }
+`;

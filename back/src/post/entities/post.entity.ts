@@ -6,6 +6,10 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne 
 import { JoinRequest } from 'src/join-request/entities/join-request.entity';
 import { C } from 'graphql-ws/dist/common-DY-PBNYy';
 
+export enum PostStatus{
+  OPEN='open',
+  CLOSED='closed'
+}
 @ObjectType()
 @Entity()
 export class Post {
@@ -21,7 +25,7 @@ export class Post {
   @Column({ type: 'varchar' })
   departure: string;
 
-  @Field(() => GraphQLISODateTime) 
+  @Field(() => String) 
   @Column({ type: 'date' })
   date: Date;
 
@@ -61,8 +65,9 @@ export class Post {
   @OneToMany(() => Ride, ride => ride.post)
   listRide: Ride[];
 
+  @Field({ nullable: true })
   @Column({ default: 'OPEN' })
-  status: string;
+  status: PostStatus;
 
   @Column({ nullable: true })
   @Field(() => Int, { nullable: true })

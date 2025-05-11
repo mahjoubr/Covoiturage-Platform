@@ -5,7 +5,7 @@ import { CarpoolPost, Ride, RideState } from '../../types/posts';
 import ViewPostModal from '../posts/ViewPostModal';
 import { useLazyQuery, useQuery } from '@apollo/client';
 import { GET_RIDES_BY_DRIVER, GET_RIDES_BY_PASSENGER, GET_USER } from '../../graphQl/queries/rides';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GET_POST_BY_ID } from '../../graphQl/queries/posts';
 
 interface CarpoolRideListProps {
@@ -16,6 +16,7 @@ type FilterType = 'yourRides' | 'ridesTaken' | null;
 
 const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
   const [rides, setRides] = useState<Ride[]>([]);
   const [selectedPost, setSelectedPost] = useState<CarpoolPost | null>(null);
@@ -26,27 +27,39 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
   const isLoggedIn = !!token;
 
   // Fetch user data only if logged in
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
+  const { data: userData, loading: userLoading, error: userError, refetch: refetchUser } = useQuery(GET_USER, {
     skip: !isLoggedIn,
     fetchPolicy: 'network-only',
     onCompleted: (data) => console.log('GET_USER completed:', data),
     onError: (error) => console.error('GET_USER error:', error),
   });
-
-  const { data: driverRidesData, loading: driverLoading } = useQuery(GET_RIDES_BY_DRIVER, {
+  const userInfo = userData?.getAppUserInfo || {};
+  
+  const { 
+    data: driverRidesData, 
+    loading: driverLoading, 
+    refetch: refetchDriverRides 
+  } = useQuery(GET_RIDES_BY_DRIVER, {
     skip: !isLoggedIn || !userData,
+    fetchPolicy: 'network-only', // Always fetch from network
     onCompleted: (data) => console.log('GET_RIDES_BY_DRIVER completed:', data),
     onError: (error) => console.error('GET_RIDES_BY_DRIVER error:', error),
   });
   
-  const { data: passengerRidesData, loading: passengerLoading } = useQuery(GET_RIDES_BY_PASSENGER, {
+  const { 
+    data: passengerRidesData, 
+    loading: passengerLoading,
+    refetch: refetchPassengerRides 
+  } = useQuery(GET_RIDES_BY_PASSENGER, {
     skip: !isLoggedIn || !userData,
+    fetchPolicy: 'network-only', // Always fetch from network
     onCompleted: (data) => console.log('GET_RIDES_BY_PASSENGER completed:', data),
     onError: (error) => console.error('GET_RIDES_BY_PASSENGER error:', error),
   });
 
   // Use a separate lazy query for getting post details
   const [getPost, { loading: postLoading }] = useLazyQuery(GET_POST_BY_ID, {
+    fetchPolicy: 'network-only',
     onCompleted: (data) => {
       // Only process the data when the query actually completes
       if (data && data.getPostById) {
@@ -67,6 +80,8 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
               ? `${post.postOwner.name} ${post.postOwner.lastName}`
               : "Unknown",
           comments: post.comments ?? [],
+          postOwnerId:post.postOwner.id,
+          status:post.status,
         };
         setSelectedPost(formattedPost);
         setIsViewModalOpen(true);
@@ -77,6 +92,18 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
       // You might want to show an error message to the user here
     }
   });
+
+  // This effect will run whenever the route/location changes
+  useEffect(() => {
+    // If logged in and the component is mounted/remounted or location changes, refetch all data
+    if (isLoggedIn) {
+      console.log('Location changed or component mounted, refetching data...');
+      refetchUser().then(() => {
+        refetchDriverRides();
+        refetchPassengerRides();
+      });
+    }
+  }, [location.pathname, isLoggedIn]);
 
   useEffect(() => {
     if (!driverRidesData && !passengerRidesData) return;
@@ -125,6 +152,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
   
     setRides(formattedRides);
   }, [driverRidesData, passengerRidesData]);
+
   
   const filteredRides = useMemo(() => {
     if (!activeFilter) return rides;
@@ -138,8 +166,21 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
   };
 
   const handleViewPost = (postId: string) => {
-    // Just initiate the query and let the onCompleted handler do the rest
+    if (!postId) {
+      console.error("Invalid postId:", postId);
+      return;
+    }
     getPost({ variables: { id: postId } });
+  };
+  
+  // Function to manually trigger a refetch
+  const refreshAllData = () => {
+    if (isLoggedIn) {
+      refetchUser().then(() => {
+        refetchDriverRides();
+        refetchPassengerRides();
+      });
+    }
   };
 
   // Loading state for user not logged in
@@ -176,6 +217,12 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
       <div className="w-full px-4 md:px-8 lg:px-12 bg-gray-50 dark:bg-gray-900 py-8">
         <div className="max-w-7xl mx-auto text-center py-12">
           <p className="text-red-500 dark:text-red-400">Error loading user data: {userError.message}</p>
+          <button
+            onClick={refreshAllData}
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -184,12 +231,20 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
   return (
     <div className="w-full px-4 md:px-8 lg:px-12 bg-gray-50 dark:bg-gray-900 pt-8 py-8">
       <div className="max-w-7xl mx-auto py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white/90 mb-4">Carpool Rides</h2>
-          <div className="flex space-x-3 mb-6">
-            <FilterButton label="Your Rides" isActive={activeFilter === 'yourRides'} onClick={() => toggleFilter('yourRides')} />
-            <FilterButton label="Rides You Took" isActive={activeFilter === 'ridesTaken'} onClick={() => toggleFilter('ridesTaken')} />
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white/90 mb-4">Carpool Rides</h2>
+            <div className="flex space-x-3 mb-6">
+              <FilterButton label="Your Rides" isActive={activeFilter === 'yourRides'} onClick={() => toggleFilter('yourRides')} />
+              <FilterButton label="Rides You Took" isActive={activeFilter === 'ridesTaken'} onClick={() => toggleFilter('ridesTaken')} />
+            </div>
           </div>
+          <button
+            onClick={refreshAllData}
+            className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100 px-4 py-2 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+          >
+            Refresh
+          </button>
         </div>
 
         {filteredRides.length === 0 ? (
@@ -204,18 +259,20 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {filteredRides.map((ride) => (
-              <RideCard 
-                key={ride.id} 
-                ride={ride} 
-                onView={() => handleViewPost(String(ride.post))} 
-              />
-            ))}
+           {filteredRides.map((ride) => (
+  <div key={ride.id} className="relative">
+    <RideCard 
+      ride={ride} 
+      onView={() => handleViewPost(String(ride.post))} 
+      userData={userInfo}
+    />
+   
+  </div>
+))}
           </div>
         )}
       </div>
 
-      {/* Add a loading indicator when fetching post details */}
       {postLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
@@ -228,6 +285,7 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
         isOpen={isViewModalOpen} 
         onClose={() => setIsViewModalOpen(false)} 
         post={selectedPost} 
+        userData={userInfo}
       />
     </div>
   );

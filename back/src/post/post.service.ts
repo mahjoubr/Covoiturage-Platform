@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Post } from './entities/post.entity';
+import { Post, PostStatus } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { GenericService } from '../services/genericService';
 import { CreatePostInput } from './dto/post-graphql.dto';
 import { Ride, RideState } from 'src/ride/entities/ride.entity';
@@ -9,6 +9,7 @@ import { AppUserService } from 'src/app-user/app-user.service';
 import { CreateRideInput } from 'src/ride/dto/create-ride.input';
 import { RideService } from 'src/ride/ride.service';
 import { SubscriptionService } from 'src/subscription/subscription.service';
+import { SearchService } from 'src/services/searchService';
 
 @Injectable()
 export class PostService extends GenericService {
@@ -17,8 +18,14 @@ export class PostService extends GenericService {
     @InjectRepository(Ride) private rideRepo: Repository<Ride>,
     private readonly userService: AppUserService,
     private readonly subscriptionService : SubscriptionService,
-    private readonly rideService: RideService) {
+    private readonly rideService: RideService,
+    private readonly searchService: SearchService,) {
     super(postRepo);
+  }
+
+
+  getPostsQueryBuilder(): SelectQueryBuilder<Post> {
+    return this.postRepo.createQueryBuilder('post');
   }
   async create(createPostInput: CreatePostInput): Promise<Post> {
     const { postOwnerId, listRide, ...rest } = createPostInput;
@@ -41,27 +48,24 @@ export class PostService extends GenericService {
     
     const savedPost = await this.postRepo.save(post);
 
-    // Create initial ride for this post
     const rideInput: CreateRideInput = {
       date: createPostInput.date,
       time: createPostInput.time,
       departure: createPostInput.departure,
       arrival: createPostInput.destination,
-      price: createPostInput.price ?? 0, // fallback if price is undefined
+      price: createPostInput.price ?? 0, 
       nbPassengers: createPostInput.seatCount,
       state: RideState.NOT_STARTED,
     };
   
-    // Create ride using rideService
     await this.rideService.createRide(rideInput, savedPost);
 
-    //HERE
+
     await this.subscriptionService.subscribe(
       postOwnerId,
       post.id,
-      'post' // Entity type
+      'post' 
     );
-    //ENDS HERE
     return savedPost;
 
   }
@@ -77,6 +81,47 @@ export class PostService extends GenericService {
   .getMany();
 
   }
+
+
+  async findAllWithSearch(
+    searchTerm?: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{ data: Post[]; totalItems: number; currentPage: number }> {
+    const queryBuilder = this.postRepo.createQueryBuilder('post')
+      .leftJoinAndSelect('post.postOwner', 'postOwner')
+      .leftJoinAndSelect('post.listRide', 'listRide')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('comments.commenter', 'commenter')
+      .where('post.status != :status', { status: PostStatus.CLOSED })
+
+    const fieldsToSearch = ['post.destination', 'post.departure', 'post.date', 'post.time'];
+
+    if (searchTerm) {
+      return await this.searchService.searchQuery<Post>(
+        queryBuilder,
+        searchTerm,
+        fieldsToSearch,
+        page,
+        limit,
+      );
+    }
+
+    const [data, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      totalItems: total,
+      currentPage: page,
+    };
+  }
+
+
+
+
   async findOne(id: number): Promise<Post> {
     const post = await this.postRepo.createQueryBuilder('post')
       .leftJoinAndSelect('post.listRide', 'listRide')
@@ -92,6 +137,73 @@ export class PostService extends GenericService {
   
     return post;
   }
+
+
+  async close(id: number): Promise<Post> {
+    const post = await this.postRepo.findOne({ where: { id } });
+  
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+  
+    post.status = PostStatus.CLOSED;
+  
+    return await this.postRepo.save(post);
+  }
+
+  async findMatchingRideAndOwner(postId: number): Promise<{ ride: Ride | null; postOwnerId: number | null }> {
+    const post = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide', 'postOwner'],
+    });
+  
+    if (!post) return { ride: null, postOwnerId: null };
+  
+    const matchingRide = post.listRide.find((ride) => ride.state === RideState.NOT_STARTED);
+  
+    return {
+      ride: matchingRide ?? null,
+      postOwnerId: post.postOwner?.id ?? null,
+    };
+  }
+  async remove(postId: number): Promise<void> {
+    const post = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide'],
+    });
+  
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    
+  
+    const matchingRide = post?.listRide[post.listRide.length - 1] ?? null;
+  
+    if (matchingRide) {
+      await this.rideRepo.delete(matchingRide.id);
+    }
+  
+    const updatedPost = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['listRide'],
+    });
+  
+    if (!updatedPost || updatedPost.listRide.length === 0) {
+      await this.postRepo.delete(postId);
+    } else {
+      
+      const nextRide = updatedPost?.listRide[updatedPost.listRide.length - 1] ?? null;
+      
+  
+      if (nextRide) {
+        updatedPost.date = nextRide.date;
+        updatedPost.time = nextRide.time;
+        updatedPost.status=PostStatus.CLOSED;
+        await this.postRepo.save(updatedPost);
+      }
+    }
+  }
+ 
   
   
 }
