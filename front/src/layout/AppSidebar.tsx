@@ -7,7 +7,6 @@ import {
   GridIcon,
   HorizontaLDots,
   UserCircleIcon,
-    OtherUsersIcon,
 
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -38,7 +37,7 @@ const navItems: NavItem[] = [
     path: "/profile",
   },
   {
-    icon:<OtherUsersIcon />,
+    icon: <Users/>,
     name: "App Users",
     path: "/users",
   },
@@ -62,11 +61,7 @@ const navItems: NavItem[] = [
     name: "Reviews",
     path: "/reviews",
   },
-  {
-    icon: <Users/>,
-    name: "App Users",
-    path: "/users",
-  },
+
   {
     icon:<ChatIcon />,
     name: "Chat",

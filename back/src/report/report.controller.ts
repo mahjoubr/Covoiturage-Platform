@@ -4,7 +4,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Body,
-  BadRequestException, Put, Param, ParseIntPipe, Query,
+  BadRequestException, Put, Param, ParseIntPipe, Query, UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -13,8 +13,10 @@ import { Express } from 'express';
 
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
+import {GqlAuthGuard} from "src/auth/guards/auth.Guard";
 
 @Controller('reports')
+@UseGuards(GqlAuthGuard)
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
@@ -30,6 +32,7 @@ export class ReportController {
         }),
       }),
   )
+  @UseGuards(GqlAuthGuard)
   async createReport(
       @UploadedFile() file: Express.Multer.File,
       @Body() createReportDto: CreateReportDto,
@@ -38,6 +41,8 @@ export class ReportController {
 
     return this.reportService.createReport(createReportDto, proofPath);
   }
+  @UseGuards(GqlAuthGuard)
+
   @Put(':id')
   async handleAction(
       @Param('id', ParseIntPipe) id: number,

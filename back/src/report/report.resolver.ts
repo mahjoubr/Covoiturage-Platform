@@ -1,4 +1,3 @@
-// src/report/report.resolver.ts
 
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { ReportService } from './report.service';
@@ -22,12 +21,11 @@ export class ReportResolver {
     async getMyReports(
         @CurrentUser() user: AppUser,
         @Args('page',  { type: () => Int, defaultValue: 1 }) page: number,
-        @Args('limit', { type: () => Int, defaultValue: 3 }) limit: number,
+        @Args('limit', { type: () => Int, defaultValue:  6}) limit: number,
         @Args('search', { type: () => String, nullable: true }) search?: string,
         @Args('status', { type: () => String, nullable: true }) status?: string,
     ): Promise<ReportPagination> {
 
-        // 1) Construction du QueryBuilder de base
         const qb: SelectQueryBuilder<Report> = this.reportService
             .createQueryBuilder('report')
             .leftJoinAndSelect('report.reporter', 'reporter')
@@ -41,28 +39,23 @@ export class ReportResolver {
                 { userId: user.id }
             );
 
-        // 2) Filtre par statut, s’il est fourni
         if (status) {
             qb.andWhere('report.status = :status', { status });
         }
 
-        // 3) Filtre de recherche, s’il est fourni
         if (search) {
             qb.andWhere(new Brackets(qb1 => {
-                // Ici, on utilise LIKE (MySQL) et LOWER(...) pour la casse insensible
                 qb1
                     .where('LOWER(report.subjectType) LIKE LOWER(:s)', { s: `%${search}%` })
                     .orWhere('LOWER(report.reason)      LIKE LOWER(:s)', { s: `%${search}%` });
             }));
         }
 
-        // 4) Pagination
         const [data, totalItems] = await qb
             .skip((page - 1) * limit)
             .take(limit)
             .getManyAndCount();
 
-        // 5) Retourne le format paginé attendu
         return {
             data,
             totalItems,

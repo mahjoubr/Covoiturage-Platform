@@ -3,6 +3,7 @@ import { useState } from "react";
 import { GET_USERS } from "../../graphQl/queries/users";
 import { Flag } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import {getCurrentUserId} from "../../services/authService.ts";
 
 
   
@@ -16,9 +17,18 @@ const navigate = useNavigate();
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
-  const handleReportUser = (userId: number) => {
+  const handleReportUser = async (userId: number) => {
+    const currentUserId = await getCurrentUserId();
+
+    if (userId === currentUserId) {
+
+      alert("You can not report yourself !! ");
+      return;
+    }
+
     navigate('/report', {state: {reportedUserId: userId}});
   };
+
   // Subtle card accent colors
   const cardAccents = [
     "border-blue-400",

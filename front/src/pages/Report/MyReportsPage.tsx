@@ -17,7 +17,7 @@ const MyReportsPage: React.FC = () => {
     const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const limit = 3;
+    const limit = 6;
 
     // Debounce search input
     useEffect(() => {

@@ -72,6 +72,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
             });
 
             navigate('/users')
+            alert('Your report has been submitted successfully.');
         } catch (err) {
             console.error(err);
             setSubjectType(ReportSubjectType.BEHAVIOR);
