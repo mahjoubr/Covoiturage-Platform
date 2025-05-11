@@ -128,13 +128,11 @@ type MatchingRideResult {
   postOwnerId: String
 }
 
-
 type PostPaginatedResponse {
   data: [Post!]!
   totalItems: Float!
   currentPage: Float!
 }
-
 
 type AppUserSearchResult {
   data: [AppUser!]!
@@ -166,6 +164,13 @@ type ReviewFormData {
 }
 
 type ReviewPaginationResult {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
+type PaginatedReviewsResponse {
   data: [Review!]!
   totalItems: Int!
   totalPages: Int!
@@ -237,21 +242,15 @@ type Query {
   getAppUserInfo: AppUser!
   getAppUserById(id: Int!): AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
-  getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
-
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
-  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
-  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
+  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
@@ -259,15 +258,12 @@ type Query {
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   getAllReviews: [Review!]!
-  getMyReviews: [Review!]!
   getAverageRating: Int!
   getAverageRatingById(id: Int!): Int!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
-  getUserReviews(userId: Int!): [Review!]!
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
+  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): [Review!]!
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!

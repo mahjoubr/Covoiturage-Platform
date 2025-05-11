@@ -42,7 +42,8 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile" element={<EditProfile />} />
             <Route path="/notifications" element={<NotificationPage />} />
-            <Route path="/profile/:id" element={ <UserProfile />  } />            <Route path={"/report"} element={<ReportPage />} />
+            <Route path="/profile/:id" element={ <UserProfile />  } />            
+            <Route path={"/report"} element={<ReportPage />} />
             <Route path={"/myReports"} element={<MyReportsPage />} />
 
             <Route path="/calendar" element={<Calendar />} />

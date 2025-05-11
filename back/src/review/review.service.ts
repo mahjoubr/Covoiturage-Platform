@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Repository } from 'typeorm';
 import { PaginationResult, PaginationService } from 'src/services/paginationService';
-import { PaginationResult, PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { EventStreamService } from 'src/SSE/sse-subscription.service';
@@ -158,7 +157,7 @@ export class ReviewService extends GenericService {
       async findByReviewerIdAndRideId (reviewerId: number, rideId: number) {  
         return this.reviewRepository.find({ where: { reviewer: { id: reviewerId }, ride: { id: rideId } } });
       }
-      async findByReviewedUserId (reviewedUserId: number) {
+      async findByReviewedAppUserId (reviewedUserId: number) {
         return this.reviewRepository.find({ where: { reviewedUser: { id: reviewedUserId } },
           relations: ['reviewer'],  });
       }

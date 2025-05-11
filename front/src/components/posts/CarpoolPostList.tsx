@@ -204,19 +204,24 @@ const CarpoolPostList: React.FC = () => {
   if (loading && page === 1) return <p>Loading...</p>;
   if (error) return (
       <div className="w-full px-4 md:px-8 lg:px-12 bg-gray-50 dark:bg-gray-900 pt-2 pb-8 mt-2">
-        <div className="max-w-7xl mx-auto text-center py-12">
+      {error && (
+        <div className="text-center py-12">
           <p className="text-red-500 dark:text-red-400">Error loading posts: {error.message}</p>
           <button
-              onClick={refreshAllData}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            onClick={() => {
+              if (isLoggedIn) {
+                refetchUser().then(() => refetchPosts());
+              } else {
+                refetchPosts();
+              }
+            }}
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
             Retry
           </button>
         </div>
-      </div>
+      )}
 
-
-      {/* Search input */}
       <div className="mb-6">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -232,119 +237,70 @@ const CarpoolPostList: React.FC = () => {
         </div>
       </div>
 
-      <PostFilter 
-        activeFilter={filter} 
-        onFilterChange={setFilter} 
-        isLoggedIn={isLoggedIn}
-      />
-      
+      <PostFilter activeFilter={filter} onFilterChange={setFilter} isLoggedIn={isLoggedIn} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-start w-full">
         {filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
-            <CarpoolPostItem 
-              key={post.id} 
-              post={post} 
+            <CarpoolPostItem
+              key={post.id}
+              post={post}
               onClick={handlePostClick}
               userData={userInfo}
             />
           ))
         ) : (
           <div className="col-span-full text-left py-4 text-gray-500 pl-1">
-            {debouncedSearchTerm ? 
-              `No results found for "${debouncedSearchTerm}"` : 
-              filter === 'my' ? 
-                "You haven't created any carpool posts yet." : 
-                "No carpool posts available."
-            }
-
+            {debouncedSearchTerm
+              ? `No results found for "${debouncedSearchTerm}"`
+              : filter === 'my'
+              ? "You haven't created any carpool posts yet."
+              : "No carpool posts available."}
           </div>
-        </div>
-        <PostFilter
-            activeFilter={filter}
-            onFilterChange={setFilter}
-            isLoggedIn={isLoggedIn}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-start w-full">
-          {filteredPosts.length > 0 ? (
-              filteredPosts.map(post => (
-                  <CarpoolPostItem
-                      key={post.id}
-                      post={post}
-                      onClick={handlePostClick}
-                      userData={userInfo}
-                  />
-              ))
-          ) : (
-              <div className="col-span-full text-left py-4 text-gray-500 pl-1">
-                {filter === 'my' ? "You haven't created any carpool posts yet." : "No carpool posts available."}
-              </div>
-          )}
-        </div>
-
-        <CreatePostModal
-            isOpen={isCreateModalOpen}
-            onClose={() => setIsCreateModalOpen(false)}
-            //onSubmit={handleCreatePost}
-            userData={userInfo}
-        />
-
-        <ViewPostModal
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
-            post={selectedPost}
-            userData={userInfo}
-        />
+        )}
       </div>
 
-
-      {/* Load more button */}
       {hasMorePosts && (
-  <div className="mt-6 text-center">
-    <div className="flex justify-center items-center gap-4">
-      <button
-        onClick={() => setPage(prevPage => Math.max(prevPage - 1, 1))}
-        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-        disabled={loading || page === 1}
-      >
-        &larr; Prev
-      </button>
-
-      <button
-        onClick={() => setPage(prevPage => prevPage + 1)}
-        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-        disabled={loading || page * limit >= totalPosts}
-      >
-        Next &rarr;
-      </button>
-    </div>
-  </div>
-)}
-
-
-      {/* Display information about search results */}
-      {debouncedSearchTerm && (
-        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          {data?.getPosts?.totalItems !== undefined ? 
-            `Showing ${currentPostsCount} of ${totalPosts} results for "${debouncedSearchTerm}"` :
-            `Found ${currentPostsCount} results for "${debouncedSearchTerm}"`
-          }
+        <div className="mt-6 text-center">
+          <div className="flex justify-center items-center gap-4">
+            <button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              disabled={loading || page === 1}
+            >
+              &larr; Prev
+            </button>
+            <button
+              onClick={handleLoadMore}
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              disabled={loading || page * limit >= totalPosts}
+            >
+              Next &rarr;
+            </button>
+          </div>
         </div>
       )}
-      
-      <CreatePostModal 
+
+      {debouncedSearchTerm && (
+        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          {data?.getPosts?.totalItems !== undefined
+            ? `Showing ${currentPostsCount} of ${totalPosts} results for "${debouncedSearchTerm}"`
+            : `Found ${currentPostsCount} results for "${debouncedSearchTerm}"`}
+        </div>
+      )}
+
+      <CreatePostModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        userData={userInfo} 
+        userData={userInfo}
       />
-      
-      <ViewPostModal 
+      <ViewPostModal
         isOpen={isViewModalOpen}
         onClose={() => setIsViewModalOpen(false)}
         post={selectedPost}
         userData={userInfo}
       />
     </div>
-
   );
 };
 
