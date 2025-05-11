@@ -1,5 +1,5 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import { Role } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { Role } from 'src/enums/role';
 import { AppUser } from "src/app-user/entities/app-user.entity";
 
 

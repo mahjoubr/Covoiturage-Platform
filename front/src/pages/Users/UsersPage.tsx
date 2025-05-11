@@ -17,6 +17,7 @@ const navigate = useNavigate();
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
+
   const handleReportUser = async (userId: number) => {
     const currentUserId = await getCurrentUserId();
 
@@ -28,6 +29,7 @@ const navigate = useNavigate();
 
     navigate('/report', {state: {reportedUserId: userId}});
   };
+
 
   // Subtle card accent colors
   const cardAccents = [

@@ -1,42 +1,75 @@
-// src/components/chat/ChatMessages.tsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const ChatMessages: React.FC = () => {
+interface Message {
+  id: number;
+  text: string;
+  sender: {
+    id: number;
+    name: string;
+    lastName: string;
+  };
+  chat: {
+    id: number;
+  };
+  createdAt: string;
+}
+
+interface ChatMessagesProps {
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+
+  chatId: number;
+  currentUserId: number;
+}
+
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages,setMessages, chatId, currentUserId }) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+/*  useSubscription(MESSAGE_SUBSCRIPTION, {
+    variables: { chatId },
+    onData: ({ data }) => {
+      // The messages will be updated in the parent component through Apollo cache
+      scrollToBottom();
+    },
+  });*/
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Format the date to a readable time
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
-    <div className="custom-scrollbar max-h-full flex-1 space-y-6 overflow-auto p-5 xl:space-y-8 xl:p-6">
-      {/* Received Message */}
-      <div className="max-w-[350px]">
-        <div className="flex items-start gap-4">
-          <div className="h-10 w-full max-w-10 rounded-full">
-            <img src="/images/user/user-17.jpg" alt="profile" className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
-          </div>
-
-          <div>
-            <div className="rounded-lg rounded-tl-sm bg-gray-100 px-3 py-2 dark:bg-white/5">
-              <p className="text-sm text-gray-800 dark:text-white/90">
-                I want to make an appointment tomorrow from 2:00 to 5:00pm?
-              </p>
+    <div className="flex-1 overflow-y-auto p-4">
+      {messages.map((message) => (
+        <div 
+          key={message.id}
+          className={`mb-4 flex ${message.sender.id === currentUserId ? 'justify-end' : 'justify-start'}`}
+        >
+          <div 
+            className={`max-w-[70%] rounded-lg px-4 py-2 ${
+              message.sender.id === currentUserId 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+            }`}
+          >
+            <div className="text-sm">{message.text}</div>
+            <div className="mt-1 text-xs text-right opacity-70">
+              {formatTime(message.createdAt)}
             </div>
-            <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
-              Lindsey, 2 hours ago
-            </p>
           </div>
         </div>
-      </div>
-
-      {/* Sent Message */}
-      <div className="ml-auto max-w-[350px] text-right">
-        <div className="ml-auto max-w-max rounded-lg rounded-tr-sm bg-brand-500 px-3 py-2 dark:bg-brand-500">
-          <p className="text-sm text-white dark:text-white/90">
-            If don't like something, I'll stay away from it.
-          </p>
-        </div>
-        <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
-          2 hours ago
-        </p>
-      </div>
-
-      {/* Add more messages as needed */}
+      ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

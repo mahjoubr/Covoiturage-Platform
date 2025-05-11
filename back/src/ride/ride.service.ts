@@ -12,10 +12,11 @@ import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
 
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
-import {AppUserRide, Role} from 'src/app-user-ride/entities/app-user-ride.entity';
-import { App } from 'supertest/types';
-import {CreateRideInput} from "src/ride/dto/create-ride.input";
 
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { Role } from 'src/enums/role';
+import { App } from 'supertest/types';
+import { CreateRideInput } from './dto/create-ride.input';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -202,7 +203,7 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   // Add passengers
   ride.appUserRides.forEach((appUserRide) => {
-    if (appUserRide.role === Role.PASSENGER && appUserRide.appUser) {
+    if (appUserRide.appUser) {
       users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
     }
   });

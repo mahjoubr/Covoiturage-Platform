@@ -1,12 +1,56 @@
-// src/components/chat/ChatSidebar.tsx
-import React from 'react';
+import React, { useState } from 'react';
 
-interface ChatSidebarProps {
-  isMobile: boolean;
-  setIsMobile: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import { useQuery } from '@apollo/client';
+import { GET_APPUSER_INFO } from '../../graphQl/queries/userProfile';
+import { GET_CHATS } from '../../graphQl/queries/chat';
+import { Chat, ChatSidebarProps,User ,Ride,Message} from '../../types/chat.ts';
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile }) => {
+
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile,onChatClick }) => {
+   const [page, setPage] = useState(1);
+   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+   const [limit] = useState(20);
+
+  const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  console.log("isLoggedIn", isLoggedIn);
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+  const userId = user?.id;
+  console.log("userId", userId);
+  console.log("accessToken", token);
+
+  
+const { loading: loadingChats, error: errorChats, data: chatsData, refetch } = useQuery(GET_CHATS, {
+  variables: { userId: Number(userId) },
+  skip: !isLoggedIn, // Wait until userId is available
+  fetchPolicy: "network-only",
+});
+  console.log("chatsData", chatsData);
+  console.log("loadingChats", loadingChats);
+  console.log("errorChats", errorChats);
+  
+const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
+  id: chat.id,
+  messages: chat.messages ?? [],
+  driver: chat.driver ?? { id: 0, name: '', lastName: '' },
+  rider: chat.rider ?? { id: 0, name: '', lastName: '' },
+  ride: chat.ride   ?? { id: 0, startLocation: '', endLocation: '' },
+  createdAt: chat.createdAt ?? '',
+})) ?? [];
+  
+
+  if (loadingChats) return <div>Loading chats...</div>;
+if ( errorChats) return <div>Error loading chats.</div>;
+
+ const handleChatClick = (chat : Chat) => {
+      setSelectedChat(chat);
+      // Call the parent component's onChatClick function to pass the selected chat up
+      if (onChatClick) {
+        onChatClick(chat);
+      }
+    };
   return (
     <div 
       onClick={(e) => {
@@ -88,28 +132,42 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile }) => {
         {/* Chat List Items */}
         <div className="flex max-h-full flex-col overflow-auto px-4 sm:px-5">
           <div className="custom-scrollbar max-h-full space-y-1 overflow-auto">
-            {/* Sample Chat Item - Repeat for each chat */}
-            <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-white/[0.03]">
-              <div className="relative h-12 w-full max-w-[48px] rounded-full">
-                <img src="/images/user/user-18.jpg" alt="profile" className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
-                <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-              </div>
-              <div className="w-full">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      Kaiya George
-                    </h5>
-                    <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                      Project Manager
-                    </p>
-                  </div>
-                  <span className="text-theme-xs text-gray-400"> 15 mins </span>
-                </div>
-              </div>
-            </div>
+            {chats.map((chat) => {
+  const otherUser = userId === chat.driver.id ? chat.rider : chat.driver;
+  const lastMessage = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : "No messages yet";
+  console.log("messages", chat.messages);
+  console.log("lastMessage", lastMessage);
+  console.log("otherUser", otherUser);
+
+  return (
+    <div 
+      key={chat.id} 
+      onClick={() => handleChatClick(chat)} 
+      className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-white/[0.03]"
+    >
+      <div className="relative h-12 w-full max-w-[48px] rounded-full">
+        <img src="/images/user/user-18.jpg" alt="profile" className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
+        <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+      </div>
+      <div className="w-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <h5 className="text-sm font-medium text-gray-800 dark:text-white/90">
+              {otherUser.name} {otherUser.lastName}
+            </h5>
+            <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
+              {lastMessage}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+})}
+
             
-            {/* Add more chat items here */}
+            
+            
           </div>
         </div>
       </div>
