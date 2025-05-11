@@ -3,11 +3,13 @@
 import { Module } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 
+const pubSub = new PubSub<{ messageAdded: any }>(); 
+
 @Module({
   providers: [
     {
       provide: 'PUB_SUB',
-      useValue: new PubSub(), 
+      useValue: pubSub, 
     },
   ],
   exports: ['PUB_SUB'], 

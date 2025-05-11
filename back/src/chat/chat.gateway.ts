@@ -1,49 +1,92 @@
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayConnection,
+// src/chat/chat.gateway.ts
+
+import { 
+  WebSocketGateway, 
+  WebSocketServer, 
+  SubscribeMessage, 
+  OnGatewayConnection, 
   OnGatewayDisconnect,
-  MessageBody,
   ConnectedSocket,
+  MessageBody
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { Logger, UseGuards } from '@nestjs/common';
+import { MessageService } from '../message/message.service';
+
+// This interface should match your CreateMessageDto
+interface MessagePayload {
+  text: string;
+  chatId: number;
+  senderId: number;
+}
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Set to frontend URL in production
+    origin: '*', // For production, specify your frontend URL
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
+  private logger: Logger = new Logger('ChatGateway');
+
+  constructor(private messageService: MessageService) {}
+
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('join_conversation')
+  @SubscribeMessage('joinRoom')
   handleJoinRoom(
-    @MessageBody() conversationId: string,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket, 
+    @MessageBody() chatId: number
   ) {
-    client.join(conversationId);
-    console.log(`Client ${client.id} joined room ${conversationId}`);
+    const roomName = `chat_${chatId}`;
+    client.join(roomName);
+    this.logger.log(`Client ${client.id} joined room: ${roomName}`);
+    return { event: 'joinedRoom', data: { chatId, room: roomName } };
   }
 
-  @SubscribeMessage('send_message')
-  handleMessage(
-    @MessageBody() data: { conversationId: string; sender: string; text: string },
-    @ConnectedSocket() client: Socket,
+  @SubscribeMessage('leaveRoom')
+  handleLeaveRoom(
+    @ConnectedSocket() client: Socket, 
+    @MessageBody() chatId: number
   ) {
-    client.broadcast.to(data.conversationId).emit('receive_message', data);
+    const roomName = `chat_${chatId}`;
+    client.leave(roomName);
+    this.logger.log(`Client ${client.id} left room: ${roomName}`);
+    return { event: 'leftRoom', data: { chatId, room: roomName } };
   }
 
-  @SubscribeMessage('typing')
-  handleTyping(
-    @MessageBody() data: { conversationId: string; sender: string },
-    @ConnectedSocket() client: Socket,
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(
+    @ConnectedSocket() client: Socket, 
+    @MessageBody() payload: MessagePayload
   ) {
-    client.broadcast.to(data.conversationId).emit('user_typing', data);
+    try {
+      this.logger.log(`Received message from client ${client.id}: ${JSON.stringify(payload)}`);
+      
+      // Create message in database using existing service
+      const newMessage = await this.messageService.create({
+        text: payload.text,
+        chatId: payload.chatId,
+        senderId: payload.senderId
+      });
+      
+      // Broadcast the message to all clients in the room
+      const roomName = `chat_${payload.chatId}`;
+      this.logger.log(`Broadcasting message to room: ${roomName}`);
+      this.server.to(roomName).emit('messageReceived', newMessage);
+      
+      // Confirm receipt to sender
+      return { success: true, messageId: newMessage.id };
+    } catch (error) {
+      this.logger.error(`Error creating message: ${error.message}`);
+      client.emit('error', { message: error.message });
+      return { success: false, error: error.message };
+    }
   }
 }

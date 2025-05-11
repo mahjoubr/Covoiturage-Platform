@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ChatMessages from './chatMessages';
 import ChatInput from './chatInput';
-import { useQuery } from '@apollo/client';
-import { GET_APPUSER_INFO } from '../../graphQl/queries/userProfile';
 import { useMessagesByChat } from '../../hooks/useMessagesByChat';
-import { useSubscription } from '@apollo/client';
-import { MESSAGE_SUBSCRIPTION } from '../../graphQl/queries/chat';
 import { Chat, Message } from '../../types/chat';
+import { useSocket } from '../../hooks/useSocket';
 
 interface ChatBoxProps {
   chatId: number;
@@ -15,47 +12,65 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ chatId }) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
-const [messages, setMessages] = useState<Message[]>([]);
-
-
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { socket, isConnected } = useSocket();
+  const processedIdsRef = useRef(new Set<number>());
 
   const token = localStorage.getItem('auth_token');
   const isLoggedIn = !!token;
-  console.log("isLoggedIn", isLoggedIn);
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
   const userId = user?.id;
-  console.log("userId", userId);
-  console.log("accessToken", token);
+  console.log("user", user);
 
   // Get messages for the chat
   const { loading: messagesLoading, error: messagesError, data: messagesData, refetch } = 
     useMessagesByChat(chatId, page, limit);
+    
   useEffect(() => {
     if (messagesData?.getChatMessages) {
       setMessages(messagesData.getChatMessages);
     }
   }, [messagesData]);
 
-  // Subscription to new messages
-  useSubscription(MESSAGE_SUBSCRIPTION, {
-  variables: { chatId },
-  onData: ({ data }) => {
-    console.log("🔔 Subscription received data:", data);
+  // Join the chat room when component mounts
+  useEffect(() => {
+    if (socket && isConnected && chatId) {
+      console.log(`Joining chat room: ${chatId}`);
+      socket.emit('joinRoom', chatId);
+      
+      const handleMessageReceived = (newMessage: Message) => {
+        // Check if we've already processed this message ID
+        if (processedIdsRef.current.has(newMessage.id)) {
+          console.log('Skipping duplicate message ID:', newMessage.id);
+          return;
+        }
 
-    const newMessage = data?.data?.messageAdded;
-    if (newMessage) {
-      setMessages(prev => {
-        const exists = prev.find(m => m.id === newMessage.id);
-        if (exists) return prev;
+        console.log("🔔 Socket received message:", newMessage);
+        processedIdsRef.current.add(newMessage.id);
 
-        return [...prev, newMessage];
-      });
-    } else {
-      console.warn("❌ No newMessage found in subscription payload:", data);
+        setMessages(prev => {
+          // Double-check to avoid duplicates (in case multiple components process the same event)
+          const isDuplicate = prev.some(m => m.id === newMessage.id);
+          
+          if (isDuplicate) {
+            console.log('Duplicate message detected, skipping');
+            return prev;
+          }
+
+          return [...prev, newMessage];
+        });
+      };
+    
+      socket.on('messageReceived', handleMessageReceived);
+    
+      return () => {
+        console.log(`Leaving chat room: ${chatId}`);
+        socket.emit('leaveRoom', chatId);
+        socket.off('messageReceived', handleMessageReceived);
+      };
     }
-  }
-});
+  }, [socket, isConnected, chatId]);
 
   const handleMessageSent = () => {
     refetch();
@@ -64,9 +79,6 @@ const [messages, setMessages] = useState<Message[]>([]);
   if (messagesLoading) return <p className="p-4 text-center">Loading...</p>;
   
   if (messagesError) return <p className="p-4 text-center text-red-500">Error loading messages</p>;
-
-  
-  //const messages = messagesData?.getChatMessages || [];
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:w-3/4">
@@ -79,9 +91,12 @@ const [messages, setMessages] = useState<Message[]>([]);
               alt={`${user.name}'s profile`}
               className="h-full w-full overflow-hidden rounded-full object-cover object-center" 
             />
+            
             <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
           </div>
-
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Conversation            
+          </h4>
           <h5 className="text-sm font-medium text-gray-500 dark:text-gray-400">
             {user.name} {user.lastName}
           </h5>
@@ -105,7 +120,6 @@ const [messages, setMessages] = useState<Message[]>([]);
       <ChatMessages 
         messages={messages} 
         setMessages={setMessages}
-
         chatId={chatId} 
         currentUserId={user.id} 
       />

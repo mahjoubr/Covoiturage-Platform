@@ -27,6 +27,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { JoinRequestModule } from './join-request/join-request.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
       
@@ -69,14 +70,14 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
       driver: ApolloDriver,
       autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
       installSubscriptionHandlers: true,
-      subscriptions: {
+      /*subscriptions: {
         'graphql-ws': true,
         'subscriptions-transport-ws': true
-      },
+      },*/
     }),
         
       RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule],
         controllers: [AppController],
-        providers: [AppService, JwtStrategy],
+        providers: [AppService, JwtStrategy,ChatGateway],
 })
 export class AppModule {}

@@ -26,9 +26,15 @@ import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 import NotificationPage from "./pages/Notification/NotificationPage";
+import { SocketProvider } from "./hooks/useSocket";
+import { ApolloProvider } from "@apollo/client";
+import client from './graphQl/client';
+
 
 export default function App() {
   return (
+     <ApolloProvider client={client}>
+      <SocketProvider>
     <React.Fragment>
       <Router>
         <ScrollToTop />
@@ -78,5 +84,7 @@ export default function App() {
         </Routes>
       </Router>
       </React.Fragment>
+      </SocketProvider>
+      </ApolloProvider>
         );
 }

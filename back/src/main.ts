@@ -17,7 +17,13 @@ async function bootstrap() {
     origin: 'http://localhost:5173',
     credentials: true, 
   });
+
   const { graphqlUploadExpress } = require('graphql-upload');
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
   
   app.useGlobalPipes(new ValidationPipe());
 

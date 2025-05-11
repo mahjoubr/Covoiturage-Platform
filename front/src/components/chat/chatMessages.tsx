@@ -1,6 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { useSubscription } from '@apollo/client';
-import { MESSAGE_SUBSCRIPTION } from '../../graphQl/queries/chat';
 
 interface Message {
   id: number;

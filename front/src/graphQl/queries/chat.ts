@@ -26,7 +26,7 @@ export const SEND_MESSAGE = gql`
     }
   }
 `;
-
+/*
 export const MESSAGE_SUBSCRIPTION = gql`
   subscription OnMessageAdded($chatId: Int!) {
     messageAdded(chatId: $chatId) {
@@ -40,7 +40,7 @@ export const MESSAGE_SUBSCRIPTION = gql`
     }
   }
 `;
-
+*/
 export const GET_CHATS=gql`
   query GetChats($userId: Int!) {
     getChats(userId: $userId) {

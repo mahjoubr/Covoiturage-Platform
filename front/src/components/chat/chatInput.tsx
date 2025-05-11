@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { useCreateMessage } from '../../hooks/useCreateMessage';
+import { useSocket } from '../../hooks/useSocket';
+import { useMutation } from '@apollo/client';
+
+import { SEND_MESSAGE } from '../../graphQl/queries/chat';
+
 
 interface ChatInputProps {
   chatId: number;
@@ -9,21 +14,46 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ chatId, senderId, onMessageSent }) => {
   const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  
   const { sendMessage, loading } = useCreateMessage();
+  const { socket, isConnected } = useSocket();
+
+  const [createMessage] = useMutation(SEND_MESSAGE);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim()) return;
+    if (!message.trim() || isSending) return;
+    
+    const messageData = {
+      text: message.trim(),
+      chatId,
+      senderId,
+    };
     
     try {
-      await sendMessage(message.trim(), senderId, chatId);
-      setMessage('');
-      if (onMessageSent) {
-        onMessageSent();
+      setIsSending(true);
+      
+      if (socket && isConnected) {
+        // Use socket to send message
+        socket.emit('sendMessage', messageData);
+        setMessage('');
+        if (onMessageSent) onMessageSent();
+      } else {
+        // Fallback to GraphQL if socket is not available
+        await createMessage({
+          variables: {
+            createMessageInput: messageData,
+          },
+        });
+        setMessage('');
+        if (onMessageSent) onMessageSent();
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -36,11 +66,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ chatId, senderId, onMessageSent }
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type a message..."
           className="flex-1 rounded-full border border-gray-300 bg-gray-100 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          disabled={loading}
+          disabled={loading || isSending}
         />
         <button
           type="submit"
-          disabled={loading || !message.trim()}
+          disabled={loading || isSending || !message.trim()}
           className="rounded-full bg-blue-500 p-2 text-white transition hover:bg-blue-600 disabled:opacity-50"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

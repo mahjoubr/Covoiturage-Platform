@@ -260,7 +260,3 @@ input CreateChatInput {
   riderId: Int!
   rideId: Int!
 }
-
-type Subscription {
-  messageAdded(chatId: Int!): Message!
-}

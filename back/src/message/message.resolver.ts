@@ -3,20 +3,21 @@ import { MessageService } from './message.service';
 import { Message } from './entities/message.entity';
 import { CreateMessageInput } from './dto/create-message.input';
 import { UpdateMessageInput } from './dto/update-message.input';
-import { Inject } from '@nestjs/common';
-import { PubSub } from 'graphql-subscriptions';
+/*import { Inject } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';*/
+
 
 @Resolver(() => Message)
 export class MessageResolver {
   constructor(
     private readonly messageService: MessageService,
-    @Inject('PUB_SUB') private pubSub: PubSub,
+    //@Inject('PUB_SUB') private pubSub: PubSub<{ messageAdded: any }>,
   ) {}
 
   @Mutation(() => Message)
   async createMessage(@Args('createMessageInput') createMessageInput: CreateMessageInput) {
     const newMessage = await this.messageService.create(createMessageInput);
-    this.pubSub.publish('messageAdded', { messageAdded: newMessage });
+    // this.pubSub.publish('messageAdded', { messageAdded: newMessage });
     return newMessage;
   }
 
@@ -44,7 +45,7 @@ export class MessageResolver {
   removeMessage(@Args('id', { type: () => Int }) id: number) {
     return this.messageService.remove(id).then(() => true);
   }
-
+/*
   @Subscription(() => Message, {
       name: 'messageAdded', 
     filter: (payload, variables) => {
@@ -52,7 +53,7 @@ export class MessageResolver {
     }
   })
 messageAdded(@Args('chatId', { type: () => Int }) chatId: number) {
-    return (this.pubSub as any).asyncIterator('messageAdded');
+  return (this.pubSub as any).asyncIterator('messageAdded');
   }
- 
+ */
 }
