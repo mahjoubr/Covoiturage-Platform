@@ -11,14 +11,14 @@ const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const limit = 5;
-
+const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_USERS, {
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
   const handleReportUser = (userId: number) => {
-        navigate('/report', { state: { reportedUserId: userId } });
-
+    navigate('/report', {state: {reportedUserId: userId}});
+  };
   // Subtle card accent colors
   const cardAccents = [
     "border-blue-400",

@@ -128,13 +128,11 @@ type MatchingRideResult {
   postOwnerId: String
 }
 
-
 type PostPaginatedResponse {
   data: [Post!]!
   totalItems: Float!
   currentPage: Float!
 }
-
 
 type AppUserSearchResult {
   data: [AppUser!]!
@@ -163,7 +161,6 @@ type RideDetails {
 type ReviewFormData {
   reviewedUser: UserInfo!
   ride: RideDetails!
-
 }
 
 type PaginatedReviewsResponse {
@@ -171,7 +168,6 @@ type PaginatedReviewsResponse {
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
-
 }
 
 type JwtAuthResponse {
@@ -240,11 +236,6 @@ type Query {
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
-
-  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
@@ -260,8 +251,8 @@ type Query {
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
+  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!

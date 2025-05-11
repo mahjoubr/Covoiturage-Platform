@@ -1,4 +1,3 @@
-// src/report/report.controller.ts
 import {
   Controller,
   Post,
@@ -37,7 +36,6 @@ export class ReportController {
   ) {
     const proofPath = file ? file.path : null;
 
-    // Call the service with or without the file path
     return this.reportService.createReport(createReportDto, proofPath);
   }
   @Put(':id')

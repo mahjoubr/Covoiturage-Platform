@@ -115,18 +115,6 @@ export class AppUserService extends GenericService {
   }
 
 
-async searchUsers(
-  searchTerm: string,
-  page: number,
-  limit: number
-): Promise<SearchResult<AppUser>> {
-  const queryBuilder = this.appUserRepo.createQueryBuilder("appUser");
-
-  return this.searchService.searchQuery(queryBuilder, searchTerm, [
-    "appUser.name",
-    "appUser.lastName",
-  ], page, limit);
-}
 
 }
   

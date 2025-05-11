@@ -55,6 +55,12 @@ async updatePhoto(
   ): Promise<SearchResult<AppUser>> {
     return this.appUserService.searchUsers(searchTerm, page, limit);
   }
+  @Query(() => AppUser, { name: 'getUserById', nullable: true })
+  async getUserById(
+      @Args('id', { type: () => Int }) id: number,
+  ): Promise<AppUser> {
+    return this.appUserService.findById(id);
+  }
 
 
 }

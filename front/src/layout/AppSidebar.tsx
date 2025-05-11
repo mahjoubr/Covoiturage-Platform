@@ -7,6 +7,7 @@ import {
   GridIcon,
   HorizontaLDots,
   UserCircleIcon,
+    OtherUsersIcon,
 
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";

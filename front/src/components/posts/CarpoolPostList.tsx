@@ -12,20 +12,18 @@ import PostFilter from './postFilter.tsx';
 import { useLocation } from 'react-router-dom';
 
 const CarpoolPostList: React.FC = () => {
-
   const location = useLocation();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(4); // Default limit per page
-  
-  const { 
-    data, 
-    loading, 
-    error, 
-    refetch: refetchPosts 
 
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchPosts
   } = useQuery(GET_POSTS, {
     variables: {
       searchTerm: debouncedSearchTerm,
@@ -118,13 +116,11 @@ const CarpoolPostList: React.FC = () => {
     // Check if getPosts exists and if it has the expected structure
     if (!data?.getPosts) return [];
 
-    
     // Handle both formats: array response or paginated object with data property
     const posts = Array.isArray(data.getPosts) ? data.getPosts : data.getPosts.data;
     if (!posts) return [];
-    
-    return posts.map((post: any) => ({
 
+    return posts.map((post: any) => ({
       id: post.id.toString(),
       destination: post.destination,
       departure: post.departure,
@@ -197,9 +193,9 @@ const CarpoolPostList: React.FC = () => {
   const totalPosts = data?.getPosts?.totalItems || 0;
   const currentPostsCount = filteredPosts.length;
   // If we have pagination data, use it; otherwise, show the load more button if we got a full page
-  const hasMorePosts = data?.getPosts?.totalItems ? 
-    currentPostsCount < totalPosts : 
-    currentPostsCount === limit;
+  const hasMorePosts = data?.getPosts?.totalItems ?
+      currentPostsCount < totalPosts :
+      currentPostsCount === limit;
 
   if (loading && page === 1) return <p>Loading...</p>;
   if (error) return (
@@ -214,56 +210,51 @@ const CarpoolPostList: React.FC = () => {
           </button>
         </div>
       </div>
+  );
 
-
-      {/* Search input */}
-      <div className="mb-6">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search size={18} className="text-gray-400" />
+  return (
+      <div className="w-full px-4 md:px-8 lg:px-12 bg-gray-50 dark:bg-gray-900 pt-4 pb-8">
+        <div className="flex justify-between items-center mb-6" style={{marginTop:"0px",padding:"0rem"}}>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Available Carpools</h1>
+          <div className="flex gap-2">
+            <button
+                onClick={refreshAllData}
+                className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md flex items-center hover:bg-blue-200 transition-colors dark:bg-blue-900 dark:text-blue-100 dark:hover:bg-blue-800"
+            >
+              Refresh
+            </button>
+            <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-700 transition-colors dark:bg-brand-500/[0.12] dark:text-white/90 dark:hover:bg-white/5"
+            >
+              <Plus size={18} className="mr-1" />
+              Create Post
+            </button>
           </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="Search by destination, departure, or description..."
-            className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          />
         </div>
-      </div>
 
-      <PostFilter 
-        activeFilter={filter} 
-        onFilterChange={setFilter} 
-        isLoggedIn={isLoggedIn}
-      />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-start w-full">
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map(post => (
-            <CarpoolPostItem 
-              key={post.id} 
-              post={post} 
-              onClick={handlePostClick}
-              userData={userInfo}
+        {/* Search input */}
+        <div className="mb-6">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search size={18} className="text-gray-400" />
+            </div>
+            <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search by destination, departure, or description..."
+                className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
-          ))
-        ) : (
-          <div className="col-span-full text-left py-4 text-gray-500 pl-1">
-            {debouncedSearchTerm ? 
-              `No results found for "${debouncedSearchTerm}"` : 
-              filter === 'my' ? 
-                "You haven't created any carpool posts yet." : 
-                "No carpool posts available."
-            }
-
           </div>
         </div>
+
         <PostFilter
             activeFilter={filter}
             onFilterChange={setFilter}
             isLoggedIn={isLoggedIn}
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-start w-full">
           {filteredPosts.length > 0 ? (
               filteredPosts.map(post => (
@@ -276,15 +267,53 @@ const CarpoolPostList: React.FC = () => {
               ))
           ) : (
               <div className="col-span-full text-left py-4 text-gray-500 pl-1">
-                {filter === 'my' ? "You haven't created any carpool posts yet." : "No carpool posts available."}
+                {debouncedSearchTerm ?
+                    `No results found for "${debouncedSearchTerm}"` :
+                    filter === 'my' ?
+                        "You haven't created any carpool posts yet." :
+                        "No carpool posts available."
+                }
               </div>
           )}
         </div>
 
+        {/* Load more button */}
+        {hasMorePosts && (
+            <div className="mt-6 text-center">
+              <div className="flex justify-center items-center gap-4">
+                <button
+                    onClick={() => setPage(prevPage => Math.max(prevPage - 1, 1))}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                    disabled={loading || page === 1}
+                >
+                  &larr; Prev
+                </button>
+
+                <button
+                    onClick={() => setPage(prevPage => prevPage + 1)}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                    disabled={loading || page * limit >= totalPosts}
+                >
+                  Next &rarr;
+                </button>
+              </div>
+            </div>
+        )}
+
+
+        {/* Display information about search results */}
+        {debouncedSearchTerm && (
+            <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              {data?.getPosts?.totalItems !== undefined ?
+                  `Showing ${currentPostsCount} of ${totalPosts} results for "${debouncedSearchTerm}"` :
+                  `Found ${currentPostsCount} results for "${debouncedSearchTerm}"`
+              }
+            </div>
+        )}
+
         <CreatePostModal
             isOpen={isCreateModalOpen}
             onClose={() => setIsCreateModalOpen(false)}
-            //onSubmit={handleCreatePost}
             userData={userInfo}
         />
 
@@ -295,56 +324,6 @@ const CarpoolPostList: React.FC = () => {
             userData={userInfo}
         />
       </div>
-
-
-      {/* Load more button */}
-      {hasMorePosts && (
-  <div className="mt-6 text-center">
-    <div className="flex justify-center items-center gap-4">
-      <button
-        onClick={() => setPage(prevPage => Math.max(prevPage - 1, 1))}
-        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-        disabled={loading || page === 1}
-      >
-        &larr; Prev
-      </button>
-
-      <button
-        onClick={() => setPage(prevPage => prevPage + 1)}
-        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-        disabled={loading || page * limit >= totalPosts}
-      >
-        Next &rarr;
-      </button>
-    </div>
-  </div>
-)}
-
-
-      {/* Display information about search results */}
-      {debouncedSearchTerm && (
-        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          {data?.getPosts?.totalItems !== undefined ? 
-            `Showing ${currentPostsCount} of ${totalPosts} results for "${debouncedSearchTerm}"` :
-            `Found ${currentPostsCount} results for "${debouncedSearchTerm}"`
-          }
-        </div>
-      )}
-      
-      <CreatePostModal 
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        userData={userInfo} 
-      />
-      
-      <ViewPostModal 
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        post={selectedPost}
-        userData={userInfo}
-      />
-    </div>
-
   );
 };
 

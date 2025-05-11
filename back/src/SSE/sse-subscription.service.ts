@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { ReviewPayload } from './ReviewPayload';
+import { ReportPayload} from "src/SSE/ReportPayload";
 
 export enum EventType{
   POST_UPDATED='update_post',
@@ -11,13 +12,16 @@ export enum EventType{
   RIDE_DELETE='ride_deleted',
   RIDE_START='ride_started',
   REVIEW_ADDED='review_added',
+  REPORT_CREATED    = 'report_created',
+  REPORT_APPROVED   = 'report_approved',
+  REPORT_DECLINED   = 'report_declined',
 }
 
 export interface StreamEvent {
   type: EventType;
   targetId: number; 
   recipientId: number; 
-  payload: any;     
+  payload: any;
   timestamp: number;
 }
 
@@ -85,6 +89,32 @@ export class EventStreamService implements OnModuleInit {
       targetId,
       recipientId: targetId,  // Recipient is the user being reviewed
       payload
+    });
+  }
+  emitReportCreated(recipientId: number, payload : ReportPayload): void {
+    this.emitEvent({
+      type: EventType.REPORT_CREATED,
+      targetId: payload.reportId,
+      recipientId,
+      payload,
+    });
+  }
+
+  emitReportApproved(recipientId: number, payload: ReportPayload): void {
+    this.emitEvent({
+      type: EventType.REPORT_APPROVED,
+      targetId: payload.reportId,
+      recipientId,
+      payload,
+    });
+  }
+
+  emitReportDeclined(recipientId: number, payload: ReportPayload): void {
+    this.emitEvent({
+      type: EventType.REPORT_DECLINED,
+      targetId: payload.reportId,
+      recipientId,
+      payload,
     });
   }
   
