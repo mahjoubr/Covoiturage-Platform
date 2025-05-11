@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
     path: "/profile",
   },
   {
-    icon:<OtherUsersIcon />,
+    icon:<Users />,
     name: "App Users",
     path: "/users",
   },

@@ -18,7 +18,8 @@ const UsersPage = () => {
 
   const handleReportUser = (userId: number) => {
         navigate('/report', { state: { reportedUserId: userId } });
-
+  }
+  const navigate = useNavigate();
   // Subtle card accent colors
   const cardAccents = [
     "border-blue-400",
