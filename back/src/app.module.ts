@@ -28,6 +28,7 @@ import { JoinRequestModule } from './join-request/join-request.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ChatGateway } from './chat/chat.gateway';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
       
@@ -76,7 +77,7 @@ import { ChatGateway } from './chat/chat.gateway';
       },*/
     }),
         
-      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule],
+      RideModule, PostModule, CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule, NotificationModule],
         controllers: [AppController],
         providers: [AppService, JwtStrategy,ChatGateway],
 })

@@ -129,6 +129,11 @@ type JwtAuthResponse {
   user: User!
 }
 
+type Notification {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
@@ -155,6 +160,7 @@ type Query {
   getAllJoinRequests: [JoinRequest!]!
   getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
+  notification(id: Int!): Notification!
 }
 
 type Mutation {
@@ -176,6 +182,9 @@ type Mutation {
   RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
+  removeNotification(id: Int!): Notification!
 }
 
 input RegisterInput {
@@ -259,4 +268,15 @@ input CreateChatInput {
   driverId: Int!
   riderId: Int!
   rideId: Int!
+}
+
+input CreateNotificationInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateNotificationInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
