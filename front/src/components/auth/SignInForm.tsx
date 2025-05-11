@@ -24,6 +24,7 @@ export default function SignInForm() {
       const { accessToken, user } = result; 
 
     localStorage.setItem('auth_token', accessToken); 
+    localStorage.setItem('user', JSON.stringify(user));
     console.log("Token saved:", accessToken);
     console.log(result.user.id)
       if (result.user.role=== 'admin') {
