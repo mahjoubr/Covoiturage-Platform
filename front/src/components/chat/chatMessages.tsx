@@ -18,21 +18,22 @@ interface Message {
 
 interface ChatMessagesProps {
   messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+
   chatId: number;
   currentUserId: number;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatId, currentUserId }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages,setMessages, chatId, currentUserId }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Subscribe to new messages
-  useSubscription(MESSAGE_SUBSCRIPTION, {
+/*  useSubscription(MESSAGE_SUBSCRIPTION, {
     variables: { chatId },
     onData: ({ data }) => {
       // The messages will be updated in the parent component through Apollo cache
       scrollToBottom();
     },
-  });
+  });*/
 
   // Scroll to bottom when messages change
   useEffect(() => {

@@ -45,6 +45,16 @@ export const GET_CHATS=gql`
   query GetChats($userId: Int!) {
     getChats(userId: $userId) {
       id
+      driver {
+        id
+        name
+        lastName
+      }
+      rider {
+        id
+        name
+        lastName
+      }
       messages {
         id
         text
@@ -113,18 +123,5 @@ export const CREATE_CHAT=gql`
 export const REMOVE_CHAT=gql`
   mutation RemoveChat($chatId: Int!) {
     removeChat(chatId: $chatId)
-  }
-`;
-export const GET_CHAT_MESSAGES_SUBSCRIPTION = gql`
-  subscription OnChatMessagesAdded($chatId: Int!) {
-    chatMessagesAdded(chatId: $chatId) {
-      id
-      text
-      createdAt
-      sender {
-        id
-        name
-      }
-    }
   }
 `;

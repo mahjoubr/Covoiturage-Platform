@@ -6,8 +6,9 @@ export const useCreateMessage = () => {
 
   const sendMessage = (text: string, senderId: number, chatId: number) => {
     return createMessage({
-      variables: { text, senderId, chatId },
-    });
+variables: {
+        createMessageInput: { text, senderId, chatId }, 
+      },    });
   };
 
   return { sendMessage, loading, error, data };

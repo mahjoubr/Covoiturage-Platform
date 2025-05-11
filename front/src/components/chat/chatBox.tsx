@@ -4,6 +4,9 @@ import ChatInput from './chatInput';
 import { useQuery } from '@apollo/client';
 import { GET_APPUSER_INFO } from '../../graphQl/queries/userProfile';
 import { useMessagesByChat } from '../../hooks/useMessagesByChat';
+import { useSubscription } from '@apollo/client';
+import { MESSAGE_SUBSCRIPTION } from '../../graphQl/queries/chat';
+import { Chat, Message } from '../../types/chat';
 
 interface ChatBoxProps {
   chatId: number;
@@ -12,25 +15,58 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ chatId }) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
+const [messages, setMessages] = useState<Message[]>([]);
 
-  // Get current user info
-  const { loading: userLoading, error: userError, data: userData } = useQuery(GET_APPUSER_INFO);
-  
+
+
+  const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  console.log("isLoggedIn", isLoggedIn);
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+  const userId = user?.id;
+  console.log("userId", userId);
+  console.log("accessToken", token);
+
   // Get messages for the chat
   const { loading: messagesLoading, error: messagesError, data: messagesData, refetch } = 
     useMessagesByChat(chatId, page, limit);
+  useEffect(() => {
+    if (messagesData?.getChatMessages) {
+      setMessages(messagesData.getChatMessages);
+    }
+  }, [messagesData]);
+
+  // Subscription to new messages
+  useSubscription(MESSAGE_SUBSCRIPTION, {
+  variables: { chatId },
+  onData: ({ data }) => {
+    console.log("🔔 Subscription received data:", data);
+
+    const newMessage = data?.data?.messageAdded;
+    if (newMessage) {
+      setMessages(prev => {
+        const exists = prev.find(m => m.id === newMessage.id);
+        if (exists) return prev;
+
+        return [...prev, newMessage];
+      });
+    } else {
+      console.warn("❌ No newMessage found in subscription payload:", data);
+    }
+  }
+});
 
   const handleMessageSent = () => {
     refetch();
   };
 
-  if (userLoading || messagesLoading) return <p className="p-4 text-center">Loading...</p>;
+  if (messagesLoading) return <p className="p-4 text-center">Loading...</p>;
   
-  if (userError) return <p className="p-4 text-center text-red-500">Error loading user info</p>;
   if (messagesError) return <p className="p-4 text-center text-red-500">Error loading messages</p>;
 
-  const user = userData.getAppUserInfo;
-  const messages = messagesData?.getChatMessages || [];
+  
+  //const messages = messagesData?.getChatMessages || [];
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:w-3/4">
@@ -68,6 +104,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chatId }) => {
       
       <ChatMessages 
         messages={messages} 
+        setMessages={setMessages}
+
         chatId={chatId} 
         currentUserId={user.id} 
       />

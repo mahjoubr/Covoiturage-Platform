@@ -46,11 +46,13 @@ export class MessageResolver {
   }
 
   @Subscription(() => Message, {
+      name: 'messageAdded', 
     filter: (payload, variables) => {
       return payload.messageAdded.chat.id === variables.chatId;
     }
   })
-  messageAdded(@Args('chatId', { type: () => Int }) chatId: number) {
+messageAdded(@Args('chatId', { type: () => Int }) chatId: number) {
     return (this.pubSub as any).asyncIterator('messageAdded');
   }
+ 
 }

@@ -6,7 +6,7 @@ import { GET_CHATS } from '../../graphQl/queries/chat';
 import { Chat, ChatSidebarProps,User ,Ride,Message} from '../../types/chat.ts';
 
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ isMobile, setIsMobile,onChatClick }) => {
    const [page, setPage] = useState(1);
    const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -30,6 +30,7 @@ const { loading: loadingChats, error: errorChats, data: chatsData, refetch } = u
   console.log("chatsData", chatsData);
   console.log("loadingChats", loadingChats);
   console.log("errorChats", errorChats);
+  
 const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
   id: chat.id,
   messages: chat.messages ?? [],
@@ -38,13 +39,17 @@ const chats: Chat[] = chatsData?.getChats?.map((chat: any) => ({
   ride: chat.ride   ?? { id: 0, startLocation: '', endLocation: '' },
   createdAt: chat.createdAt ?? '',
 })) ?? [];
+  
 
   if (loadingChats) return <div>Loading chats...</div>;
 if ( errorChats) return <div>Error loading chats.</div>;
 
-  const handleChatClick = (chat : Chat) => {
+ const handleChatClick = (chat : Chat) => {
       setSelectedChat(chat);
-      setIsViewModalOpen(true);
+      // Call the parent component's onChatClick function to pass the selected chat up
+      if (onChatClick) {
+        onChatClick(chat);
+      }
     };
   return (
     <div 
@@ -129,7 +134,10 @@ if ( errorChats) return <div>Error loading chats.</div>;
           <div className="custom-scrollbar max-h-full space-y-1 overflow-auto">
             {chats.map((chat) => {
   const otherUser = userId === chat.driver.id ? chat.rider : chat.driver;
-  const lastMessage = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].content : "No messages yet";
+  const lastMessage = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : "No messages yet";
+  console.log("messages", chat.messages);
+  console.log("lastMessage", lastMessage);
+  console.log("otherUser", otherUser);
 
   return (
     <div 

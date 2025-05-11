@@ -24,8 +24,16 @@ export type Ride = {
   
 };
 
-export type Message = {
+export interface Message {
   id: number;
-  content: string;
-  
-};
+  text: string;
+  sender: {
+    id: number;
+    name: string;
+    lastName: string;
+  };
+  chat: {
+    id: number;
+  };
+  createdAt: string;
+}
