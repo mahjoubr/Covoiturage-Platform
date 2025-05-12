@@ -28,6 +28,7 @@ export const GET_MY_REVIEWS = gql`
         stars
         comment
         date
+
         ride {
           id
           departure
@@ -41,13 +42,15 @@ export const GET_MY_REVIEWS = gql`
           lastName
           imageUrl
         }
-      }
+      
       totalItems
       totalPages
       currentPage
+  }
     }
   }
 `;
+
 
 export const GET_USER_REVIEWS = gql`
   query GetUserReviews($userId: Int!, $page: Int, $limit: Int) {
@@ -77,3 +80,49 @@ export const GET_USER_REVIEWS = gql`
     }
   }
 `;
+
+
+
+
+export const GET_PAGINATED_REVIEWS_BY_USER = gql`
+  query GetPaginatedMyReviews(
+    $page: Int
+    $limit: Int
+    $sortField: String
+    $sortOrder: String
+  ) {
+    getPaginatedMyReviews(
+      page: $page
+      limit: $limit
+      sortField: $sortField
+      sortOrder: $sortOrder
+    ) {
+      data {
+        id
+        stars
+        comment
+        date
+        reviewer {
+          name
+          lastName
+        }
+      }
+
+    }
+  }
+`;
+
+
+
+export const GET_AVERAGE_RATING = gql`
+  query GetAverageRating {
+    getAverageRating 
+  }
+`;
+
+export const GET_AVERAGE_RATING_BY_ID = gql`
+  query getAverageRatingById($id: Int!) {
+    getAverageRatingById(id: $id) 
+  }
+`;
+

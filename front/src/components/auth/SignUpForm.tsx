@@ -15,12 +15,14 @@ export default function SignUpForm() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   const navigate = useNavigate();
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
-      const user = await signup(email, password,firstName ,lastName);
+      const user = await signup(email, password,firstName ,lastName, phoneNumber);
       console.log("Signed up user:", user);
       navigate("/signin"); 
     } catch (error: any) {
@@ -84,6 +86,19 @@ export default function SignUpForm() {
                       required= {true}
                     />
                   </div>
+                </div>
+                {/* <!-- Phone --> */}
+                 <div>
+                  <Label>
+                    Phone number<span className="text-error-500">*</span>
+                  </Label>
+                  <Input 
+                  type="text" 
+                  placeholder="+216--------"
+                  value={phoneNumber } 
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required= {true}  />
+
                 </div>
                 {/* <!-- Email --> */}
                 <div>
