@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import {
-  CalenderIcon,
-  ChatIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  UserCircleIcon,
-
-} from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon,  Calendar as CalenderIcon,
+  MessageCircle as ChatIcon,
+  ChevronDown as ChevronDownIcon,
+  LayoutGrid as GridIcon,
+  MoreHorizontal as HorizontaLDots,
+  UserCircle as UserCircleIcon,} from "lucide-react";
 
 
 type NavItem = {
