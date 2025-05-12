@@ -1,26 +1,77 @@
-import { Injectable } from '@nestjs/common';
-import { CreateNotificationInput } from './dto/create-notification.input';
-import { UpdateNotificationInput } from './dto/update-notification.input';
+// notification.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { EventStreamService, EventType } from '../SSE/sse-subscription.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class NotificationService {
-  create(createNotificationInput: CreateNotificationInput) {
-    return 'This action adds a new notification';
+  private readonly logger = new Logger(NotificationService.name);
+
+  constructor(
+    private readonly eventStreamService: EventStreamService,
+    private readonly subscriptionService: SubscriptionService,
+  ) {}
+
+  async sendNotificationToUser(
+    recipientId: number,
+    type: EventType,
+    targetId: number,
+    payload: any,
+  ): Promise<void> {
+    this.eventStreamService.emitEvent({
+      type,
+      targetId,
+      recipientId,
+      payload,
+    });
   }
 
-  findAll() {
-    return `This action returns all notification`;
+  async sendNotificationToSubscribers(
+    type: EventType,
+    targetId: number,
+    targetType: string,
+    payload: any,
+  ): Promise<void> {
+    await this.eventStreamService.emitEventToSubscribers(
+      type,
+      targetId,
+      targetType,
+      payload,
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async notifyPostUpdated(postId: number, updaterId: number): Promise<void> {
+    const payload = {
+      message: 'A post you follow has been updated',
+      postId,
+      updaterId,
+    };
+    await this.sendNotificationToSubscribers(
+      EventType.POST_UPDATED,
+      postId,
+      'post',
+      payload,
+    );
   }
 
-  update(id: number, updateNotificationInput: UpdateNotificationInput) {
-    return `This action updates a #${id} notification`;
+  async notifyNewComment(
+    postId: number,
+    commentId: number,
+    commenterId: number,
+  ): Promise<void> {
+    const payload = {
+      message: 'New comment on a post you follow',
+      postId,
+      commentId,
+      commenterId,
+    };
+    await this.sendNotificationToSubscribers(
+      EventType.NEW_COMMENT,
+      postId,
+      'post',
+      payload,
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
-  }
+  // Add more specific notification methods as needed
 }
