@@ -34,35 +34,46 @@ export const getReviewFormData = async (
 };
 
 
-export const getMyReviews = async (): Promise<Review[]> => {
+export const getMyReviews = async (page?: number, limit?: number): Promise<{ data: Review[], totalItems: number, totalPages: number, currentPage: number }> => {
   const { data } = await client.query({
     query: GET_MY_REVIEWS,
+    variables: { page, limit },
     fetchPolicy: 'network-only',
   });
-  const transformedReviews: Review[] = data.getMyReviews.map((review: any) => ({
+  
+  const transformedReviews: Review[] = data.getMyReviews.data.map((review: any) => ({
     ...review,
     user: review.reviewedUser, // Rename field
   }));
 
-  return transformedReviews;
+  return {
+    data: transformedReviews,
+    totalItems: data.getMyReviews.totalItems,
+    totalPages: data.getMyReviews.totalPages,
+    currentPage: data.getMyReviews.currentPage
+  };
 };
 
 
-export const getReceivedReviews = async (userId: number): Promise<Review[]> => {
-  console.log("Fetching received reviews for user ID:", userId);
+export const getReceivedReviews = async (userId: number, page?: number, limit?: number): Promise<{ data: Review[], totalItems: number, totalPages: number, currentPage: number }> => {
   const { data } = await client.query({
     query: GET_USER_REVIEWS,
-    variables: { userId },
+    variables: { userId, page, limit },
     fetchPolicy: 'network-only',
   });
-  console.log("Received reviews data:", data);
-  const transformedReviews: Review[] = data.getUserReviews.map((review: any) => ({
+  
+  const transformedReviews: Review[] = data.getUserReviews.data.map((review: any) => ({
     ...review,
     user: review.reviewer, // Rename field
   }));
 
-  return transformedReviews;
-}
+  return {
+    data: transformedReviews,
+    totalItems: data.getUserReviews.totalItems,
+    totalPages: data.getUserReviews.totalPages,
+    currentPage: data.getUserReviews.currentPage
+  };
+};
 
 
 

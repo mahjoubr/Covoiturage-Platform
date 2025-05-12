@@ -7,10 +7,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppUserModule } from 'src/app-user/app-user.module';
 import { AuthResolver } from './auth.resolver';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 
 @Module({
   imports: [
+    SubscriptionModule,
     UserModule,
     AppUserModule,
     PassportModule,

@@ -3,6 +3,7 @@ import { CreateAppUserRideDto } from './dto/create-app-user-ride.dto';
 import { UpdateAppUserRideDto } from './dto/update-app-user-ride.dto';
 import { GenericService } from 'src/services/genericService';
 import { AppUserRide} from './entities/app-user-ride.entity';
+import { Role } from 'src/enums/role';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppUser } from 'src/app-user/entities/app-user.entity';

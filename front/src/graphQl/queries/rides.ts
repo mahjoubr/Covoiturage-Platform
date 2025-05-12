@@ -109,7 +109,17 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
 }
 `;
 
-
+export const GET_RIDE_USERS = gql`
+  query GetRideUsers($rideId: Int!) {
+    getUsersForRide(rideId: $rideId) {
+      id
+      name
+      lastName
+      imageUrl
+      roleInRide
+    }
+  }
+`;
   export const CREATE_JOIN_REQUEST = gql`
   mutation CreateJoinRequest($postId: Int!) {
     createJoinRequest(postId: $postId) {

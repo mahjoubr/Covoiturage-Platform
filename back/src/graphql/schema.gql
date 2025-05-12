@@ -26,7 +26,7 @@ type Post {
   id: ID!
   destination: String!
   departure: String!
-  date: DateTime!
+  date: String!
   time: String!
   seatCount: Int!
   frequency: String!
@@ -93,6 +93,28 @@ type Ride {
   joinRequests: [JoinRequest!]
 }
 
+type AppUserWithRole {
+  id: Float!
+  email: String!
+  password: String!
+  role: String!
+  name: String!
+  lastName: String!
+  dateOfBirth: String
+  phoneNumber: String
+  imageUrl: String
+  posts: [Post!]!
+  reviews: [Review!]!
+  rating: Float!
+  appUserRides: [AppUserRide!]!
+  roleInRide: Role!
+}
+
+enum Role {
+  DRIVER
+  PASSENGER
+}
+
 type RidePaginationResult {
   data: [Ride!]!
   totalItems: Int!
@@ -103,6 +125,18 @@ type RidePaginationResult {
 type MatchingRideResult {
   ride: Ride
   postOwnerId: String
+}
+
+type PostPaginatedResponse {
+  data: [Post!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
 }
 
 type UserInfo {
@@ -128,10 +162,50 @@ type ReviewFormData {
   ride: RideDetails!
 }
 
+type PaginatedReviewsResponse {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
   user: User!
+}
+
+type Report {
+  id: Int!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type ReportPagination {
+  """Liste des rapports de la page courante"""
+  data: [Report!]!
+
+  """Nombre total d’éléments disponibles"""
+  totalItems: Int!
+
+  """Nombre total de pages"""
+  totalPages: Int!
+
+  """Page courante"""
+  currentPage: Int!
 }
 
 type DashboardStatsType {
@@ -158,22 +232,28 @@ type DashboardData {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
+  getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
+  getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
   getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
-  getPosts: [Post!]!
+  getUsersForRide(rideId: Int!): [AppUserWithRole!]!
+  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   isUserInRide(userId: Int!, rideId: Int!): Boolean!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getMyReviews: [Review!]!
-  getUserReviews(userId: Int!): [Review!]!
+  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getJoinRequestById(id: Float!): JoinRequest!

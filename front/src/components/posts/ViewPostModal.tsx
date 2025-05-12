@@ -21,7 +21,7 @@ interface ViewPostModalProps {
 
 
 const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,userData }) => {
-  
+    console.log("post data ",post);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [requestPending, setRequestPending] = useState(false);

@@ -6,12 +6,12 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-
   UserCircleIcon,
-  ReviewIcon
+
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { CarIcon, NewspaperIcon } from "lucide-react";
+import { CarIcon, NewspaperIcon ,Users,Star,  CircleAlertIcon} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -21,44 +21,52 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      path: "/",
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: "/profile",
+    },
+    {
 
-    icon: <NewspaperIcon />,
-    name: "Posts",
-    path: "/Posts",
-  },
-  {
-    icon: <CarIcon />,
-    name: "Rides",
-    path: "/rides",
-  },{
-    icon:<ReviewIcon/>,
-    name:"Reviews",
-    subItems: [{ name: "My Reviews", path: "/reviewed-list", pro: false },
-    { name: "Received Reviews", path: "/received-reviews", pro: false }],
+      icon: <NewspaperIcon />,
+      name: "Posts",
+      path: "/Posts",
+    },
+    {
+      icon: <CarIcon />,
+      name: "Rides",
+      path: "/rides",
+    },
+    {
+      icon:<ChatIcon />,
+      name: "Chat",
+      path: "/chat",
+    },
+    {
+      icon:<Users />,
+      name: "App Users",
+      path: "/users",
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Calendar",
+      path: "/calendar",
+    },
+    {
+      icon:<CircleAlertIcon/>,
+      name: "Reports",
+      path: "/myReports",
+    }, {
+      icon: <Star/>,
+      name: "Reviews",
+      path: "/reviews",
+    },
 
-  },
-  {
-    icon:<ChatIcon />,
-    name: "Chat",
-    path: "/chat",
-  },
- 
 ];
 
 
@@ -81,7 +89,7 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
- 
+
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
@@ -305,7 +313,7 @@ const AppSidebar: React.FC = () => {
                     : "justify-start"
                 }`}
               >
-                
+
               </h2>
             </div>
           </div>
