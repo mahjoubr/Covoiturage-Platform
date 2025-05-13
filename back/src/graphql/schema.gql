@@ -162,13 +162,6 @@ type ReviewFormData {
   ride: RideDetails!
 }
 
-type ReviewPaginationResult {
-  data: [Review!]!
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
-}
-
 type PaginatedReviewsResponse {
   data: [Review!]!
   totalItems: Int!
@@ -239,7 +232,6 @@ type DashboardData {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
-  getAppUserById(id: Int!): AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
   getDashboardData: DashboardData!
@@ -249,19 +241,15 @@ type Query {
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
-  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
-  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
+  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
   getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
-  getAllReviews: [Review!]!
-  getAverageRating: Int!
-  getAverageRatingById(id: Int!): Int!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
-  getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
@@ -294,7 +282,6 @@ type Mutation {
 input RegisterInput {
   name: String!
   lastName: String!
-  phoneNumber: String!
   email: String!
   password: String!
 }

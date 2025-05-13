@@ -21,8 +21,8 @@ export interface Drive {
     comment: string;
     date: string; 
     reviewer: {
-      lastName: string;
-      name: string;
+      id: number;
+      username: string;
     };
     reviewedUser: {
       id: number;
