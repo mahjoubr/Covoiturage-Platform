@@ -36,6 +36,7 @@ import UsersPage from "./pages/Users/UsersPage";
 import { SocketProvider } from "./hooks/useSocket";
 import { ApolloProvider } from "@apollo/client";
 import client from './graphQl/client';
+import UserProfile from "./pages/UserProfile";
 
 
 export default function App() {
@@ -51,8 +52,8 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/profile/Edit" element={<EditProfile />} />
-            <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/profile" element={<EditProfile />} />
+            <Route path="/profile/:id" element={ <UserProfile />  } />   
             <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
 
