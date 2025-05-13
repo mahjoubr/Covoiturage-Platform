@@ -10,6 +10,6 @@ import { EventStreamModule } from 'src/SSE/sse.module';
   controllers: [AppUserRideController],
   imports: [TypeOrmModule.forFeature([AppUserRide]),SubscriptionModule,EventStreamModule],
   providers: [AppUserRideService], 
-  exports: [AppUserRideService, TypeOrmModule.forFeature([AppUserRide])],
+  exports: [AppUserRideService]
 })
 export class AppUserRideModule {}
