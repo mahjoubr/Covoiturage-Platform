@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link, } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, AlertTriangle, Send, ThumbsUp, Users, Star, MessageSquare } from 'lucide-react';
 
-import {
-  AlertTriangle, Send, ThumbsUp, Users, Star, MessageSquare
-} from 'lucide-react';
 import ReviewCard from '../../components/review/ReviewCard';
 import { getMyReviews, getReceivedReviews, deleteReview } from '../../services/reviews';
 import { getCurrentUserId } from '../../services/authService';
 import { Review } from '../../interfaces/Review';
 import DeleteConfirmationModal from './DeleteConfirmationModel';
 import UpdateReviewModal from './updateReview';
+import LoginPrompt from '../../components/auth/LoginPrompt';
 
 const ReviewsPage = () => {
   const [activeView, setActiveView] = useState<'my-reviews' | 'received-reviews'>('my-reviews');
@@ -18,6 +16,7 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 6, 
@@ -82,45 +81,63 @@ const ReviewsPage = () => {
 
   const currentConfig = config[activeView];
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+    }
+  };
 
-
-const handlePageChange = (newPage: number) => {
-  if (newPage >= 1 && newPage <= pagination.totalPages) {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  }
-};
-
+  // Check authentication status first
   useEffect(() => {
-    const fetchReviews = async () => {
+    const checkAuth = async () => {
       try {
-        setLoading(true);
-        const response = await currentConfig.fetchFn({
-          page: pagination.page,
-          limit: pagination.limit
-        });
-        
-        setReviews(response.data);
-        setPagination(prev => ({
-          ...prev,
-          totalItems: response.totalItems,
-          totalPages: response.totalPages,
-          currentPage: response.currentPage
-        }));
-        setError(null);
+        const userId = await getCurrentUserId();
+        setIsLoggedIn(!!userId);
+        setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching reviews');
-      } finally {
+        setError(err instanceof Error ? err.message : 'Error checking authentication');
         setLoading(false);
       }
     };
-  
-    fetchReviews();
-  }, [activeView, pagination.page, activeTab]);
+    
+    checkAuth();
+  }, []);
+
+  // Only fetch reviews if user is logged in
+  useEffect(() => {
+    if (isLoggedIn === true) {
+      const fetchReviews = async () => {
+        try {
+          setLoading(true);
+          const response = await currentConfig.fetchFn({
+            page: pagination.page,
+            limit: pagination.limit
+          });
+          
+          setReviews(response.data);
+          setPagination(prev => ({
+            ...prev,
+            totalItems: response.totalItems,
+            totalPages: response.totalPages,
+            currentPage: response.currentPage
+          }));
+          setError(null);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Error fetching reviews');
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      fetchReviews();
+    }
+  }, [activeView, pagination.page, activeTab, isLoggedIn]);
+
   const handleDeleteReview = (id: number) => {
     setReviewToDelete(id);
     setDeleteModalOpen(true);
   };
-  
+ 
   const confirmDelete = async () => {
     if (!reviewToDelete) return;
     
@@ -162,39 +179,30 @@ const handlePageChange = (newPage: number) => {
       console.error('Error refreshing reviews:', err);
     }
   };
-  
-
 
   const filteredReviews = reviews.filter(review => {
     if (activeTab === 'all') return true;
     if (activeTab === 'positive') return review.stars >= 4;
     return review.stars < 4;
   });
-
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${currentConfig.gradientColors}`}>
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 relative">
-          <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-200 border-opacity-50 dark:border-${currentConfig.accentColor}-500`}></div>
-          <div className={`absolute inset-0 rounded-full border-4 border-${currentConfig.accentColor}-600 border-t-transparent animate-spin dark:border-${currentConfig.accentColor}-700`}></div>
-          </div>
-          <p className={`mt-4 text-${currentConfig.accentColor}-700 dark:text-${currentConfig.accentColor}-300 font-medium`}>{currentConfig.loadingMessage}</p>
-        </div>
-      </div>
-    );
+  const userid=getCurrentUserId();
+  console.log('userId', userid); 
+  console.log('isLoggedIn', isLoggedIn);
+ if (isLoggedIn === false) {
+    return <LoginPrompt />;
   }
+
 
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:bg-gradient-to-br dark:from-red-900 dark:to-red-800">
         <div className="bg-white p-8 rounded-xl shadow-xl border-l-4 border-red-500 max-w-md dark:bg-gray-800 dark:border-red-700">
-        <div className="flex items-center mb-4">
-        <AlertTriangle size={24} className="text-red-500 mr-3 dark:text-red-300" />
-        <h3 className="text-xl font-bold text-red-600 dark:text-red-300">Oops! Something went wrong</h3>
-        </div>
-        <p className="text-gray-600 mb-4 dark:text-gray-300">{error}</p>
-        <button
+          <div className="flex items-center mb-4">
+            <AlertTriangle size={24} className="text-red-500 mr-3 dark:text-red-300" />
+            <h3 className="text-xl font-bold text-red-600 dark:text-red-300">Oops! Something went wrong</h3>
+          </div>
+          <p className="text-gray-600 mb-4 dark:text-gray-300">{error}</p>
+          <button
             onClick={() => window.location.reload()}
             className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all font-medium flex items-center justify-center"
           >
@@ -205,22 +213,19 @@ const handlePageChange = (newPage: number) => {
     );
   }
 
-
-  
-
   return (
     <div className={`min-h-screen ${currentConfig.gradientColors} py-12 px-4 dark:bg-gray-900`}>
       <div className="max-w-6xl mx-auto">
         {/* Tab Switcher */}
         <div className="flex justify-center mb-8">
-        <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
+          <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
             <button
               onClick={() => setActiveView('my-reviews')}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeView === 'my-reviews'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
-                }`}
+              }`}
             >
               My Reviews
             </button>
@@ -230,7 +235,7 @@ const handlePageChange = (newPage: number) => {
                 activeView === 'received-reviews'
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-gray-700 hover:bg-indigo-50 dark:text-white dark:hover:bg-gray-700'
-                }`}
+              }`}
             >
               Received Reviews
             </button>
@@ -246,7 +251,7 @@ const handlePageChange = (newPage: number) => {
             {currentConfig.title}
           </h1>
           <p className={`text-${currentConfig.accentColor}-700 max-w-lg mx-auto dark:text-gray-300`}>
-          {currentConfig.subtitle}
+            {currentConfig.subtitle}
           </p>
 
           {/* Stats */}
@@ -254,9 +259,12 @@ const handlePageChange = (newPage: number) => {
             {currentConfig.stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <div key={index}                className="bg-white rounded-lg p-4 shadow-md flex items-center dark:bg-gray-800"
->
-                  <div                   className={`h-12 w-12 rounded-full bg-${stat.color}-100 flex items-center justify-center mr-4 dark:bg-${stat.color}-700`}
+                <div 
+                  key={index} 
+                  className="bg-white rounded-lg p-4 shadow-md flex items-center dark:bg-gray-800"
+                >
+                  <div 
+                    className={`h-12 w-12 rounded-full bg-${stat.color}-100 flex items-center justify-center mr-4 dark:bg-${stat.color}-700`}
                   >
                     <Icon 
                       size={20} 
@@ -265,8 +273,8 @@ const handlePageChange = (newPage: number) => {
                     />
                   </div>
                   <div>
-                  <p className="text-gray-600 text-sm dark:text-gray-400">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                    <p className="text-gray-600 text-sm dark:text-gray-400">{stat.title}</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">
                       {stat.getValue(reviews)}
                     </p>
                   </div>
@@ -275,165 +283,163 @@ const handlePageChange = (newPage: number) => {
             })}
           </div>
         </div>
+
         {reviews.length === 0 ? (
-  <div className="text-center max-w-md mx-auto px-6 mt-12">
-    <div className="relative">
-    <div className="bg-white rounded-full h-32 w-32 flex items-center justify-center mx-auto mb-8 shadow-xl dark:bg-gray-700">
-    <div                 className={`absolute inset-0 rounded-full bg-gradient-to-br from-${currentConfig.accentColor}-100 to-${currentConfig.accentColor}-50 animate-pulse dark:bg-gradient-to-br from-${currentConfig.accentColor}-700 to-${currentConfig.accentColor}-600`}
-    ></div>
-        <currentConfig.emptyIcon size={40} className={`text-${currentConfig.accentColor}-500 relative z-10`} />
-      </div>
-    </div>
-    <h2 className={`text-2xl font-bold text-${currentConfig.accentColor}-900 mb-3 dark:text-white`}>
-    {currentConfig.emptyTitle}
-    </h2>
-    <p className={`text-${currentConfig.accentColor}-700 mb-8 dark:text-gray-300`}>
-    {currentConfig.emptyMessage}
-    </p>
-    <Link
-      to={currentConfig.emptyCtaLink}
-      className={`inline-block bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-700 text-white rounded-lg px-6 py-3 font-medium hover:from-${currentConfig.accentColor}-700 hover:to-${currentConfig.accentColor}-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 dark:bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-500`}
-      >
-      {currentConfig.emptyCtaText}
-    </Link>
-  </div>
-) : (
-  <>
-   
-
-        {/* Filter Tabs */}
-        <div className="flex justify-center mb-8">
-        <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
-        <button
-              onClick={() => setActiveTab('all')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'all'
-                  ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
-                }`}
+          <div className="text-center max-w-md mx-auto px-6 mt-12">
+            <div className="relative">
+              <div className="bg-white rounded-full h-32 w-32 flex items-center justify-center mx-auto mb-8 shadow-xl dark:bg-gray-700">
+                <div 
+                  className={`absolute inset-0 rounded-full bg-gradient-to-br from-${currentConfig.accentColor}-100 to-${currentConfig.accentColor}-50 animate-pulse dark:bg-gradient-to-br dark:from-${currentConfig.accentColor}-700 dark:to-${currentConfig.accentColor}-600`}
+                ></div>
+                <currentConfig.emptyIcon size={40} className={`text-${currentConfig.accentColor}-500 relative z-10`} />
+              </div>
+            </div>
+            <h2 className={`text-2xl font-bold text-${currentConfig.accentColor}-900 mb-3 dark:text-white`}>
+              {currentConfig.emptyTitle}
+            </h2>
+            <p className={`text-${currentConfig.accentColor}-700 mb-8 dark:text-gray-300`}>
+              {currentConfig.emptyMessage}
+            </p>
+            <Link
+              to={currentConfig.emptyCtaLink}
+              className={`inline-block bg-gradient-to-r from-${currentConfig.accentColor}-600 to-${currentConfig.accentColor}-700 text-white rounded-lg px-6 py-3 font-medium hover:from-${currentConfig.accentColor}-700 hover:to-${currentConfig.accentColor}-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 dark:bg-gradient-to-r dark:from-${currentConfig.accentColor}-600 dark:to-${currentConfig.accentColor}-500`}
             >
-              All
-            </button>
-            <button
-              onClick={() => setActiveTab('positive')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'positive'
-                  ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
-                }`}
-            >
-              Positive
-            </button>
-            <button
-              onClick={() => setActiveTab('negative')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'negative'
-                  ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
-                  : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
-                }`}
-            >
-              Negative
-            </button>
+              {currentConfig.emptyCtaText}
+            </Link>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Filter Tabs */}
+            <div className="flex justify-center mb-8">
+              <div className="flex bg-white rounded-lg shadow-md p-1 dark:bg-gray-800">
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'all'
+                      ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
+                      : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setActiveTab('positive')}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'positive'
+                      ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
+                      : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Positive
+                </button>
+                <button
+                  onClick={() => setActiveTab('negative')}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'negative'
+                      ? `bg-${currentConfig.accentColor}-600 text-white shadow-md`
+                      : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Negative
+                </button>
+              </div>
+            </div>
 
-        {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredReviews.map((review) => (
-           // Make sure you're passing the handleDeleteReview function
-        
-        
-        <ReviewCard
-        key={review.id}
-        review={review}
-        variant={currentConfig.variant}
-        onEdit={currentConfig.variant === 'author' ? handleEditReview : undefined}
-        onDelete={currentConfig.variant === 'author' ? handleDeleteReview : undefined}
-        />
-          ))}
-        </div>
-        </>
-)}
+            {/* Reviews Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {filteredReviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  variant={currentConfig.variant}
+                  onEdit={currentConfig.variant === 'author' ? handleEditReview : undefined}
+                  onDelete={currentConfig.variant === 'author' ? handleDeleteReview : undefined}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
+        {pagination.totalPages > 1 && (
+          <div className="flex justify-center mt-8">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                className={`p-2 rounded-md ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              
+              {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1;
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = pagination.page - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-10 h-10 rounded-md flex items-center justify-center ${
+                      pageNum === pagination.page
+                        ? `bg-${currentConfig.accentColor}-600 text-white`
+                        : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page === pagination.totalPages}
+                className={`p-2 rounded-md ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Page info */}
+        {reviews.length > 0 && (
+          <div className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
+            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+            {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
+            {pagination.totalItems} reviews
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
       <DeleteConfirmationModal
-  isOpen={deleteModalOpen}
-  onClose={() => {
-    setDeleteModalOpen(false);
-    setReviewToDelete(null);
-  }}
-  onConfirm={confirmDelete}
-/>
-{editingReview && (
-  <UpdateReviewModal
-    reviewId={editingReview.id}
-    initialStars={editingReview.stars}
-    initialComment={editingReview.comment}
-    onClose={() => setEditingReview(null)}
-    onUpdated={handleUpdateComplete}
-  />
-)}
-
-
-{pagination.totalPages >= 1 && (
-  <div className="flex justify-center mt-8">
-    <div className="flex items-center space-x-2">
-      <button
-        onClick={() => handlePageChange(pagination.page - 1)}
-        disabled={pagination.page === 1}
-        className={`p-2 rounded-md ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
-        >
-        <ChevronLeft size={20} />
-      </button>
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setReviewToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+      />
       
-      {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
-        let pageNum;
-        if (pagination.totalPages <= 5) {
-          pageNum = i + 1;
-        } else if (pagination.page <= 3) {
-          pageNum = i + 1;
-        } else if (pagination.page >= pagination.totalPages - 2) {
-          pageNum = pagination.totalPages - 4 + i;
-        } else {
-          pageNum = pagination.page - 2 + i;
-        }
-        
-        return (
-          <button
-            key={pageNum}
-            onClick={() => handlePageChange(pageNum)}
-            className={`w-10 h-10 rounded-md flex items-center justify-center ${
-              pageNum === pagination.page
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
-              }`}
-          >
-            {pageNum}
-          </button>
-        );
-      })}
-
-      <button
-        onClick={() => handlePageChange(pagination.page + 1)}
-        disabled={pagination.page === pagination.totalPages}
-        className={`p-2 rounded-md ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'}`}
-        >
-        <ChevronRight size={20} />
-      </button>
+      {editingReview && (
+        <UpdateReviewModal
+          reviewId={editingReview.id}
+          initialStars={editingReview.stars}
+          initialComment={editingReview.comment}
+          onClose={() => setEditingReview(null)}
+          onUpdated={handleUpdateComplete}
+        />
+      )}
     </div>
-  </div>
-)}
-
-{/* Page info */}
-<div className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
-Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-  {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
-  {pagination.totalItems} reviews
-</div>
-    </div>
-  
-);
+  );
 };
 
 export default ReviewsPage;
-

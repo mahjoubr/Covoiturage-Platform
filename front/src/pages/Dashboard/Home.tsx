@@ -17,12 +17,10 @@ export default function Home() {
         getCurrentUser().then(setUser);
     }, []);
 
-    // Show placeholder while user auth is loading
     if (user === null) return <div>Loading...</div>;
 
     const isAdmin = user?.role === 'admin';
 
-    // Common error handling
     if (error) return (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <strong className="font-bold">Error!</strong>
