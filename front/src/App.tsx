@@ -21,6 +21,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import ChatPage from "./pages/Chat/chatPage";
 import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
+import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
@@ -29,16 +30,12 @@ import ReportPage from "./pages/Report/ReportPage.tsx";
 import MyReportsPage from "./pages/Report/MyReportsPage.tsx";
 
 import NotificationPage from "./pages/Notification/NotificationPage";
-
-import UserProfile from "./pages/UserProfile";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
-
 import UsersPage from "./pages/Users/UsersPage";
 import { SocketProvider } from "./hooks/useSocket";
 import { ApolloProvider } from "@apollo/client";
 import client from './graphQl/client';
-
 
 
 export default function App() {
@@ -54,10 +51,11 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/profile" element={<EditProfile />} />
+            <Route path="/profile/Edit" element={<EditProfile />} />
+            <Route path="/profile" element={<UserProfiles />} />
             <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
-            <Route path="/profile/:id" element={ <UserProfile />  } />            
+
             <Route path={"/report"} element={<ReportPage />} />
             <Route path={"/myReports"} element={<MyReportsPage />} />
 
@@ -65,10 +63,6 @@ export default function App() {
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />
-
-
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />
 
