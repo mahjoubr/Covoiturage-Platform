@@ -26,7 +26,7 @@ type Post {
   id: ID!
   destination: String!
   departure: String!
-  date: DateTime!
+  date: String!
   time: String!
   seatCount: Int!
   frequency: String!
@@ -36,6 +36,7 @@ type Post {
   comments: [Comment!]
   postOwner: AppUser!
   listRide: [Ride!]
+  status: String
   chatId: Int
 }
 
@@ -43,7 +44,7 @@ type Review {
   id: Float!
   stars: Float!
   comment: String
-  date: DateTime!
+  date: String!
   reviewer: AppUser!
   reviewedUser: AppUser!
   ride: Ride!
@@ -58,7 +59,7 @@ type AppUser {
   lastName: String!
   dateOfBirth: String
   phoneNumber: String
-  imageUrl: String!
+  imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
   rating: Float!
@@ -67,15 +68,8 @@ type AppUser {
 
 type AppUserRide {
   id: Float!
-  role: Role!
   appUser: AppUser!
   ride: Ride!
-}
-
-"""The role of the user in the ride"""
-enum Role {
-  DRIVER
-  PASSENGER
 }
 
 type JoinRequest {
@@ -87,7 +81,7 @@ type JoinRequest {
 
 type Ride {
   id: Float!
-  date: DateTime!
+  date: String!
   time: String!
   departure: String!
   arrival: String!
@@ -100,11 +94,50 @@ type Ride {
   joinRequests: [JoinRequest!]
 }
 
+type AppUserWithRole {
+  id: Float!
+  email: String!
+  password: String!
+  role: String!
+  name: String!
+  lastName: String!
+  dateOfBirth: String
+  phoneNumber: String
+  imageUrl: String
+  posts: [Post!]!
+  reviews: [Review!]!
+  rating: Float!
+  appUserRides: [AppUserRide!]!
+  roleInRide: Role!
+}
+
+enum Role {
+  DRIVER
+  PASSENGER
+}
+
 type RidePaginationResult {
   data: [Ride!]!
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
+}
+
+type MatchingRideResult {
+  ride: Ride
+  postOwnerId: String
+}
+
+type PostPaginatedResponse {
+  data: [Post!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
 }
 
 type Chat {
@@ -123,10 +156,73 @@ type Message {
   sender: AppUser!
 }
 
+type UserInfo {
+  id: Float!
+  name: String!
+  lastName: String!
+  rating: Float!
+  phoneNumber: String!
+  imageUrl: String!
+}
+
+type RideDetails {
+  id: Float!
+  departure: String!
+  date: String!
+  arrival: String!
+  price: Float!
+  time: String!
+}
+
+type ReviewFormData {
+  reviewedUser: UserInfo!
+  ride: RideDetails!
+}
+
+type PaginatedReviewsResponse {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
 type JwtAuthResponse {
   accessToken: String!
   refreshToken: String
   user: User!
+}
+
+type Report {
+  id: Int!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type ReportPagination {
+  """Liste des rapports de la page courante"""
+  data: [Report!]!
+
+  """Nombre total d’éléments disponibles"""
+  totalItems: Int!
+
+  """Nombre total de pages"""
+  totalPages: Int!
+
+  """Page courante"""
+  currentPage: Int!
 }
 
 type Notification {
@@ -137,17 +233,22 @@ type Notification {
 type Query {
   dummyQuery: String
   getAppUserInfo: AppUser!
+  getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
+  getUserById(id: Int!): AppUser
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
+  getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
   getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
-  getPosts: [Post!]!
+  getUsersForRide(rideId: Int!): [AppUserWithRole!]!
+  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
-  matchingRide(postId: Int!): Ride
+  matchingRide(postId: Int!): MatchingRideResult
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getChatMessages(chatId: Int!): [Message!]!
@@ -156,10 +257,14 @@ type Query {
   getChats(userId: Int!): [Chat!]!
   getChat(chatId: Int!): Chat!
   getChatByRideId(rideId: Int!): Chat!
+  reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
+  getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+  getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
-  getJoinRequestsByRide(rideId: Float!): [JoinRequest!]!
+  getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
+  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   notification(id: Int!): Notification!
 }
 
@@ -172,8 +277,8 @@ type Mutation {
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
   createPost(createPostInput: CreatePostInput!): Post!
-  deletePost(id: Float!): Boolean!
-  updatePost(id: Float!, status: String!): Post!
+  deletePost(id: Int!): Boolean!
+  closepost(id: Int!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   updateMessage(updateMessageInput: UpdateMessageInput!): Message!
@@ -182,6 +287,8 @@ type Mutation {
   RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
+  deleteJoinRequestById(id: Int!): Boolean!
+  acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
   removeNotification(id: Int!): Notification!
