@@ -11,6 +11,11 @@ export class ChatController {
   create(@Body() createChatDto: CreateChatDto) {
     return this.chatService.create(createChatDto);
   }
+  @Get('ride/:rideId')
+  async getMessagesByRide(@Param('rideId') rideId: number) {
+  return this.chatService.getMessagesByRideId(Number(rideId));
+  }
+
 
   @Get()
   findAll() {
