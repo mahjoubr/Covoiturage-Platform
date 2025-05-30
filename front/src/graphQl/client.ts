@@ -30,7 +30,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         window.location.replace('/signIn');
       }
       else if (err.extensions?.code === 'FORBIDDEN' || err.extensions?.code === 'NOT_FOUND') {
-      //window.location.replace('/404');
+      window.location.replace('/404');
     }
     }
   }
