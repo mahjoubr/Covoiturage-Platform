@@ -1,6 +1,7 @@
 // src/pages/MyReportsPage.tsx
 import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
+import { useNavigate } from 'react-router-dom'; // Ajout de useNavigate
 import { GET_MY_REPORTS } from '../../graphQl/queries/myReports.ts';
 import { AlertCircle, CheckCircle, Clock, FileText, Search } from 'lucide-react';
 import { ReportCardSkeleton } from '../../components/report/ReportCardSkaleton.tsx';
@@ -13,6 +14,7 @@ interface MyReportsData {
 }
 
 const MyReportsPage: React.FC = () => {
+    const navigate = useNavigate(); // Hook pour la navigation
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -36,6 +38,25 @@ const MyReportsPage: React.FC = () => {
                 status: statusFilter || undefined,
             },
             fetchPolicy: 'network-only',
+            // Gestion des erreurs d'authentification
+            onError: (error) => {
+                // Vérifier si l'erreur indique que l'utilisateur n'est pas autorisé
+                if (error.graphQLErrors?.some(err =>
+                    err.extensions?.code === 'UNAUTHENTICATED' ||
+                    err.message.includes('unauthorized') ||
+                    err.message.includes('Unauthorized') ||
+                    err.extensions?.code === 'FORBIDDEN'
+                )) {
+                    navigate('/signIn');
+                }
+                // Ou vérifier les erreurs réseau avec status 401/403
+                if (error.networkError && 'statusCode' in error.networkError) {
+                    const statusCode = (error.networkError as any).statusCode;
+                    if (statusCode === 401 || statusCode === 403) {
+                        navigate('/signIn');
+                    }
+                }
+            }
         }
     );
 
@@ -45,6 +66,23 @@ const MyReportsPage: React.FC = () => {
         {
             variables: { page: 1, limit: 9999 },
             fetchPolicy: 'network-only',
+            // Même gestion d'erreur pour la requête des stats
+            onError: (error) => {
+                if (error.graphQLErrors?.some(err =>
+                    err.extensions?.code === 'UNAUTHENTICATED' ||
+                    err.message.includes('unauthorized') ||
+                    err.message.includes('Unauthorized') ||
+                    err.extensions?.code === 'FORBIDDEN'
+                )) {
+                    navigate('/signIn');
+                }
+                if (error.networkError && 'statusCode' in error.networkError) {
+                    const statusCode = (error.networkError as any).statusCode;
+                    if (statusCode === 401 || statusCode === 403) {
+                        navigate('/signIn');
+                    }
+                }
+            }
         }
     );
 
@@ -217,7 +255,11 @@ const MyReportsPage: React.FC = () => {
 
                 {/* Loading & Error */}
                 {loading && <ReportCardSkeleton />}
-                {error && <div>Error loading reports: {error.message}</div>}
+                {error && (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-400">
+                        Error loading reports: {error.message}
+                    </div>
+                )}
 
                 {/* Reports List or Empty */}
                 {!loading && !error && (
@@ -242,4 +284,3 @@ const MyReportsPage: React.FC = () => {
 };
 
 export default MyReportsPage;
-

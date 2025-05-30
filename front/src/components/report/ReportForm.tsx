@@ -64,10 +64,11 @@ const ReportForm: React.FC<ReportFormProps> = ({
         if (proof) {
             formData.append('proof', proof);
         }
-
+        const token = localStorage.getItem('auth_token');
         try {
             await axios.post('http://localhost:3000/reports', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+                headers: { 'Content-Type': 'multipart/form-data'
+                , Authorization: `Bearer ${token}` },
                 withCredentials: true,
             });
 

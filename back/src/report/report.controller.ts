@@ -15,10 +15,10 @@ import { Express } from 'express';
 
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
-import {GqlAuthGuard} from "src/auth/guards/auth.Guard";
+import {AuthGuard} from "@nestjs/passport";
 
 @Controller('reports')
-@UseGuards(GqlAuthGuard)
+@UseGuards(AuthGuard('jwt'))
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
@@ -34,7 +34,7 @@ export class ReportController {
         }),
       }),
   )
-  @UseGuards(GqlAuthGuard)
+
   async createReport(
       @UploadedFile() file: Express.Multer.File,
       @Body() createReportDto: CreateReportDto,
@@ -43,8 +43,6 @@ export class ReportController {
 
     return this.reportService.createReport(createReportDto, proofPath);
   }
-  @UseGuards(GqlAuthGuard)
-
   @Put(':id')
   async handleAction(
       @Param('id', ParseIntPipe) id: number,
