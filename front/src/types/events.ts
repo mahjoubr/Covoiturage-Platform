@@ -1,17 +1,21 @@
 export enum EventType {
-  POST_UPDATED = 'update_post',
-  NEW_COMMENT = 'new_comment',
-  JOIN_REQUEST = 'join_request',
-  JOIN_ACCEPT = 'join_accepted',
-  RIDE_DELETE = 'ride_deleted',
-  RIDE_START = 'ride_started',
-  REVIEW_ADDED = 'review_added',
+  POST_UPDATED = 'POST_UPDATED',
+  NEW_COMMENT = 'NEW_COMMENT',
+  JOIN_REQUEST = 'JOIN_REQUEST',
+  JOIN_ACCEPT = 'JOIN_ACCEPT',
+  RIDE_DELETE = 'RIDE_DELETE',
+  RIDE_START = 'RIDE_START',
+  REVIEW_ADDED = 'REVIEW_ADDED',
 }
 
-export interface StreamEvent {
-  type: EventType;
-  targetId: number;
-  recipientId: number;
-  payload: any;
-  timestamp: number;
+export interface SSEEventData {
+  type: EventType | 'connection' | 'heartbeat';
+  message?: string;
+  timestamp: string;
+  postId?: number;
+  commentId?: number;
+  groupId?: number;
+  rideId?: number;
+  userId?: number;
+  [key: string]: any;
 }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import ChatSidebar from '../../components/chat/chatSidebar';
 import ChatBox from '../../components/chat/chatBox';
-import { Chat, ChatSidebarProps,User ,Ride,Message} from '../../types/chat.ts';
+import { Chat} from '../../types/chat.ts';
 
 
 const ChatPage: React.FC = () => {
@@ -26,14 +26,15 @@ const handleChatClick = (chat: Chat) => {
             isMobile={isMobile} 
             setIsMobile={setIsMobile} 
             onChatClick={handleChatClick} 
-          />          
+          />    
           {selectedChat ? (
             <ChatBox chatId={selectedChat.id} />
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
               Select a chat to start messaging
             </div>
-          )}
+          )
+          }
         </div>
       </div>
     </div>

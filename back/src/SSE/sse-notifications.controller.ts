@@ -1,80 +1,80 @@
-
+// sse-notifications.controller.ts
 import {
   Controller,
-  Sse,
+  Get,
   Param,
-  Req,
   Res,
-  UseGuards,
+  Headers,
   Logger,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { EventStreamService, StreamEvent } from './sse-subscription.service';
-import { AuthGuard } from '@nestjs/passport';
-
-interface SseMessageEvent {
-  data: string | object;
-  id?: number;
-  type?: string;
-  retry?: number;
-}
+import { Response } from 'express';
+import { SseSubscriptionService } from './sse-subscription.service';
 
 @Controller('events')
-export class EventStreamController {
-  private readonly logger = new Logger(EventStreamController.name);
+export class SseNotificationsController {
+  private readonly logger = new Logger(SseNotificationsController.name);
 
-  constructor(private readonly eventStreamService: EventStreamService) {}
+  constructor(
+    private readonly sseSubscriptionService: SseSubscriptionService,
+  ) {}
 
-  @Sse('stream/:recipientId')
-  @UseGuards(AuthGuard('jwt')) // Add authentication if needed
-  subscribeToEvents(
-    @Param('recipientId') recipientId: number,
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Observable<SseMessageEvent> {
-    // Generate a unique connection ID
-    const connectionId = Math.floor(Math.random() * 1000000000);
+  @Get('stream/:userId')
+  async streamEvents(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Res() response: Response,
+    @Headers('accept') accept: string,
+  ) {
+    // Validate that client accepts SSE
+    if (!accept || !accept.includes('text/event-stream')) {
+      return response.status(400).json({
+        error: 'Client must accept text/event-stream',
+      });
+    }
+
+    this.logger.log(`SSE connection established for user ${userId}`);
 
     // Set SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders(); // Flush the headers to establish the connection
-
-    // Register the connection
-    this.eventStreamService.registerConnection(recipientId, connectionId);
-    this.logger.log(`New SSE connection for user ${recipientId}`);
-
-    // Handle connection close
-    req.on('close', () => {
-      this.eventStreamService.removeConnection(recipientId, connectionId);
-      this.logger.log(`SSE connection closed for user ${recipientId}`);
+    response.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control',
     });
 
-    // Return the observable stream
-    return this.eventStreamService.getStreamForRecipient(recipientId).pipe(
-      map((event) => {
-        this.logger.debug(
-          `Sending event to user ${recipientId}: ${event.type}`,
-        );
-        return {
-          data: this.formatNotification(event),
-          id: event.timestamp,
-          type: event.type,
-          retry: 3000, // Reconnection time in ms
-        };
-      }),
-    );
-  }
+    // Send initial connection message
+    response.write(`data: ${JSON.stringify({
+      type: 'connection',
+      message: 'Connected to notification stream',
+      timestamp: new Date().toISOString(),
+    })}\n\n`);
 
-  private formatNotification(event: StreamEvent): any {
-    return {
-      ...event.payload,
-      type: event.type,
-      timestamp: event.timestamp,
+    // Subscribe user to SSE stream
+    const unsubscribe = this.sseSubscriptionService.subscribe(userId, response);
+
+    // Handle client disconnect
+    const cleanup = () => {
+      this.logger.log(`SSE connection closed for user ${userId}`);
+      unsubscribe();
     };
+
+    response.on('close', cleanup);
+    response.on('error', cleanup);
+
+    // Keep connection alive with periodic heartbeat
+    const heartbeat = setInterval(() => {
+      if (response.writableEnded) {
+        clearInterval(heartbeat);
+        return;
+      }
+      response.write(`data: ${JSON.stringify({
+        type: 'heartbeat',
+        timestamp: new Date().toISOString(),
+      })}\n\n`);
+    }, 30000); // Send heartbeat every 30 seconds
+
+    // Clean up heartbeat on disconnect
+    response.on('close', () => clearInterval(heartbeat));
   }
 }

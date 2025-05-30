@@ -1,4 +1,3 @@
-// src/chat/chat.gateway.ts
 
 import { 
   WebSocketGateway, 
@@ -13,7 +12,6 @@ import { Server, Socket } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 import { MessageService } from '../message/message.service';
 
-// This interface should match your CreateMessageDto
 interface MessagePayload {
   text: string;
   chatId: number;
@@ -22,7 +20,7 @@ interface MessagePayload {
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // For production, specify your frontend URL
+    origin: '*', 
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

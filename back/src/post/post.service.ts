@@ -61,11 +61,13 @@ export class PostService extends GenericService {
     await this.rideService.createRide(rideInput, savedPost);
 
 
-    await this.subscriptionService.subscribe(
+    /*await this.subscriptionService.subscribe(
       postOwnerId,
       post.id,
       'post' 
-    );
+    );*/
+       // await this.notificationService.notifyPostUpdated(postId, userId);
+
     return savedPost;
 
   }
