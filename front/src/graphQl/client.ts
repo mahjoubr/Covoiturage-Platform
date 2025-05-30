@@ -27,10 +27,10 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     for (let err of graphQLErrors) {
       if (err.extensions?.code === 'UNAUTHENTICATED') {
-        window.location.href = '/signIn'; 
+        window.location.replace('/signIn');
       }
       else if (err.extensions?.code === 'FORBIDDEN' || err.extensions?.code === 'NOT_FOUND') {
-      window.location.href = '/404'; 
+      //window.location.replace('/404');
     }
     }
   }
