@@ -31,7 +31,6 @@ import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
     TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription, AppUserRide]),
     MessageModule,
     AppUserRideModule
-    AppUserRideModule
   ],
   controllers: [ChatController],
   providers: [
