@@ -100,7 +100,18 @@ export class AppUserService extends GenericService {
     if (!user) throw new NotFoundException(`User ${id} not found`);
     return user;
   }
+  async searchUsers(
+      searchTerm: string,
+      page: number,
+      limit: number
+  ): Promise<SearchResult<AppUser>> {
+    const queryBuilder = this.appUserRepo.createQueryBuilder("appUser");
 
+    return this.searchService.searchQuery(queryBuilder, searchTerm, [
+      "appUser.name",
+      "appUser.lastName",
+    ], page, limit);
+  }
  
 
 
