@@ -7,6 +7,7 @@ query {
       departure
       arrival
       date
+      state
       post {
         id
         postOwner {
@@ -185,3 +186,12 @@ mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
   }
 }
   `;
+
+export const END_RIDE = gql`
+mutation closeRide($rideId: Int!) {
+  closeRide(rideId: $rideId) {
+    id
+    state
+  }
+}
+    `;

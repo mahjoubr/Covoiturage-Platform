@@ -56,23 +56,16 @@ export class RideResolver {
   @Mutation(() => Ride)
   async createRide(
     @Args('createRideInput') createRideInput: CreateRideInput,
-    @Args('postId') postId: number,  // Accept the postId as a parameter
+    @Args('postId') postId: number,  
   ): Promise<Ride> {
     if (createRideInput.date && typeof createRideInput.date === 'string') {
       createRideInput.date = new Date(createRideInput.date);
     }
-    
-
-  
-  
-    // Find the post by the provided postId
     const post = await this.postrepo.findOne(postId);
   
     if (!post) {
       throw new Error('Post not found');
     }
-  
-    // Create a new Ride and associate it with the found Post
     const ride = await this.rideService.createRide(createRideInput, post);
   
     return ride;
@@ -124,7 +117,14 @@ export class RideResolver {
     }
     
   }
-  
+  @Mutation(() => Ride)
+  @UseGuards(GqlAuthGuard)
+  async closeRide(
+    @Args('rideId',{ type: () => Int }) rideId: number,
+    @CurrentUser() user: AppUser
+  ): Promise<Ride> {
+    return this.rideService.closeRide(rideId, user.id);
+  }
 
   @Query(() => [Ride], { name: 'getRidesByState' })
   async findByState(@Args('state', { type: () => String }) state: RideState): Promise<Ride[]> {
@@ -225,5 +225,6 @@ async getUsersForRide(
     throw error;
   }
 }
+
 }
 
