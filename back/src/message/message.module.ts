@@ -10,7 +10,6 @@ import { PubSub } from 'graphql-subscriptions';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { AppUserModule } from 'src/app-user/app-user.module';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([Message,Chat,AppUser]),
 AppUserModule], 

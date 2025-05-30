@@ -15,14 +15,16 @@ type NavItem = {
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
-
+const userString = localStorage.getItem("user");
+const role = userString ? JSON.parse(userString).role : null;
 const navItems: NavItem[] = [
-    {
-      icon: <GridIcon />,
-      name: "Dashboard",
-      path: "/",
-    },
-    {
+  {
+    icon: <GridIcon />,
+    name: role === "admin" ? "Dashboard" : "Home",
+    path: "/",
+  },
+
+  {
       icon: <UserCircleIcon />,
       name: "User Profile",
       path: "/profile",
