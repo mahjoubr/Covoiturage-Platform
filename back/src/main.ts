@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { AdminService } from './admin/admin.service';
 import * as bodyParser from 'body-parser';
+import { GraphQLExceptionFilter } from './common/filters/graphql-exception.filter';
 dotenv.config();
 
 async function bootstrap() {
@@ -31,6 +32,7 @@ async function bootstrap() {
   const adminService = app.get(AdminService);
   await seedAdmin(adminService);
   app.use('/graphql', graphqlUploadExpress());
+  app.useGlobalFilters(new GraphQLExceptionFilter());
   await app.listen(process.env.APP_PORT ?? 3000, '127.0.0.1'); // or 'localhost'
 }
 bootstrap();

@@ -62,4 +62,17 @@ async updatePhoto(
     return this.appUserService.findById(id);
   }
 
+   @Query(() => AppUser, { name: 'getAppUserById' })
+  async getAppUserById(@Args('id', { type: () => Int }) id: number): Promise<AppUser | null> {
+    const appUser= await this.appUserService.findOne(id);
+    if (!appUser) {
+      throw new NotFoundException('User not found');
+    }
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000/'; 
+
+    appUser.imageUrl = appUser.imageUrl ? `${baseUrl}${appUser.imageUrl}` : null;
+    
+    return appUser;
+  }
+
 }

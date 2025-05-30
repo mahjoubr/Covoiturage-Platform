@@ -9,15 +9,40 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-// HTTP link for queries and mutations
+
+import { onError } from '@apollo/client/link/error';
+
 const httpLink = createHttpLink({
   uri: 'http://localhost:3000/graphql',
 });
 
+const authLink = setContext((_, { headers }) => ({
+  headers: {
+    ...headers,
+    authorization: authToken() ? `Bearer ${authToken()}` : '',
+  },
+}));
+
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors) {
+    for (let err of graphQLErrors) {
+      if (err.extensions?.code === 'UNAUTHENTICATED') {
+        window.location.href = '/signIn'; 
+      }
+      else if (err.extensions?.code === 'FORBIDDEN' || err.extensions?.code === 'NOT_FOUND') {
+      window.location.href = '/404'; 
+    }
+    }
+  }
+
+  if (networkError) {
+    console.error(`[Network error]: ${networkError}`);
+  }
+});
+
+const httpErrorHandledLink = errorLink.concat(authLink.concat(httpLink));
 // Auth middleware for HTTP and WS
 const authToken = () => localStorage.getItem('auth_token');
-
-// WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(createClient({
   url: 'ws://localhost:3000/graphql',
   connectionParams: () => ({
@@ -27,15 +52,6 @@ const wsLink = new GraphQLWsLink(createClient({
   }),
 }));
 
-// Auth link for HTTP requests
-const authLink = setContext((_, { headers }) => ({
-  headers: {
-    ...headers,
-    authorization: authToken() ? `Bearer ${authToken()}` : '',
-  },
-}));
-
-// Split traffic between HTTP and WS
 const splitLink = split(
   ({ query }) => {
     const def = getMainDefinition(query);
@@ -45,10 +61,9 @@ const splitLink = split(
     );
   },
   wsLink,
-  authLink.concat(httpLink)
+  httpErrorHandledLink
 );
 
-// Apollo Client setup
 const client = new ApolloClient({
   link: splitLink,
   cache: new InMemoryCache(),
