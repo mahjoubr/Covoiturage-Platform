@@ -18,15 +18,34 @@ import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { Review } from 'src/review/entities/review.entity';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { SearchService } from 'src/services/searchService';
+import { Subscription } from '@nestjs/graphql';
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chat, User, Ride,Message,AppUser,Review]),
+    TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription, AppUserRide]),
     MessageModule,
+    AppUserRideModule
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway,ChatResolver,UserService,
-     MessageService,RideService,PaginationService,AppUserRideService,AppUserService],
+  providers: [
+    ChatService, 
+    ChatGateway,
+    ChatResolver,
+    UserService,
+    MessageService,
+    RideService,
+    PaginationService,
+    AppUserRideService,
+    AppUserService,
+    SubscriptionService,
+    EventStreamService ,
+    SearchService
+  ],
 })
 export class ChatModule {}
