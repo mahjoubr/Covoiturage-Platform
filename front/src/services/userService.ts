@@ -52,7 +52,7 @@ export const fetchUserPhoto= async () => {
   const { data } = await client.query({
     query: GET_APPUSER_BY_ID,
     variables: { id },
-    fetchPolicy: 'network-only', // Optional: to bypass cache
+    fetchPolicy: 'network-only', 
   });
   return data.getAppUserById;
 };

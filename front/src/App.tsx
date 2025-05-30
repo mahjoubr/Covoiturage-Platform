@@ -21,7 +21,6 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import ChatPage from "./pages/Chat/chatPage";
 import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
-import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
