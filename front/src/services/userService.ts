@@ -1,7 +1,7 @@
 import { ApolloClient } from "@apollo/client";
 import client from "../graphQl/client";
 import { UPDATE_USER, UPDATE_USER_PHOTO } from "../graphQl/mutations/userProfile";
-import { GET_APPUSER_BY_ID, GET_APPUSER_INFO, GET_APPUSER_PHOTO } from "../graphQl/queries/userProfile";
+import { GET_APPUSER_INFO, GET_APPUSER_PHOTO } from "../graphQl/queries/userProfile";
 import { UpdateAppUserInput } from "../types";
 
 export const fetchUserById = async () => {
@@ -11,16 +11,6 @@ export const fetchUserById = async () => {
     return data.getAppUserInfo;
 
 }
-
-export const getUserById = async (id: number) => {
-  const { data } = await client.query({
-    query: GET_APPUSER_BY_ID,
-    variables: { id },
-    fetchPolicy: 'network-only', // Optional: to bypass cache
-  });
-  return data.getAppUserById;
-};
-
 export const fetchUserPhoto= async () => {
   const { data } = await client.query({
     query: GET_APPUSER_PHOTO,

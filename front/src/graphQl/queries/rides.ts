@@ -56,8 +56,8 @@ query {
   `;
 
 export const GET_RIDES_DRIVER_PAGINATED = gql`
-query GetRidesPaginatedByDriver($page: Int!, $limit: Int!, $id: Int) {
-  getRidesPaginatedByDriver(page: $page, limit: $limit, id: $id) {
+query GetRidesPaginatedByDriver($page: Int!, $limit: Int!) {
+  getRidesPaginatedByDriver(page: $page, limit: $limit) {
     data {
       date
       departure
@@ -68,7 +68,6 @@ query GetRidesPaginatedByDriver($page: Int!, $limit: Int!, $id: Int) {
       appUser {
         name
         lastName
-        id
       }
     }
 
@@ -81,8 +80,8 @@ query GetRidesPaginatedByDriver($page: Int!, $limit: Int!, $id: Int) {
 `;
 
 export const GET_RIDES_PASSENGER_PAGINATED = gql`
-query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!,$id: Int) {
-  getRidesPaginatedByPassenger(page: $page, limit: $limit, id: $id) {
+query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
+  getRidesPaginatedByPassenger(page: $page, limit: $limit) {
     data {
       date
       departure
@@ -93,7 +92,6 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!,$id: Int) {
       
         name
         lastName
-        id
       
       }
     }
