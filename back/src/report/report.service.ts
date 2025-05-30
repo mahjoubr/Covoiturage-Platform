@@ -7,27 +7,28 @@ import { AppUser } from '../app-user/entities/app-user.entity';
 import { Ride } from '../ride/entities/ride.entity';
 import { GenericService } from '../services/genericService';
 import { ReportStatus } from '../enums/report-status.enum';
+import { EventStreamService } from '../SSE/sse-subscription.service';
+import { ReportPayload } from '../SSE/ReportPayload';
+import {User} from "src/user/entities/user.entity";
 
 @Injectable()
 export class ReportService extends GenericService {
     constructor(
-        @InjectRepository(Report)
-        private readonly reportRepo: Repository<Report>,
-
-        @InjectRepository(AppUser)
-        private readonly userRepo: Repository<AppUser>,
-
-        @InjectRepository(Ride)
-        private readonly rideRepo: Repository<Ride>,
+        @InjectRepository(Report) private readonly reportRepo: Repository<Report>,
+        @InjectRepository(AppUser) private readonly appUserRepo: Repository<AppUser>,
+        @InjectRepository(Ride) private readonly rideRepo: Repository<Ride>,
+        @InjectRepository(User) private readonly userRepo: Repository<User>,
+        private readonly eventStream: EventStreamService,
     ) {
         super(reportRepo);
     }
 
+
     async createReport(createDto: CreateReportDto, proofPath: string | null): Promise<Report> {
-        const reporter = await this.userRepo.findOneBy({ id: createDto.reporterId });
+        const reporter = await this.appUserRepo.findOneBy({ id: createDto.reporterId });
         if (!reporter) throw new NotFoundException('Reporter not found');
 
-        const reportedUser = await this.userRepo.findOneBy({ id: createDto.reportedUserId });
+        const reportedUser = await this.appUserRepo.findOneBy({ id: createDto.reportedUserId });
         if (!reportedUser) throw new NotFoundException('Reported user not found');
 
         const report = this.reportRepo.create({
@@ -49,7 +50,22 @@ export class ReportService extends GenericService {
             report.proofUrl = `/uploads/proofs/${proofPath.split('\\').pop()}`;
         }
 
-        return this.reportRepo.save(report);
+        const saved = await this.reportRepo.save(report);
+
+        const admin = await this.userRepo.findOne({ where: { role: 'admin' } });
+        if (admin) {
+            const payload: ReportPayload = {
+                reportId: saved.id,
+                subjectType: saved.subjectType,
+                reporterId: reporter.id,
+                reason: saved.reason,
+                status: saved.status,
+            };
+            this.eventStream.emitReportCreated(admin.id, payload);
+            console.log('Report created:', payload);
+        }
+
+        return saved;
     }
 
     async findAll(): Promise<Report[]> {
@@ -63,28 +79,54 @@ export class ReportService extends GenericService {
     async approve(id: number): Promise<Report> {
         const report = await this.reportRepo.findOne({
             where: { id },
-            relations: ['reportedUser'],
+            relations: ['reporter', 'reportedUser'],
         });
         if (!report) throw new NotFoundException(`Report ${id} not found`);
-        report.status = ReportStatus.ACCEPTED;
 
+        report.status = ReportStatus.ACCEPTED;
         const saved = await this.reportRepo.save(report);
 
-        // 2) Décrémentez la note de reportedUser si > 1
-        const user = report.reportedUser;
-        if (user && typeof (user as any).rating === 'number' && (user as any).rating > 1) {
-            (user as any).rating = (user as any).rating - 1;
-            await this.userRepo.save(user);
+        if ((report.reportedUser as any).rating > 1) {
+            (report.reportedUser as any).rating -= 1;
+            await this.appUserRepo.save(report.reportedUser);
         }
 
+        const payload: ReportPayload = {
+            reportId: saved.id,
+            reporterId: report.reporter.id,
+            reason: saved.reason,
+            subjectType: saved.subjectType,
+            status: saved.status,
+        };
+
+        this.eventStream.emitReportApproved(report.reporter.id, payload);
+
+        this.eventStream.emitReportApproved(report.reportedUser.id, payload);
+        console.log('Report approved:', payload);
         return saved;
     }
 
+
     async decline(id: number): Promise<Report> {
-        const report = await this.reportRepo.findOneBy({ id });
+        const report = await this.reportRepo.findOne({
+            where: { id },
+            relations: ['reporter'],
+        });
         if (!report) throw new NotFoundException(`Report ${id} not found`);
+
         report.status = ReportStatus.REJECTED;
-        return this.reportRepo.save(report);
+        const saved = await this.reportRepo.save(report);
+
+        const payload: ReportPayload = {
+            reportId: saved.id,
+            subjectType: saved.subjectType,
+            status: saved.status,
+            reporterId: report.reporter.id,
+            reason: saved.reason,
+        };
+        this.eventStream.emitReportDeclined(report.reporter.id, payload);
+        console.log('Report declined:', payload);
+        return saved;
     }
 
     async remove(id: number): Promise<void> {
