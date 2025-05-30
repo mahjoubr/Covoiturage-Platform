@@ -253,6 +253,7 @@ type Query {
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
