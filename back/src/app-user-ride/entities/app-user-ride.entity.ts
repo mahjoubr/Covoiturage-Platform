@@ -5,18 +5,17 @@ import { Ride } from '../../ride/entities/ride.entity';
 
 
 
-
-@ObjectType() // Add @ObjectType() to expose this as a GraphQL type
+@ObjectType()
 @Entity()
 @Unique(['appUser', 'ride'])
 export class AppUserRide {
   @PrimaryGeneratedColumn()
-  @Field() // Expose this field in GraphQL
+  @Field() 
   id: number;
 
- 
+
   @ManyToOne(() => AppUser, (appUser) => appUser.appUserRides)
-  @Field(() => AppUser) // Expose the related AppUser in GraphQL
+  @Field(() => AppUser) 
   appUser: AppUser;
 
   @ManyToOne(() => Ride, (ride) => ride.appUserRides)

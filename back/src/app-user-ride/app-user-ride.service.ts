@@ -61,4 +61,15 @@ async addPassenger(user: AppUser, ride: Ride): Promise<AppUserRide> {
   
 
 }
-return this.appUserRideRepository.save(entry);}}
+return this.appUserRideRepository.save(entry);}
+async exists(userId: number, rideId: number): Promise<boolean> {
+  const existing = await this.appUserRideRepository.findOne({
+    where: {
+      appUser: { id: userId },
+      ride: { id: rideId },
+    },
+  });
+  return !!existing;
+}
+
+}
