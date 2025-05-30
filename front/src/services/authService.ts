@@ -55,3 +55,8 @@ export async function signup(email: string, password: string, name: string, last
 
  
 }
+
+export const logout = () => {
+  localStorage.removeItem('auth_token');
+  window.location.href = '/signIn'; // Or use navigate('/login') if you're in a React component
+};

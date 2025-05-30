@@ -10,13 +10,11 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
-
-import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
-
+import { CreateRideInput } from './dto/create-ride.input';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
+import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
 import { App } from 'supertest/types';
-import { CreateRideInput } from './dto/create-ride.input';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -29,20 +27,19 @@ export class RideService extends GenericService {
     super(rideRepo);
   }
   async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
-    // Create a new ride and associate it with the post
+    //create a new ride and associate it with the post+post owner
     const ride = this.rideRepo.create({
       ...createRideInput,
-      post, // Associate the ride with the post
+      post,
+      driver:post.postOwner,
     });
-
-    // Save the ride in the database
     return await this.rideRepo.save(ride);
   }
   
   async findByState(state: RideState): Promise<Ride[]> {
     return this.rideRepo.find({
       where: { state },
-      relations: ['appUserRides','post'],
+      relations: ['appUserRides','post','post.postOwner'],
     });
   }
 
@@ -54,20 +51,18 @@ export class RideService extends GenericService {
       relations: ['appUserRides'],
     });
   }
-  // ride.service.ts
 
-async findByDriver(driverId: number): Promise<Ride[]> {
-  return this.rideRepo.find({
-    where: {
-      post: {
-        postOwner: {
-          id: driverId,
-        },
-      },
-    },
-    relations: ['post', 'post.postOwner', 'appUserRides'],
-  });
-}
+  async findByDriver(driverId: number): Promise<Ride[]> {
+    return this.rideRepo
+      .createQueryBuilder('ride')
+      .leftJoinAndSelect('ride.post', 'post')
+      .leftJoinAndSelect('post.postOwner', 'postOwner')
+      .leftJoinAndSelect('ride.appUserRides', 'appUserRide')
+      .leftJoinAndSelect('appUserRide.appUser', 'appUser')
+      .where('postOwner.id = :driverId', { driverId })
+      .getMany();
+  }
+  
 async findPaginatedByDriver(
   driverId: number,
   page = 1,
@@ -112,9 +107,6 @@ async findByPassenger(passengerId: number): Promise<Ride[]> {
     .leftJoinAndSelect('allAppUserRides.appUser', 'eachPassenger')
     .getMany();
 }
-// ride.service.ts
-// ride.service.ts
-// ride.service.ts
 async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   const ride = await this.rideRepo.findOne({ where: { id: rideId } });
   if (!ride) throw new Error('Ride not found');

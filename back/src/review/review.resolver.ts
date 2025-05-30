@@ -10,6 +10,8 @@ import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
 import { Review } from './entities/review.entity';
 import { PaginationResult } from 'src/services/paginationService';
 import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResponse';
+import { GraphQLInt } from 'graphql';
+import { ReviewPaginationResult } from './dto/ReviewPaginationResult';
 
 @Resolver()
 export class ReviewResolver {
@@ -74,4 +76,29 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findByReviewedUserId(userId, page, limit);
   }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => GraphQLInt, { name: 'getAverageRating' })
+  getAverageRating(@CurrentUser() user: AppUser): Promise<number> {
+    return this.reviewService.getAverageRating(user.id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => GraphQLInt, { name: 'getAverageRatingById' })
+  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number> {
+    return this.reviewService.getAverageRating(id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => ReviewPaginationResult, { name: 'getPaginatedMyReviews' }) 
+  async getPaginatedReviews(
+    @CurrentUser() user: AppUser,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 10 }) limit: number,
+    @Args('sortField', { nullable: true, defaultValue: 'createdAt' }) sortField: string,
+    @Args('sortOrder', { nullable: true, defaultValue: 'DESC' }) sortOrder: 'ASC' | 'DESC',
+  ): Promise<PaginationResult<Review>> {
+    return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
+  }
+  
 }

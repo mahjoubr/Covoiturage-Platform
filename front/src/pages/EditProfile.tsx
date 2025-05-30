@@ -1,50 +1,16 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import PageMeta from "../components/common/PageMeta";
-import { Drive, Review, Ride } from "../types";
+import { Drive, Ride } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
-import ReviewCarousel from "../components/UserProfile/ReviewCarousel";
 import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import Review from "../components/UserProfile/Review";
 
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 5,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-  {
-    id: 1,
-    reviewer: { id: 1, username: 'John Doe' },
-    stars: 4,
-    comment: 'Excellent product! Would definitely recommend.',
-    date: '2024-03-15',
-    reviewedUser: {
-      id: 0,
-      username: ""
-    }
-  },
-    {
-      id: 1,
-      reviewer: { id: 1, username: 'John Doe' },
-      stars: 3,
-      comment: 'Excellent product! Would definitely recommend.',
-      date: '2024-03-15',
-      reviewedUser: {
-        id: 0,
-        username: ""
-      }
-    },]
 const UserProfiles= () => { 
   const navigate = useNavigate();
   const [page] = useState(1);
@@ -103,11 +69,14 @@ const UserProfiles= () => {
           <p>Loading driver history...</p>
         ) : errorDriver ? (
           <p>Error loading driver rides</p>
-        ) : (
+        ) : rides.length > 0 ?(
           drives.map((ride: any) => (
             <UserDriveCard key={ride.id} drive={ride} />
           ))
-        )}
+        ) : (
+          <p className="text-gray-500 " >No drives</p>
+        )
+        }
           {drives.map((drive, index) => (
         <UserDriveCard key={index} drive={drive} />
       ))}
@@ -120,27 +89,29 @@ const UserProfiles= () => {
       <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
           History as a rider
       </h2>         
-     {loadingPassenger ? (
-                         <p>Loading rider history...</p>
-                       ) : errorPassenger ? (
-                         <p>Error loading rider rides</p>
-                       ) : (
-                         rides.map((ride, index) => (
-                           <UserRideCard key={index} ride={ride} />
-                         ))
-               
-           )}
-        <div style={{justifySelf: "center"}}>
-        </div>
+      {loadingPassenger ? (
+  <p>Loading rider history...</p>
+) : errorPassenger ? (
+  <p>Error loading rider rides</p>
+) : rides.length > 0 ? (
+  rides.map((ride, index) => (
+    <UserRideCard key={index} ride={ride} />
+  ))
+) : (
+  <p className="text-gray-500 " >No rides</p>
+)}
+
       </div>
       </div>
-      <div className="flex w-full items-center justify-center" >
-      <button  onClick={() => navigate('/rides')}
-         className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto">
-            view more
-        </button>
-        </div>
-            <ReviewCarousel reviews={reviews} />
+      {(drives.length > 0 || rides.length > 0) && (
+  <div className="flex w-full items-center justify-center">
+    <button onClick={() => navigate('/rides')}
+      className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto">
+      view more
+    </button>
+  </div>
+)}
+            <Review />
       
           
         </div>
