@@ -67,7 +67,7 @@ export class ReviewService extends GenericService {
         date: new Date().toISOString().split('T')[0], 
       };
   
-      this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
+      //this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
     }
     
     async deleteReview(userid:number,id: number) {

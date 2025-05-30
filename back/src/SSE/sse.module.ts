@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { EventStreamController } from './sse-notifications.controller';
+import { SseNotificationsController } from './sse-notifications.controller';
 import { EventStreamService } from './sse-subscription.service';
 
 @Module({
-  controllers: [EventStreamController],
+  controllers: [SseNotificationsController],
   providers: [EventStreamService],
   exports: [EventStreamService],
 })
