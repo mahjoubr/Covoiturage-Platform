@@ -15,6 +15,13 @@ query {
           lastName
         }
       }
+      appUserRides {
+      appUser {
+        id
+        name
+        lastName
+      } 
+      }
     }
   }
 `;
@@ -89,7 +96,7 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
       time
       state
       driver{
-      
+        id
         name
         lastName
       
@@ -163,7 +170,6 @@ export const ACCEPT_REQUEST = gql`
 mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
   acceptJoinRequest(requestId:$requestId,rideId: $rideId, userId: $userId) {
     id
-    role
     appUser {
       id
       name

@@ -1,6 +1,6 @@
 import { User } from 'lucide-react';
 import React from 'react';
-import { ACCEPT_REQUEST, DELETE_REQUEST, GET_JOIN_REQUESTS_BY_RIDE } from '../../graphQl/queries/rides';
+import { ACCEPT_REQUEST, DELETE_REQUEST, GET_JOIN_REQUESTS_BY_RIDE, GET_RIDES_BY_DRIVER } from '../../graphQl/queries/rides';
 import { useMutation } from '@apollo/client';
 
 interface User {
@@ -45,10 +45,16 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
   });
 
   const [acceptJoinRequest] = useMutation(ACCEPT_REQUEST, {
-    refetchQueries: [{ 
-      query: GET_JOIN_REQUESTS_BY_RIDE, 
-      variables: { rideId: Number(rideId) } 
-    }],
+    refetchQueries: [
+      { 
+        query: GET_JOIN_REQUESTS_BY_RIDE, 
+        variables: { rideId: Number(rideId) } 
+      },
+      { 
+        query: GET_RIDES_BY_DRIVER, 
+      }
+    ],
+    
     onCompleted: () => {
       console.log('Accept request completed');
     },
