@@ -186,12 +186,14 @@ type PaginatedReviewsResponse {
   currentPage: Int!
 }
 
+
 type ReviewPaginationResult {
   data: [Review!]!
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
 }
+
 
 type JwtAuthResponse {
   accessToken: String!
@@ -242,21 +244,28 @@ type Query {
   getAppUserInfo: AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
+
   getAppUserById(id: Int!): AppUser!
+
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
+
   getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
   getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
+
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
   getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
+
+  isUserInRide(userId: Int!, rideId: Int!): Boolean!
+
   getAllComments: [Comment!]!
   getCommentsByPost(postId: Int!): [Comment!]!
   getChatMessages(chatId: Int!): [Message!]!
@@ -268,9 +277,11 @@ type Query {
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
+
   getAverageRating: Int!
   getAverageRatingById(id: Int!): Int!
   getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
+
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
   getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
