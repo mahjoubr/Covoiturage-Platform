@@ -16,7 +16,11 @@ import { RidePaginationResult } from './dto/ride-pagination-result';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { AppUserWithRole} from 'src/graphql/types/AppUserWithRole';
+import { Roles } from 'src/auth/role.decorator';
 
+
+@UseGuards(GqlAuthGuard)
+@Roles('user') 
 @Resolver(() => Ride)
 export class RideResolver {
   
@@ -118,7 +122,6 @@ export class RideResolver {
     
   }
   @Mutation(() => Ride)
-  @UseGuards(GqlAuthGuard)
   async closeRide(
     @Args('rideId',{ type: () => Int }) rideId: number,
     @CurrentUser() user: AppUser
