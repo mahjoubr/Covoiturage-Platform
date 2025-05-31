@@ -4,8 +4,7 @@ import { Repository } from 'typeorm';
 import { Notification, NotificationStatus } from './entities/notification.entity';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UpdateNotificationInput } from './dto/update-notification.input';
-import { EventStreamService, EventType } from '../SSE/sse-subscription.service';
-import { SubscriptionService } from '../subscription/subscription.service';
+import { EventStreamService, EventType, SseSubscriptionService } from '../SSE/sse-subscription.service';
 
 @Injectable()
 export class NotificationService {
@@ -15,7 +14,7 @@ export class NotificationService {
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
     private readonly eventStreamService: EventStreamService,
-    private readonly subscriptionService: SubscriptionService,
+    private readonly subscriptionService: SseSubscriptionService,
   ) {}
 
   async create(createNotificationInput: CreateNotificationInput): Promise<Notification> {

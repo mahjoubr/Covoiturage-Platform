@@ -1,5 +1,6 @@
-// entities/notification.entity.ts
+
 import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum NotificationStatus {
@@ -47,9 +48,10 @@ export class Notification {
   @Column({ nullable: true })
   actionUrl?: string;
 
-  @Field({ nullable: true })
-  @Column('json', { nullable: true })
-  metadata?: Record<string, any>;
+  @Field(() => GraphQLJSON, { nullable: true })
+@Column('json', { nullable: true })
+metadata?: Record<string, any>;
+
 
   @Field(() => Int, { nullable: true })
   @Column({ nullable: true })

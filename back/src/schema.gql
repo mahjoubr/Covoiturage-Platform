@@ -140,6 +140,32 @@ type AppUserSearchResult {
   currentPage: Float!
 }
 
+type Notification {
+  id: Int!
+  userId: Int!
+  type: String!
+  title: String!
+  message: String!
+  status: NotificationStatus!
+  actionUrl: String
+  metadata: JSON
+  relatedEntityId: Int
+  relatedEntityType: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 type Chat {
   id: Float!
   messages: [Message!]!
@@ -225,13 +251,13 @@ type ReportPagination {
   currentPage: Int!
 }
 
-type Notification {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
 type Query {
   dummyQuery: String
+  notifications: [Notification!]!
+  userNotifications(userId: Int!, limit: Int): [Notification!]!
+  unreadNotifications(userId: Int!): [Notification!]!
+  unreadNotificationCount(userId: Int!): Int!
+  notification(id: Int!): Notification!
   getAppUserInfo: AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
@@ -265,12 +291,16 @@ type Query {
   getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
   getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
-  notification(id: Int!): Notification!
 }
 
 type Mutation {
   register(input: RegisterInput!): AppUser!
   login(input: LoginInput!): JwtAuthResponse!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
+  markNotificationAsRead(id: Int!): Notification!
+  markAllNotificationsAsRead(userId: Int!): Boolean!
+  removeNotification(id: Int!): Notification!
   updateAppUser(updateAppUserInput: UpdateAppUserInput!): AppUser!
   updatePhoto(updatePhotoInput: UploadPhotoInput!): AppUser!
   createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
@@ -289,9 +319,6 @@ type Mutation {
   deleteJoinRequest(postId: Int!): Boolean!
   deleteJoinRequestById(id: Int!): Boolean!
   acceptJoinRequest(requestId: Int!, rideId: Int!, userId: Int!): AppUserRide!
-  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
-  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
-  removeNotification(id: Int!): Notification!
 }
 
 input RegisterInput {
@@ -304,6 +331,35 @@ input RegisterInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input CreateNotificationInput {
+  userId: Int!
+  type: String!
+  title: String!
+  message: String!
+  actionUrl: String
+  metadata: JSONObject
+  relatedEntityId: Int
+  relatedEntityType: String
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+input UpdateNotificationInput {
+  userId: Int
+  type: String
+  title: String
+  message: String
+  actionUrl: String
+  metadata: JSONObject
+  relatedEntityId: Int
+  relatedEntityType: String
+  id: Int!
+  status: NotificationStatus
 }
 
 input UpdateAppUserInput {
@@ -375,15 +431,4 @@ input CreateChatInput {
   driverId: Int!
   riderId: Int!
   rideId: Int!
-}
-
-input CreateNotificationInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input UpdateNotificationInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
 }
