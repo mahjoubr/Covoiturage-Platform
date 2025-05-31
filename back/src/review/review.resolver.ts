@@ -79,13 +79,13 @@ export class ReviewResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRating' })
-  getAverageRating(@CurrentUser() user: AppUser): Promise<number> {
+  getAverageRating(@CurrentUser() user: AppUser): Promise<number | null> {
     return this.reviewService.getAverageRating(user.id);
   }
 
   @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRatingById' })
-  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number> {
+  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number | null> {
     return this.reviewService.getAverageRating(id);
   }
 

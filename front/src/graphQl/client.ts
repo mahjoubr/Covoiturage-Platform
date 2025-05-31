@@ -15,6 +15,7 @@ import { onError } from '@apollo/client/link/error';
 const httpLink = createHttpLink({
   uri: 'http://localhost:3000/graphql',
 });
+const authToken = () => localStorage.getItem('auth_token');
 
 const authLink = setContext((_, { headers }) => ({
   headers: {
@@ -30,7 +31,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         window.location.replace('/signIn');
       }
       else if (err.extensions?.code === 'FORBIDDEN' || err.extensions?.code === 'NOT_FOUND') {
-      window.location.replace('/404');
+        window.location.replace('/404');
     }
     }
   }
@@ -41,8 +42,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const httpErrorHandledLink = errorLink.concat(authLink.concat(httpLink));
-// Auth middleware for HTTP and WS
-const authToken = () => localStorage.getItem('auth_token');
 const wsLink = new GraphQLWsLink(createClient({
   url: 'ws://localhost:3000/graphql',
   connectionParams: () => ({
