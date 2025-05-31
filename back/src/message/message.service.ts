@@ -1,26 +1,79 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Message } from './entities/message.entity';
+import { Repository } from 'typeorm';
+import { Chat } from 'src/chat/entities/chat.entity';
+import { User } from 'src/user/entities/user.entity';
+import { AppUser } from 'src/app-user/entities/app-user.entity';
 
 @Injectable()
 export class MessageService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
+  constructor(
+    @InjectRepository(Message) private messageRepository: Repository<Message>,
+    @InjectRepository(Chat) private chatRepository: Repository<Chat>,
+    @InjectRepository(AppUser) private userRepository: Repository<AppUser>,
+  ) {
+
   }
+  async create(createMessageDto: CreateMessageDto) {
+    if (!createMessageDto.chatId) {
+      throw new Error('Chat ID is required.');
+    }
+  
+    const chat = await this.chatRepository.findOne({ where: { id: createMessageDto.chatId },
+      relations: ['messages'], });
+    if (!chat) {
+      throw new Error('Chat not found.');
+    }
+  
+    const sender = await this.userRepository.findOne({ where: { id: createMessageDto.senderId } });
+    if (!sender) {
+      throw new Error('Sender not found.');
+    }
+  
+    const message = this.messageRepository.create({
+      text: createMessageDto.text,
+      chat: chat,
+      sender: sender,
+    });
+    chat.messages.push(message); 
+
+     await this.chatRepository.save(chat);
+    return this.messageRepository.save(message);
+  }
+  
+  async getChatMessages(chatId: number) {
+    const messages=await this.messageRepository
+      .createQueryBuilder('message')
+      .leftJoinAndSelect('message.sender', 'sender')
+      .leftJoinAndSelect('message.chat', 'chat')
+      .where('chat.id = :id', { id: chatId })
+      .getMany();
+      console.log('messages', messages);
+      return messages;
+
+    };
+  
 
   findAll() {
-    return `This action returns all message`;
+    return this.messageRepository.find({ relations: ['sender', 'chat'] });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} message`;
+    return this.messageRepository.findOne({ where: { id }, relations: ['sender', 'chat'] });
   }
 
   update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
+    return this.messageRepository.update(id, updateMessageDto).then(() => {
+      return this.messageRepository.findOne({ where: { id }, relations: ['sender', 'chat'] });
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} message`;
+    return this.messageRepository.delete(id).then(() => {
+      return { deleted: true };
+    });
   }
 }

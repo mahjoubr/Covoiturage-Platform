@@ -25,6 +25,10 @@ import {EventStreamModule } from './SSE/sse.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { JoinRequestModule } from './join-request/join-request.module';
 import {ReportModule} from "src/report/report.module";
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ChatGateway } from './chat/chat.gateway';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -50,7 +54,7 @@ import {ReportModule} from "src/report/report.module";
         return {
           type: 'mysql',
           host: configService.get('DB_HOST'),
-          port: configService.get<number>('DB_PORT', 3306),
+          port:configService.get<number>('DB_PORT', 3306),
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_DATABASE'),
@@ -62,7 +66,7 @@ import {ReportModule} from "src/report/report.module";
       },
     }),
       AuthModule,
-      GraphqlModule,
+      
       RideModule,
       PostModule,
       CommentModule,
@@ -77,8 +81,23 @@ import {ReportModule} from "src/report/report.module";
       SubscriptionModule,
       JoinRequestModule,
       ReportModule,
-  ],
+      GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
+      installSubscriptionHandlers: true,
+      /*subscriptions: {
+        'graphql-ws': true,
+        'subscriptions-transport-ws': true
+      },*/
+    }),
+        
+      RideModule, PostModule, 
+      CommentModule, MessageModule, ChatModule, ReviewModule, UserModule, AppUserModule, AdminModule, AppUserRideModule, 
+      ReviewModule,EventStreamModule,SubscriptionModule, JoinRequestModule,MessageModule, NotificationModule],
+  
+     
+     
         controllers: [AppController],
-        providers: [AppService, JwtStrategy],
+        providers: [AppService, JwtStrategy,ChatGateway],
 })
 export class AppModule {}

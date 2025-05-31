@@ -22,3 +22,14 @@ export const GET_APPUSER_PHOTO = gql`
     }
   }
 `;
+
+export const GET_APPUSER_BY_ID = gql`
+  query getAppUserById($id: Int!) {
+    getAppUserById(id: $id) {
+      name
+      lastName
+      imageUrl
+      email
+    }
+  }
+`;

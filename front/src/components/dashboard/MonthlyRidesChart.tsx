@@ -82,13 +82,6 @@ export default function InnovativeMonthlyRidesChart({
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const [showFullStats, setShowFullStats] = useState<boolean>(false);
 
-    // Set initial visible range to show the most recent months
-    useEffect(() => {
-        if (sortedData.length > visibleMonths) {
-            setStartIndex(sortedData.length - visibleMonths);
-        }
-    }, [data]);
-
     // Handle empty data case
     if (!data || data.length === 0) {
         return (
@@ -102,8 +95,15 @@ export default function InnovativeMonthlyRidesChart({
         );
     }
 
-    // Sort the data chronologically
+    // Sort the data chronologically - moved before useEffect
     const sortedData = useMemo(() => sortMonthsChronologically(data), [data]);
+
+    // Set initial visible range to show the most recent months
+    useEffect(() => {
+        if (sortedData.length > visibleMonths) {
+            setStartIndex(sortedData.length - visibleMonths);
+        }
+    }, [sortedData, visibleMonths]); // Added sortedData to dependencies
 
     // Calculate visible data range
     const visibleData = useMemo(() => {

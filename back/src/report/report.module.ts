@@ -1,4 +1,3 @@
-// src/report/report.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Report } from './entities/report.entity';
@@ -9,10 +8,13 @@ import { ReportController } from './report.controller';
 import {ReportResolver} from "src/report/report.resolver";
 import {SearchService} from "src/services/searchService";
 import {PaginationService} from "src/services/paginationService";
+import {EventStreamModule} from "src/SSE/sse.module";
+import {User} from "src/user/entities/user.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Report, AppUser, Ride]),
+    TypeOrmModule.forFeature([Report, AppUser, Ride,User]),
+    EventStreamModule,
   ],
   providers: [ReportResolver,ReportService, SearchService,PaginationService],
   controllers: [ReportController],

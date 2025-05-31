@@ -3,38 +3,38 @@ import { useState } from "react";
 import { GET_USERS } from "../../graphQl/queries/users";
 import { Flag, Search, Sparkles, Users } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import {getCurrentUserId} from "../../services/authService.ts";
 
 const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const limit = 5;
-
+const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_USERS, {
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
-  const navigate = useNavigate();
-  
-  const handleReportUser = (userId:number) => {
-    navigate('/report', { state: { reportedUserId: userId } });
+
+  const handleReportUser = async (userId: number) => {
+    const currentUserId = await getCurrentUserId();
+
+    if (userId === currentUserId) {
+
+      alert("You can not report yourself !! ");
+      return;
+    }
+
+    navigate('/report', {state: {reportedUserId: userId}});
   };
 
-  // Gradient card backgrounds
-  const cardGradients = [
-    "from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20",
-    "from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20",
-    "from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20",
-    "from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20",
-    "from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20",
-  ];
 
-  // Button accent colors
-  const buttonAccents = [
-    "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
-    "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
-    "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500",
-    "bg-teal-600 hover:bg-teal-700 focus:ring-teal-500",
-    "bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-500",
+  // Subtle card accent colors
+  const cardAccents = [
+    "border-blue-400",
+    "border-indigo-400",
+    "border-purple-400",
+    "border-teal-400",
+    "border-cyan-400",
   ];
 
   return (

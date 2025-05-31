@@ -1,21 +1,104 @@
-// src/components/chat/ChatBox.tsx
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ChatMessages from './chatMessages';
 import ChatInput from './chatInput';
+import { useMessagesByChat } from '../../hooks/useMessagesByChat';
+import { Chat, Message } from '../../types/chat';
+import { useSocket } from '../../hooks/useSocket';
 
-const ChatBox: React.FC = () => {
+interface ChatBoxProps {
+  chatId: number;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ chatId }) => {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { socket, isConnected } = useSocket();
+  const processedIdsRef = useRef(new Set<number>());
+
+  const token = localStorage.getItem('auth_token');
+  const isLoggedIn = !!token;
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+  const userId = user?.id;
+  console.log("user", user);
+
+  // Get messages for the chat
+  const { loading: messagesLoading, error: messagesError, data: messagesData, refetch } = 
+    useMessagesByChat(chatId, page, limit);
+    
+  useEffect(() => {
+    if (messagesData?.getChatMessages) {
+      setMessages(messagesData.getChatMessages);
+    }
+  }, [messagesData]);
+
+  // Join the chat room when component mounts
+  useEffect(() => {
+    if (socket && isConnected && chatId) {
+      console.log(`Joining chat room: ${chatId}`);
+      socket.emit('joinRoom', chatId);
+      
+      const handleMessageReceived = (newMessage: Message) => {
+        // Check if we've already processed this message ID
+        if (processedIdsRef.current.has(newMessage.id)) {
+          console.log('Skipping duplicate message ID:', newMessage.id);
+          return;
+        }
+
+        console.log("🔔 Socket received message:", newMessage);
+        processedIdsRef.current.add(newMessage.id);
+
+        setMessages(prev => {
+          // Double-check to avoid duplicates (in case multiple components process the same event)
+          const isDuplicate = prev.some(m => m.id === newMessage.id);
+          
+          if (isDuplicate) {
+            console.log('Duplicate message detected, skipping');
+            return prev;
+          }
+
+          return [...prev, newMessage];
+        });
+      };
+    
+      socket.on('messageReceived', handleMessageReceived);
+    
+      return () => {
+        console.log(`Leaving chat room: ${chatId}`);
+        socket.emit('leaveRoom', chatId);
+        socket.off('messageReceived', handleMessageReceived);
+      };
+    }
+  }, [socket, isConnected, chatId]);
+
+  const handleMessageSent = () => {
+    refetch();
+  };
+
+  if (messagesLoading) return <p className="p-4 text-center">Loading...</p>;
+  
+  if (messagesError) return <p className="p-4 text-center text-red-500">Error loading messages</p>;
+
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:w-3/4">
       {/* Chat Header */}
       <div className="sticky flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 xl:px-6">
         <div className="flex items-center gap-3">
           <div className="relative h-12 w-full max-w-[48px] rounded-full">
-            <img src="/images/user/user-17.jpg" alt="profile" className="h-full w-full overflow-hidden rounded-full object-cover object-center" />
+            <img 
+              src={user.imageUrl} 
+              alt={`${user.name}'s profile`}
+              className="h-full w-full overflow-hidden rounded-full object-cover object-center" 
+            />
+            
             <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
           </div>
-
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Conversation            
+          </h4>
           <h5 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Lindsey Curtis
+            {user.name} {user.lastName}
           </h5>
         </div>
 
@@ -33,12 +116,19 @@ const ChatBox: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Chat Messages */}
-      <ChatMessages />
       
-      {/* Chat Input */}
-      <ChatInput />
+      <ChatMessages 
+        messages={messages} 
+        setMessages={setMessages}
+        chatId={chatId} 
+        currentUserId={user.id} 
+      />
+      
+      <ChatInput 
+        chatId={chatId} 
+        senderId={user.id} 
+        onMessageSent={handleMessageSent} 
+      />
     </div>
   );
 };

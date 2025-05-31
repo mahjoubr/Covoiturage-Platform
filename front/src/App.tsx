@@ -21,7 +21,6 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import ChatPage from "./pages/Chat/chatPage";
 import Home from "./pages/Dashboard/Home";
 import Posts from "./pages/Posts/PostsPage";
-import UserProfiles from "./pages/UserProfile";
 import ReviewPage from "./pages/Review/ReviewFormPage";
 import Rides from "./pages/Rides/RidesPage";
 
@@ -33,9 +32,16 @@ import NotificationPage from "./pages/Notification/NotificationPage";
 import ReviewsPage from "./pages/Review/ReviewsPage";
 import UserReviewsPage from "./pages/Review/UserReviews";
 import UsersPage from "./pages/Users/UsersPage";
+import { SocketProvider } from "./hooks/useSocket";
+import { ApolloProvider } from "@apollo/client";
+import client from './graphQl/client';
+import UserProfile from "./pages/UserProfile";
+
 
 export default function App() {
   return (
+     <ApolloProvider client={client}>
+      <SocketProvider>
     <React.Fragment>
       <Router>
         <ScrollToTop />
@@ -45,8 +51,8 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/profile/Edit" element={<EditProfile />} />
-            <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/profile" element={<EditProfile />} />
+            <Route path="/profile/:id" element={ <UserProfile />  } />   
             <Route path="/Users" element={<UsersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
 
@@ -91,5 +97,7 @@ export default function App() {
         </Routes>
       </Router>
       </React.Fragment>
+      </SocketProvider>
+      </ApolloProvider>
         );
 }

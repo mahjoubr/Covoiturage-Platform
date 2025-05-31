@@ -4,6 +4,7 @@ import { Comment } from '../../comment/entities/comment.entity';
 import { Ride } from '../../ride/entities/ride.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne } from 'typeorm';
 import { JoinRequest } from 'src/join-request/entities/join-request.entity';
+import { C } from 'graphql-ws/dist/common-DY-PBNYy';
 
 export enum PostStatus{
   OPEN='open',
@@ -67,5 +68,9 @@ export class Post {
   @Field({ nullable: true })
   @Column({ default: 'OPEN' })
   status: PostStatus;
+
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  chatId: number;
 
 }

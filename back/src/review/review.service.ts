@@ -66,6 +66,7 @@ export class ReviewService extends GenericService {
         rating: stars,
         date: new Date().toISOString().split('T')[0], 
       };
+
   
       this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
     }
@@ -157,6 +158,45 @@ export class ReviewService extends GenericService {
       async findByReviewerIdAndRideId (reviewerId: number, rideId: number) {  
         return this.reviewRepository.find({ where: { reviewer: { id: reviewerId }, ride: { id: rideId } } });
       }
+
+       async findPaginatedByReviewedUserId(
+        reviewedUserId: number,
+        page = 1,
+        limit = 10,
+        sortField: string = 'createdAt',
+        sortOrder: 'ASC' | 'DESC' = 'DESC',
+      ): Promise<PaginationResult<Review>> {
+        const qb = this.reviewRepository
+          .createQueryBuilder('review')
+          .leftJoinAndSelect('review.reviewer', 'reviewer')
+          .leftJoin('review.reviewedUser', 'reviewedUser')
+          .where('reviewedUser.id = :reviewedUserId', { reviewedUserId });
+        
+        // Add sorting
+        if (sortField) {
+          qb.orderBy(`review.${sortField}`, sortOrder);
+        }
+    
+        return this.paginationService.paginateQuery(qb, page, limit);
+      }
+
+      async getAverageRating(userId: number): Promise<number> {
+        const reviews = await this.reviewRepository.find({
+          where: [
+            { reviewedUser: { id: userId } },
+          ],
+        });
+    
+        if (reviews.length === 0) {
+          return 0;
+        }
+        const totalStars = reviews.reduce((sum, review) => sum + review.stars, 0);
+        const averageRating = totalStars / reviews.length;
+    
+        return Math.round(averageRating); 
+      }
+    
+
 
 
 

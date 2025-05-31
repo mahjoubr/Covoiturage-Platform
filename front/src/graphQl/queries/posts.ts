@@ -168,3 +168,9 @@ export const CLOSE_POST = gql`
     closepost(id: $postId)
   }
 `;
+
+export const IS_USER_IN_RIDE = gql`
+  query IsUserInRide($userId: Int!, $rideId: Int!) {
+    isUserInRide(userId: $userId, rideId: $rideId)
+  }
+`;

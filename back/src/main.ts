@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { AdminService } from './admin/admin.service';
 import * as bodyParser from 'body-parser';
+import { GraphQLExceptionFilter } from './common/filters/graphql-exception.filter';
 dotenv.config();
 
 async function bootstrap() {
@@ -16,15 +17,22 @@ async function bootstrap() {
     origin: 'http://localhost:5173',
     credentials: true,
   });
+
   const { graphqlUploadExpress } = require('graphql-upload');
 
-  app.useGlobalPipes(new ValidationPipe(
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+  
+  app.useGlobalPipes(new ValidationPipe());
 
-  ));
 
   const adminService = app.get(AdminService);
   await seedAdmin(adminService);
   app.use('/graphql', graphqlUploadExpress());
+  app.useGlobalFilters(new GraphQLExceptionFilter());
   await app.listen(process.env.APP_PORT ?? 3000, '127.0.0.1'); // or 'localhost'
 }
 bootstrap();
