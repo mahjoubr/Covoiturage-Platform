@@ -1,4 +1,4 @@
-// sse-notifications.controller.ts
+
 import {
   Controller,
   Get,
@@ -25,7 +25,7 @@ export class SseNotificationsController {
     @Res() response: Response,
     @Headers('accept') accept: string,
   ) {
-    // Validate that client accepts SSE
+    // client accepts SSE
     if (!accept || !accept.includes('text/event-stream')) {
       return response.status(400).json({
         error: 'Client must accept text/event-stream',
@@ -34,7 +34,7 @@ export class SseNotificationsController {
 
     this.logger.log(`SSE connection established for user ${userId}`);
 
-    // Set SSE headers
+    //  SSE headers
     response.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
@@ -43,14 +43,13 @@ export class SseNotificationsController {
       'Access-Control-Allow-Headers': 'Cache-Control',
     });
 
-    // Send initial connection message
     response.write(`data: ${JSON.stringify({
       type: 'connection',
       message: 'Connected to notification stream',
       timestamp: new Date().toISOString(),
     })}\n\n`);
 
-    // Subscribe user to SSE stream
+    
     const unsubscribe = this.sseSubscriptionService.subscribe(userId, response);
 
     // Handle client disconnect
@@ -62,7 +61,6 @@ export class SseNotificationsController {
     response.on('close', cleanup);
     response.on('error', cleanup);
 
-    // Keep connection alive with periodic heartbeat
     const heartbeat = setInterval(() => {
       if (response.writableEnded) {
         clearInterval(heartbeat);

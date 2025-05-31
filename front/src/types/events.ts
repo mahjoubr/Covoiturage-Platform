@@ -6,6 +6,7 @@ export enum EventType {
   RIDE_DELETE = 'RIDE_DELETE',
   RIDE_START = 'RIDE_START',
   REVIEW_ADDED = 'REVIEW_ADDED',
+  MESSAGE = 'MESSAGE',
 }
 
 export interface SSEEventData {

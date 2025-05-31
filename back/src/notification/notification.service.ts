@@ -38,6 +38,27 @@ export class NotificationService {
 
     return savedNotification;
   }
+  async messageNotification(
+    userId: number,
+    receiverId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.MESSAGE,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: receiverId,
+      relatedEntityType: 'app-user',
+    });
+
+    return notification;
+  }
 
   async findAll(): Promise<Notification[]> {
     return await this.notificationRepository.find({
@@ -110,7 +131,7 @@ export class NotificationService {
     await this.notificationRepository.remove(notification);
     return notification;
   }
-
+/*
   // Helper methods for creating specific notification types
   async createAndSendNotification(
     userId: number,
@@ -198,7 +219,7 @@ export class NotificationService {
       payload,
     );
   }
-
+/*
   async notifyJoinRequest(
     groupId: number,
     requesterId: number,
@@ -293,5 +314,5 @@ export class NotificationService {
       reviewedUserId,
       'user',
     );
-  }
+  }*/
 }

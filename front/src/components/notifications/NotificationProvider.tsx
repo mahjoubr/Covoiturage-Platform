@@ -38,6 +38,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getNotificationTitle = (type: EventType): string => {
     const titles: Record<EventType, string> = {
+      [EventType.MESSAGE]: 'New Message',
       [EventType.POST_UPDATED]: 'Post Updated',
       [EventType.NEW_COMMENT]: 'New Comment',
       [EventType.JOIN_REQUEST]: 'Join Request',

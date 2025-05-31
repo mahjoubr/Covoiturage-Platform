@@ -1,6 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsOptional, IsNumber, IsObject } from 'class-validator';
-import { GraphQLJSONObject } from 'graphql-type-json'; // ✅ Import
+import { GraphQLJSONObject } from 'graphql-type-json';
 
 @InputType()
 export class CreateNotificationInput {
@@ -29,7 +29,7 @@ export class CreateNotificationInput {
   @IsOptional()
   actionUrl?: string;
 
-  @Field(() => GraphQLJSONObject, { nullable: true }) // ✅ Corrected type
+  @Field(() => GraphQLJSONObject, { nullable: true }) 
   @IsObject()
   @IsOptional()
   metadata?: Record<string, any>;

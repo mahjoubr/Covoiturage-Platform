@@ -1,6 +1,20 @@
-// sse-subscription.service.ts
+
 import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+interface EventData {
+  type: EventType;
+  targetId: number;
+  recipientId?: number;
+  payload: any;
+}
+
+
+interface SSEConnection {
+  userId: number;
+  response: Response;
+  lastActivity: Date;
+}
 
 export enum EventType {
   POST_UPDATED = 'POST_UPDATED',
@@ -10,29 +24,19 @@ export enum EventType {
   RIDE_DELETE = 'RIDE_DELETE',
   RIDE_START = 'RIDE_START',
   REVIEW_ADDED = 'REVIEW_ADDED',
+  MESSAGE = 'MESSAGE',
 }
 
-interface EventData {
-  type: EventType;
-  targetId: number;
-  recipientId?: number;
-  payload: any;
-}
-
-interface SSEConnection {
-  userId: number;
-  response: Response;
-  lastActivity: Date;
-}
 
 @Injectable()
 export class SseSubscriptionService {
   private readonly logger = new Logger(SseSubscriptionService.name);
   private connections = new Map<number, SSEConnection>();
 
-  /**
-   * Subscribe a user to SSE events
-   */
+  
+  
+
+
   subscribe(userId: number, response: Response): () => void {
     const connection: SSEConnection = {
       userId,
@@ -43,16 +47,13 @@ export class SseSubscriptionService {
     this.connections.set(userId, connection);
     this.logger.log(`User ${userId} subscribed to SSE events`);
 
-    // Return unsubscribe function
+    
     return () => {
       this.connections.delete(userId);
       this.logger.log(`User ${userId} unsubscribed from SSE events`);
     };
   }
 
-  /**
-   * Send event to a specific user
-   */
   async sendEventToUser(userId: number, eventData: EventData): Promise<boolean> {
     const connection = this.connections.get(userId);
     
@@ -87,9 +88,7 @@ export class SseSubscriptionService {
     }
   }
 
-  /**
-   * Send event to multiple users
-   */
+ 
   async sendEventToUsers(userIds: number[], eventData: EventData): Promise<void> {
     const promises = userIds.map(userId => 
       this.sendEventToUser(userId, eventData)
@@ -98,16 +97,12 @@ export class SseSubscriptionService {
     await Promise.all(promises);
   }
 
-  /**
-   * Get all active connections
-   */
+
   getActiveConnections(): number[] {
     return Array.from(this.connections.keys());
   }
 
-  /**
-   * Clean up stale connections
-   */
+ 
   cleanupStaleConnections(): void {
     const now = new Date();
     const staleThreshold = 5 * 60 * 1000; // 5 minutes
@@ -129,6 +124,7 @@ export class EventStreamService {
 
   constructor(
     private readonly sseSubscriptionService: SseSubscriptionService,
+    private readonly subscriptionService: SubscriptionService
   ) {
     // Clean up stale connections every 5 minutes
     setInterval(() => {
@@ -136,9 +132,7 @@ export class EventStreamService {
     }, 5 * 60 * 1000);
   }
 
-  /**
-   * Emit event to a specific user
-   */
+
   async emitEvent(eventData: EventData): Promise<void> {
     if (eventData.recipientId) {
       await this.sseSubscriptionService.sendEventToUser(
@@ -158,8 +152,7 @@ export class EventStreamService {
     targetType: string,
     payload: any,
   ): Promise<void> {
-    // TODO: Implement logic to get subscribers from database
-    // For now, this is a placeholder
+  
     const subscribers = await this.getSubscribers(targetId, targetType);
     
     const eventData: EventData = {
@@ -171,22 +164,13 @@ export class EventStreamService {
     await this.sseSubscriptionService.sendEventToUsers(subscribers, eventData);
   }
 
-  /**
-   * Get subscribers for a target - implement based on your database schema
-   */
-  private async getSubscribers(targetId: number, targetType: string): Promise<number[]> {
-    // TODO: Implement based on your subscription/follow system
-    // This should query your database to find users who should receive notifications
-    // for the given target (e.g., users who follow a post, group members, etc.)
+ 
+  async getSubscribers(targetId: number, targetType: string): Promise<number[]> {
+
     
-    // Example implementation:
-    // if (targetType === 'post') {
-    //   return await this.subscriptionService.getPostSubscribers(targetId);
-    // }
-    // if (targetType === 'group') {
-    //   return await this.subscriptionService.getGroupMembers(targetId);
-    // }
+    return this.subscriptionService.getSubscribers(targetId, targetType);
     
-    return []; // Return empty array for now
+    
   }
 }
+

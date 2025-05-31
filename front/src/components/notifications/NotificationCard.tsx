@@ -82,7 +82,7 @@ export default NotificationCard;
 import React from 'react';
 import { formatTimeAgo } from './utils';
 import { Notification } from '../../types';
-import { useNotifications } from './Notifications';
+//import { useNotifications } from './Notifications';
 import { EventType } from '../../types/events';
 
 const getNotificationIcon = (type: string) => {
@@ -103,11 +103,11 @@ interface NotificationCardProps {
 }
 
 const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => {
-  const { markAsRead } = useNotifications();
+ // const { markAsRead } = useNotifications();
 
   const handleClick = () => {
     if (!notification.read) {
-      markAsRead(notification.id);
+     // markAsRead(notification.id);
     }
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl;
