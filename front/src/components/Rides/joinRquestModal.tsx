@@ -95,10 +95,11 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
     });
     createChat({
       variables:{
+        createChatInput:{
         rideId:Number(rideId),
-        userId:Number(userId)
-      }
-    })
+        riderId:Number(userId)
+      }}
+    });
   };
 
   return (

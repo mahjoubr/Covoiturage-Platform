@@ -42,9 +42,12 @@ export class RideResolver {
   @Query(() => Ride, { name: 'getRideById' })
   async findOne(@Args('id', { type: () => String }) id: string): Promise<Ride> {
     const ride = await this.rideService.findOne(+id);
+    if (!ride) {
+throw new Error('Ride not found'); 
+}
     return {
       ...ride,
-      date: ride.date instanceof Date ? ride.date : new Date(ride.date)
+      date: ride?.date instanceof Date ? ride.date : new Date(ride?.date)
     };
   }
 
