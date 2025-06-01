@@ -28,10 +28,11 @@ export class PostResolver {
       @Args('searchTerm', { nullable: true }) searchTerm?: string,
       @Args('page', { type: () =>Int, nullable: true }) page = 1,
       @Args('limit', { type: () => Int, nullable: true }) limit = 10,
+      @Args('filter', { nullable: true }) filter?: string,
     ): Promise<PostPaginatedResponse> {
       console.log('Resolver executed with searchTerm:', searchTerm);
   
-      const result = await this.postService.findAllWithSearch(searchTerm, page, limit);
+      const result = await this.postService.findAllWithSearch(searchTerm, page, limit,filter);
       console.log('Search result:', result);
   
       return {

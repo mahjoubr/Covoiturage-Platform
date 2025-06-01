@@ -32,10 +32,9 @@ export const GET_POSTS = gql`
   }
 }
 `;
-*/
-export const GET_POSTS = gql`
-  query GetPosts($searchTerm: String, $page: Int, $limit: Int) {
-    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+*/export const GET_POSTS = gql`
+  query GetPosts($searchTerm: String, $page: Int, $limit: Int, $filter: String) {
+    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit, filter: $filter) {
       data {
         id
         destination
