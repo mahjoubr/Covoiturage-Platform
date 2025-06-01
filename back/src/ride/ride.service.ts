@@ -203,7 +203,13 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
   return users;
 }
 
+async findOne(id: number): Promise<Ride | null>{
+  return this.rideRepo.findOne({
+  where: { id },
+  relations: ['driver'],
+});
 
+}
 
 async closeRide(rideId: number, userId: number): Promise<Ride> {
   const ride = await this.rideRepo.findOne({
