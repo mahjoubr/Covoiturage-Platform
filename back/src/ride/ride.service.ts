@@ -24,7 +24,7 @@ export class RideService extends GenericService {
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
   private readonly EventStreamService: EventStreamService,
-  private readonly searchService: SearchService, // Assuming you have a SearchService for searching
+  private readonly searchService: SearchService, 
   
 
 ){
@@ -32,7 +32,6 @@ export class RideService extends GenericService {
     super(rideRepo);
   }
   async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
-    //create a new ride and associate it with the post+post owner
     const ride = this.rideRepo.create({
       ...createRideInput,
       post,
@@ -147,7 +146,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
     const result = await this.rideRepo
         .createQueryBuilder('ride')
-        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') // ensures month is a string like '2025-12'
+        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') 
         .addSelect('COUNT(*)', 'count')
         .groupBy('month')
         .orderBy('month', 'DESC')
@@ -155,7 +154,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
         .getRawMany();
 
     return result.map(row => ({
-      month: row.month,                  // Make sure 'month' is a string
+      month: row.month,                  
       count: parseInt(row.count, 10),
     }));
   }
@@ -193,12 +192,10 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   const users: AppUserWithRole[] = [];
 
-  // Add driver if exists
   if (ride.driver) {
     users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
   }
 
-  // Add passengers
   ride.appUserRides.forEach((appUserRide) => {
     if (appUserRide.appUser) {
       users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
@@ -208,7 +205,34 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
   return users;
 }
 
-// Add this method to your RideService class
+
+
+async closeRide(rideId: number, userId: number): Promise<Ride> {
+  const ride = await this.rideRepo.findOne({
+    where: { id: rideId },
+    relations: ['driver'],
+  });
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  // Verify the ride has a driver and the user is the driver
+  if (!ride.driver || ride.driver.id !== userId) {
+    throw new Error('Only the driver can close a ride');
+  }
+
+  // Check if ride is already closed
+  if (ride.state === RideState.CLOSED) {
+    throw new Error('Ride is already closed');
+  }
+
+  ride.state = RideState.CLOSED;
+  return await this.rideRepo.save(ride);
+}
+
+
+
 async searchRidesByUser(
   userId: number,
   searchTerm: string,
@@ -223,7 +247,6 @@ async searchRidesByUser(
     .leftJoinAndSelect('ride.appUserRides', 'appUserRides')
     .leftJoinAndSelect('appUserRides.appUser', 'rideUser');
 
-  // Apply filter based on filterType
   if (filterType === 'yourRides') {
     queryBuilder = queryBuilder.where('post.postOwnerId = :userId', { userId });
   } else if (filterType === 'ridesTaken') {
@@ -231,14 +254,12 @@ async searchRidesByUser(
       .innerJoin('ride.appUserRides', 'userRides')
       .where('userRides.appUserId = :userId', { userId });
   } else {
-    // Show all rides for the user (both as driver and passenger)
     queryBuilder = queryBuilder.where(
       '(post.postOwnerId = :userId OR EXISTS (SELECT 1 FROM app_user_ride aur WHERE aur.rideId = ride.id AND aur.appUserId = :userId))',
       { userId }
     );
   }
 
-  // Apply search using SearchService
   const searchFields = [
     'ride.departure',
     'ride.arrival',
