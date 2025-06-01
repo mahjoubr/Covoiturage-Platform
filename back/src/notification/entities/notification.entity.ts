@@ -1,4 +1,3 @@
-
 import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
@@ -6,7 +5,6 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 export enum NotificationStatus {
   UNREAD = 'UNREAD',
   READ = 'READ',
-  ARCHIVED = 'ARCHIVED',
 }
 
 registerEnumType(NotificationStatus, {
@@ -44,14 +42,25 @@ export class Notification {
   })
   status: NotificationStatus;
 
+  // Add computed field for frontend compatibility
+  @Field(() => Boolean)
+  get read(): boolean {
+    return this.status === NotificationStatus.READ;
+  }
+
+  // Add computed field for frontend compatibility  
+  @Field()
+  get timestamp(): Date {
+    return this.createdAt;
+  }
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   actionUrl?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
-@Column('json', { nullable: true })
-metadata?: Record<string, any>;
-
+  @Column('json', { nullable: true })
+  metadata?: Record<string, any>;
 
   @Field(() => Int, { nullable: true })
   @Column({ nullable: true })

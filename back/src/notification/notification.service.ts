@@ -52,13 +52,13 @@ export class NotificationService {
     chatId, 
   };
     const notification = await this.create({
-      userId,
+      userId: receiverId,
       type: EventType.MESSAGE,
       title,
       message,
       actionUrl,
       metadata: finalMetadata,
-      relatedEntityId: receiverId,
+      relatedEntityId: userId,
       relatedEntityType: 'app-user',
        
     });

@@ -363,9 +363,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         return `/ride/${data.rideId}`;
       case EventType.JOIN_REQUEST:
       case EventType.JOIN_ACCEPT:
-        return `/group/${data.groupId}`;
+        return `/post/${data.groupId}`;
       case EventType.REVIEW_ADDED:
-        return `/user/${data.userId}`;
+        return `/profile/${data.userId}`;
       default:
         return '/notifications';
     }

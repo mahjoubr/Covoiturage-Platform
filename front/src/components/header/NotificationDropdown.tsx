@@ -636,7 +636,7 @@ export default function NotificationDropdown() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatDate(notification.timestamp.toISOString())}
+{formatDate(new Date(notification.timestamp).toISOString())}
                       </span>
                       
                       {!notification.read && (

@@ -34,6 +34,7 @@ export class MessageService {
     if (!sender) {
       throw new Error('Sender not found.');
     }
+    console.log('sender', sender);
   
     const message = this.messageRepository.create({
       text: createMessageDto.text,

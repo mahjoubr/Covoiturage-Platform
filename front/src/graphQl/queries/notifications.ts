@@ -1,17 +1,19 @@
-
 import { gql } from '@apollo/client';
 
-/*
-export const GET_USER_NOTIFICATIONS = gql`
-  query GetUserNotifications($userId: Int!, $limit: Int) {
-    userNotifications(userId: $userId, limit: $limit) {
+// Queries
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($userId: Int!, $limit: Int, $offset: Int) {
+    notifications(userId: $userId, limit: $limit, offset: $offset) {
       id
       type
       title
       message
       status
+      read
+      timestamp
       actionUrl
       metadata
+      userId
       relatedEntityId
       relatedEntityType
       createdAt
@@ -27,6 +29,9 @@ export const GET_UNREAD_NOTIFICATIONS = gql`
       type
       title
       message
+      status
+      read
+      timestamp
       actionUrl
       metadata
       createdAt
@@ -35,8 +40,29 @@ export const GET_UNREAD_NOTIFICATIONS = gql`
 `;
 
 export const GET_UNREAD_COUNT = gql`
-  query GetUnreadNotificationCount($userId: Int!) {
-    unreadNotificationCount(userId: $userId)
+  query GetUnreadCount($userId: Int!) {
+    unreadNotificationsCount(userId: $userId)
+  }
+`;
+
+export const GET_SINGLE_NOTIFICATION = gql`
+  query GetNotification($id: Int!) {
+    notification(id: $id) {
+      id
+      type
+      title
+      message
+      status
+      read
+      timestamp
+      actionUrl
+      metadata
+      userId
+      relatedEntityId
+      relatedEntityType
+      createdAt
+      updatedAt
+    }
   }
 `;
 
@@ -49,25 +75,30 @@ export const CREATE_NOTIFICATION = gql`
       title
       message
       status
+      read
       actionUrl
+      userId
       createdAt
     }
   }
 `;
 
-export const MARK_NOTIFICATION_AS_READ = gql`
-  mutation MarkNotificationAsRead($id: Int!) {
-    markNotificationAsRead(id: $id) {
+export const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationRead($notificationId: Int!) {
+    markNotificationRead(notificationId: $notificationId) {
       id
       status
+      read
       updatedAt
     }
   }
 `;
 
-export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
-  mutation MarkAllNotificationsAsRead($userId: Int!) {
-    markAllNotificationsAsRead(userId: $userId)
+export const MARK_ALL_NOTIFICATIONS_READ = gql`
+  mutation MarkAllNotificationsRead($userId: Int!) {
+    markAllNotificationsRead(userId: $userId) {
+      count
+    }
   }
 `;
 
@@ -76,66 +107,36 @@ export const UPDATE_NOTIFICATION = gql`
     updateNotification(updateNotificationInput: $updateNotificationInput) {
       id
       status
+      read
       updatedAt
     }
   }
 `;
 
 export const DELETE_NOTIFICATION = gql`
-  mutation DeleteNotification($id: Int!) {
-    removeNotification(id: $id) {
-      id
-    }
-  }
-`;
-
-*/
-
-
-export const GET_NOTIFICATIONS = gql`
-  query GetNotifications($userId: ID!, $limit: Int, $offset: Int) {
-    notifications(userId: $userId, limit: $limit, offset: $offset) {
-      id
-      type
-      title
-      message
-      timestamp
-      read
-      actionUrl
-      metadata
-      userId
-    }
-  }
-`;
-
-export const MARK_NOTIFICATION_READ = gql`
-  mutation MarkNotificationRead($notificationId: ID!) {
-    markNotificationRead(notificationId: $notificationId) {
-      id
-      read
-    }
-  }
-`;
-
-export const MARK_ALL_NOTIFICATIONS_READ = gql`
-  mutation MarkAllNotificationsRead($userId: ID!) {
-    markAllNotificationsRead(userId: $userId) {
-      count
-    }
-  }
-`;
-
-export const DELETE_NOTIFICATION = gql`
-  mutation DeleteNotification($notificationId: ID!) {
+  mutation DeleteNotification($notificationId: Int!) {
     deleteNotification(notificationId: $notificationId) {
       id
     }
   }
 `;
 
-export const GET_UNREAD_COUNT = gql`
-  query GetUnreadCount($userId: ID!) {
-    unreadNotificationsCount(userId: $userId)
+// Alternative queries for backwards compatibility
+export const GET_USER_NOTIFICATIONS = gql`
+  query GetUserNotifications($userId: Int!, $limit: Int) {
+    notifications(userId: $userId, limit: $limit) {
+      id
+      type
+      title
+      message
+      status
+      read
+      actionUrl
+      metadata
+      relatedEntityId
+      relatedEntityType
+      createdAt
+      updatedAt
+    }
   }
 `;
-

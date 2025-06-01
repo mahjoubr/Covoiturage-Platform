@@ -1,9 +1,14 @@
-// notification.resolver.ts
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ObjectType, Field } from '@nestjs/graphql';
 import { NotificationService } from './notification.service';
 import { Notification, NotificationStatus } from './entities/notification.entity';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UpdateNotificationInput } from './dto/update-notification.input';
+
+@ObjectType()
+class MarkAllAsReadResponse {
+  @Field(() => Int)
+  count: number;
+}
 
 @Resolver(() => Notification)
 export class NotificationResolver {
@@ -16,15 +21,17 @@ export class NotificationResolver {
     return this.notificationService.create(createNotificationInput);
   }
 
-  @Query(() => [Notification], { name: 'notifications' })
+  @Query(() => [Notification], { name: 'allNotifications' })
   findAllNotifications() {
     return this.notificationService.findAll();
   }
 
-  @Query(() => [Notification], { name: 'userNotifications' })
+  // Updated to match frontend query - supports userId, limit, and offset
+  @Query(() => [Notification], { name: 'notifications' })
   findUserNotifications(
     @Args('userId', { type: () => Int }) userId: number,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('offset', { type: () => Int, nullable: true }) offset?: number,
   ) {
     return this.notificationService.findByUserId(userId, limit);
   }
@@ -36,7 +43,8 @@ export class NotificationResolver {
     return this.notificationService.findUnreadByUserId(userId);
   }
 
-  @Query(() => Int, { name: 'unreadNotificationCount' })
+  // Fixed query name to match frontend
+  @Query(() => Int, { name: 'unreadNotificationsCount' })
   getUnreadCount(
     @Args('userId', { type: () => Int }) userId: number
   ) {
@@ -58,21 +66,24 @@ export class NotificationResolver {
     );
   }
 
+  // Fixed mutation name to match frontend
   @Mutation(() => Notification)
-  markNotificationAsRead(@Args('id', { type: () => Int }) id: number) {
-    return this.notificationService.markAsRead(id);
+  markNotificationRead(@Args('notificationId', { type: () => Int }) notificationId: number) {
+    return this.notificationService.markAsRead(notificationId);
   }
 
-  @Mutation(() => Boolean)
-  async markAllNotificationsAsRead(
+  // Fixed mutation name to match frontend
+  @Mutation(() => MarkAllAsReadResponse)
+  async markAllNotificationsRead(
     @Args('userId', { type: () => Int }) userId: number
   ) {
-    await this.notificationService.markAllAsRead(userId);
-    return true;
+    const count = await this.notificationService.markAllAsRead(userId);
+    return { count };
   }
 
+  // Fixed mutation name to match frontend
   @Mutation(() => Notification)
-  removeNotification(@Args('id', { type: () => Int }) id: number) {
-    return this.notificationService.remove(id);
+  deleteNotification(@Args('notificationId', { type: () => Int }) notificationId: number) {
+    return this.notificationService.remove(notificationId);
   }
 }
