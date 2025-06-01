@@ -62,7 +62,7 @@ type AppUser {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
 }
 
@@ -106,7 +106,7 @@ type AppUserWithRole {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
   roleInRide: Role!
 }
@@ -163,6 +163,8 @@ type Notification {
   title: String!
   message: String!
   status: NotificationStatus!
+  read: Boolean!
+  timestamp: DateTime!
   actionUrl: String
   metadata: JSON
   relatedEntityId: Int
@@ -174,13 +176,16 @@ type Notification {
 enum NotificationStatus {
   UNREAD
   READ
-  ARCHIVED
 }
 
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+type MarkAllAsReadResponse {
+  count: Int!
+}
 
 type DashboardStatsType {
   userCount: Int!
@@ -305,10 +310,10 @@ type Query {
   getChatMessages(chatId: Int!): [Message!]!
   messages: [Message!]!
   message(id: Int!): Message!
-  notifications: [Notification!]!
-  userNotifications(userId: Int!, limit: Int): [Notification!]!
+  allNotifications: [Notification!]!
+  notifications(userId: Int!, limit: Int, offset: Int): [Notification!]!
   unreadNotifications(userId: Int!): [Notification!]!
-  unreadNotificationCount(userId: Int!): Int!
+  unreadNotificationsCount(userId: Int!): Int!
   notification(id: Int!): Notification!
   getChats(userId: Int!): [Chat!]!
   getChat(chatId: Int!): Chat!
@@ -335,6 +340,7 @@ type Mutation {
   createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
+  closeRide(rideId: Int!): Ride!
   createPost(createPostInput: CreatePostInput!): Post!
   deletePost(id: Int!): Boolean!
   closepost(id: Int!): Boolean!
@@ -344,9 +350,9 @@ type Mutation {
   removeMessage(id: Int!): Boolean!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
-  markNotificationAsRead(id: Int!): Notification!
-  markAllNotificationsAsRead(userId: Int!): Boolean!
-  removeNotification(id: Int!): Notification!
+  markNotificationRead(notificationId: Int!): Notification!
+  markAllNotificationsRead(userId: Int!): MarkAllAsReadResponse!
+  deleteNotification(notificationId: Int!): Notification!
   CreateChat(createChatInput: CreateChatInput!): Chat
   RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
