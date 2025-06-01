@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Report } from "../types/report";
-export type ReportAction = 'approve' | 'decline' | 'delete';
+
 const API_BASE = 'http://localhost:3000';
 
 export async function handleReportAction(
@@ -8,20 +8,23 @@ export async function handleReportAction(
     action: 'approve' | 'decline' | 'delete'
 ): Promise<Report | void> {
     const url = `${API_BASE}/reports/${id}`;
+    const token = localStorage.getItem('auth_token');
+    const config = {
+        params: { action },
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
 
     switch (action) {
         case 'approve':
         case 'decline': {
-            const response = await axios.put<Report>(
-                url,
-                {},
-                { params: { action } }
-            );
+            const response = await axios.put<Report>(url, {}, config);
             return response.data;
         }
 
         case 'delete': {
-            await axios.put(url, {}, { params: { action } });
+            await axios.put(url, {}, config);
             return;
         }
 
@@ -37,5 +40,5 @@ export function setProofUrl(report: Report): Report {
             report.proofUrl = `${API_BASE}${report.proofUrl}`;
         }
     }
-    return report
+    return report;
 }

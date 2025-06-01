@@ -37,6 +37,7 @@ type Post {
   postOwner: AppUser!
   listRide: [Ride!]
   status: String
+  chatId: Int
 }
 
 type Review {
@@ -139,6 +140,88 @@ type AppUserSearchResult {
   currentPage: Float!
 }
 
+type Chat {
+  id: Float!
+  messages: [Message!]!
+  driver: AppUser!
+  rider: AppUser!
+  ride: Ride!
+}
+
+type Message {
+  id: Int!
+  text: String!
+  chat: Chat!
+  createdAt: DateTime!
+  sender: AppUser!
+}
+
+type Notification {
+  id: Int!
+  userId: Int!
+  type: String!
+  title: String!
+  message: String!
+  status: NotificationStatus!
+  actionUrl: String
+  metadata: JSON
+  relatedEntityId: Int
+  relatedEntityType: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type DashboardStatsType {
+  userCount: Int!
+  rideCount: Int!
+  postCount: Int!
+  reviewCount: Int!
+  reportCount: Int!
+  commentCount: Int!
+}
+
+type RidesPerMonth {
+  month: String!
+  count: Int!
+}
+
+type DashboardData {
+  stats: DashboardStatsType!
+  ridesPerMonth: [RidesPerMonth!]!
+  recentRides: [Ride!]!
+  recentUsers: [AppUser!]!
+}
+
+type Report {
+  id: Int!
+  subjectType: String!
+  reporter: AppUser!
+  reportedUser: AppUser!
+  reportedRide: Ride
+  reason: String!
+  proofPath: String
+  proofUrl: String
+  status: ReportStatus!
+  createdAt: DateTime!
+}
+
+enum ReportStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 type UserInfo {
   id: Float!
   name: String!
@@ -169,29 +252,11 @@ type PaginatedReviewsResponse {
   currentPage: Int!
 }
 
-type JwtAuthResponse {
-  accessToken: String!
-  refreshToken: String
-  user: User!
-}
-
-type Report {
-  id: Int!
-  subjectType: String!
-  reporter: AppUser!
-  reportedUser: AppUser!
-  reportedRide: Ride
-  reason: String!
-  proofPath: String
-  proofUrl: String
-  status: ReportStatus!
-  createdAt: DateTime!
-}
-
-enum ReportStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+type ReviewPaginationResult {
+  data: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
 }
 
 type ReportPagination {
@@ -208,25 +273,10 @@ type ReportPagination {
   currentPage: Int!
 }
 
-type DashboardStatsType {
-  userCount: Int!
-  rideCount: Int!
-  postCount: Int!
-  reviewCount: Int!
-  reportCount: Int!
-  commentCount: Int!
-}
-
-type RidesPerMonth {
-  month: String!
-  count: Int!
-}
-
-type DashboardData {
-  stats: DashboardStatsType!
-  ridesPerMonth: [RidesPerMonth!]!
-  recentRides: [Ride!]!
-  recentUsers: [AppUser!]!
+type JwtAuthResponse {
+  accessToken: String!
+  refreshToken: String
+  user: User!
 }
 
 type Query {
@@ -234,15 +284,15 @@ type Query {
   getAppUserInfo: AppUser!
   getUsers(searchTerm: String!, page: Int! = 1, limit: Int! = 10): AppUserSearchResult!
   getUserById(id: Int!): AppUser
-  getDashboardData: DashboardData!
+  getAppUserById(id: Int!): AppUser!
   getAllRides: [Ride!]!
   getRideById(id: String!): Ride!
   getCommonRides(userId1: Int!, userId2: Int!): [Ride!]!
   getRidesByState(state: String!): [Ride!]!
   getRidesByDateRange(startDate: DateTime!, endDate: DateTime!): [Ride!]!
   getRidesByDriver: [Ride!]!
-  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
-  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10): RidePaginationResult!
+  getRidesPaginatedByDriver(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
+  getRidesPaginatedByPassenger(page: Int! = 1, limit: Int! = 10, id: Int): RidePaginationResult!
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
@@ -250,13 +300,27 @@ type Query {
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   isUserInRide(userId: Int!, rideId: Int!): Boolean!
+  getAllComments: [Comment!]!
+  getCommentsByPost(postId: Int!): [Comment!]!
+  getChatMessages(chatId: Int!): [Message!]!
+  messages: [Message!]!
+  message(id: Int!): Message!
+  notifications: [Notification!]!
+  userNotifications(userId: Int!, limit: Int): [Notification!]!
+  unreadNotifications(userId: Int!): [Notification!]!
+  unreadNotificationCount(userId: Int!): Int!
+  notification(id: Int!): Notification!
+  getChats(userId: Int!): [Chat!]!
+  getChat(chatId: Int!): Chat!
+  getChatByRideId(rideId: Int!): Chat!
   reviewFormData(rideId: Int!, reviewedUserId: Int!): ReviewFormData!
   getMyReviews(page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
   getUserReviews(userId: Int!, page: Int = 1, limit: Int = 6): PaginatedReviewsResponse!
-
-  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
-  getAllComments: [Comment!]!
-  getCommentsByPost(postId: Int!): [Comment!]!
+  getAverageRating: Int!
+  getAverageRatingById(id: Int!): Int!
+  getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
+  getDashboardData: DashboardData!
+  getMyReports(page: Int! = 1, limit: Int! = 6, search: String, status: String): ReportPagination!
   getJoinRequestById(id: Float!): JoinRequest!
   getAllJoinRequests: [JoinRequest!]!
   getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
@@ -275,6 +339,16 @@ type Mutation {
   deletePost(id: Int!): Boolean!
   closepost(id: Int!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
+  createMessage(createMessageInput: CreateMessageInput!): Message!
+  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
+  removeMessage(id: Int!): Boolean!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
+  markNotificationAsRead(id: Int!): Notification!
+  markAllNotificationsAsRead(userId: Int!): Boolean!
+  removeNotification(id: Int!): Notification!
+  CreateChat(createChatInput: CreateChatInput!): Chat
+  RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
   deleteJoinRequest(postId: Int!): Boolean!
   deleteJoinRequestById(id: Int!): Boolean!
@@ -343,4 +417,52 @@ input CreatePostInput {
 input CreateCommentInput {
   text: String!
   postId: Int!
+}
+
+input CreateMessageInput {
+  text: String!
+  chatId: Int!
+  senderId: Int!
+}
+
+input UpdateMessageInput {
+  text: String
+  chatId: Int
+  senderId: Int
+  id: Int!
+}
+
+input CreateNotificationInput {
+  userId: Int!
+  type: String!
+  title: String!
+  message: String!
+  actionUrl: String
+  metadata: JSONObject
+  relatedEntityId: Int
+  relatedEntityType: String
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+input UpdateNotificationInput {
+  userId: Int
+  type: String
+  title: String
+  message: String
+  actionUrl: String
+  metadata: JSONObject
+  relatedEntityId: Int
+  relatedEntityType: String
+  id: Int!
+  status: NotificationStatus
+}
+
+input CreateChatInput {
+  driverId: Int!
+  riderId: Int!
+  rideId: Int!
 }

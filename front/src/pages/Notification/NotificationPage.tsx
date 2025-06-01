@@ -13,7 +13,8 @@ const NotificationPage: React.FC = () => {
       </div>
 
       {/* Notifications Component */}
-      <Notifications />
+      {/*<Notifications children={undefined} />*/}
+      <Notifications  />
     </div>
   );
 };

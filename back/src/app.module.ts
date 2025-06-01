@@ -83,7 +83,7 @@ import { NotificationModule } from './notification/notification.module';
       ReportModule,
       GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: path.join(process.cwd(), 'src/graphql/schema.gql'),
       installSubscriptionHandlers: true,
       /*subscriptions: {
         'graphql-ws': true,

@@ -57,6 +57,7 @@ const [error, setError] = useState<string | null>(null);
     try {
       await updateUser(updatePayload as UpdateAppUserInput);
       closeModal();
+      window.location.reload();
       await getUserData();
     } catch (error) {
       setError("Failed to update user. Please try again.");
