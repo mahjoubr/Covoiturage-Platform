@@ -68,7 +68,7 @@ const ReviewPage = () => {
         <div className="flex items-center mb-4">
           <div className="mr-4">
             <img
-              src={reviewedUser?.image || '/images/user/user-06.jpg'}
+              src={reviewedUser?.imageUrl || '/images/user/default-avatar.jpg'}
               alt={reviewedUser?.name || 'Driver'}
               className="w-12 h-12 rounded-full object-cover"
             />
@@ -77,7 +77,8 @@ const ReviewPage = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Ride with {reviewedUser?.name || 'N/A'}</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm">{ride?.date || 'N/A'}</p>
             <button
-              onClick={() => navigate(`/users/${reviewedId}`)}
+
+              onClick={() => navigate(`/profile/${reviewedId}`)}
               className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
             >
               View {reviewedUser?.name}'s profile

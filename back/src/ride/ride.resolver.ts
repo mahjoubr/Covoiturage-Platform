@@ -221,8 +221,19 @@ async getUsersForRide(
   @Args('rideId', { type: () => Int }) rideId: number,
 ): Promise<AppUserWithRole[]> {
   this.logger.log(`Getting users for ride: ${rideId}`);
+
   try {
-    return await this.rideService.getUsersForRide(rideId);
+    const users = await this.rideService.getUsersForRide(rideId);
+
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+    for (const user of users) {
+      if (user.imageUrl) {
+        user.imageUrl = `${baseUrl}${user.imageUrl}`;
+      }
+    }
+
+    return users;
   } catch (error) {
     this.logger.error(`Error getting users for ride: ${error.message}`);
     throw error;

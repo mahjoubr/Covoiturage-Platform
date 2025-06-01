@@ -65,7 +65,7 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
             <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
               <img
-                  src={user?.imageUrl }
+                  src={user?.imageUrl || '/images/user/default-avatar.jpg'}
                   alt="User profile"
                   width={100}
                   height={100}

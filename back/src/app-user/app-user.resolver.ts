@@ -48,13 +48,26 @@ async updatePhoto(
 }
 
 @Query(() => AppUserSearchResult)
-  async getUsers(
-    @Args("searchTerm", { type: () => String }) searchTerm: string,
-    @Args("page", { type: () => Int, defaultValue: 1 }) page: number,
-    @Args("limit", { type: () => Int, defaultValue: 10 }) limit: number
-  ): Promise<SearchResult<AppUser>> {
-    return this.appUserService.searchUsers(searchTerm, page, limit);
-  }
+async getUsers(
+  @Args("searchTerm", { type: () => String }) searchTerm: string,
+  @Args("page", { type: () => Int, defaultValue: 1 }) page: number,
+  @Args("limit", { type: () => Int, defaultValue: 10 }) limit: number
+): Promise<SearchResult<AppUser>> {
+  const result = await this.appUserService.searchUsers(searchTerm, page, limit);
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+  // Update imageUrl for each user
+  result.data = result.data.map((user) => {
+    if (user.imageUrl) {
+      user.imageUrl = `${baseUrl}${user.imageUrl}`;
+    }
+    return user;
+  });
+
+  return result;
+}
+
   @Query(() => AppUser, { name: 'getUserById', nullable: true })
   async getUserById(
       @Args('id', { type: () => Int }) id: number,
