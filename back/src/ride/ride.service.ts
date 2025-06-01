@@ -188,12 +188,10 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   const users: AppUserWithRole[] = [];
 
-  // Add driver if exists
   if (ride.driver) {
     users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
   }
 
-  // Add passengers
   ride.appUserRides.forEach((appUserRide) => {
     if (appUserRide.appUser) {
       users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
