@@ -195,3 +195,47 @@ mutation closeRide($rideId: Int!) {
   }
 }
     `;
+
+  export const SEARCH_RIDES_BY_USER = gql`
+  query SearchRidesByUser(
+    $searchTerm: String!
+    $page: Int
+    $limit: Int
+    $filterType: String
+  ) {
+    searchRidesByUser(
+      searchTerm: $searchTerm
+      page: $page
+      limit: $limit
+      filterType: $filterType
+    ) {
+      data {
+        id
+        departure
+        arrival
+        date
+        price
+        nbPassengers
+        state
+        post {
+          id
+          postOwner {
+            id
+            name
+            lastName
+          }
+        }
+        appUserRides {
+          appUser {
+            id
+            name
+            lastName
+          }
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
+    }
+  }
+`;
