@@ -58,6 +58,7 @@ export async function signup(email: string, password: string, name: string, last
 
 export const logout = () => {
   localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+  localStorage.removeItem('user');
   window.location.href = '/signIn'; 
+
 };

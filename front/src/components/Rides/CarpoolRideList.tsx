@@ -149,8 +149,11 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
         });
       });
     }
-  
-    setRides(formattedRides);
+    const sortedRides = formattedRides.sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  setRides(sortedRides);
   }, [driverRidesData, passengerRidesData]);
 
   

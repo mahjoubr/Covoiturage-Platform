@@ -17,7 +17,7 @@ const CarpoolPostList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [limit] = useState(4); // Default limit per page
+  const [limit] = useState(6); 
   
   const { 
     data, 
