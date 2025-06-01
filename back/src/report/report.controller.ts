@@ -17,7 +17,7 @@ import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import {AuthGuard} from "@nestjs/passport";
 
-@Controller('reports/')
+@Controller('reports')
 @UseGuards(AuthGuard('jwt'))
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}

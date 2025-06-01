@@ -10,9 +10,10 @@ import { AppUserModule } from 'src/app-user/app-user.module';
 import { RideModule } from 'src/ride/ride.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { SearchService } from 'src/services/searchService';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, Ride, AppUser]),AppUserModule,forwardRef(() => RideModule),SubscriptionModule],
+  imports: [TypeOrmModule.forFeature([Post, Ride, AppUser]),AppUserModule,forwardRef(() => RideModule),SubscriptionModule,NotificationModule],
   controllers: [PostController],
   providers: [PostService,PostResolver,SearchService],
   exports: [PostService],

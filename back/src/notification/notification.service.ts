@@ -88,16 +88,27 @@ export class NotificationService {
     return notification;
   }
   async JoinRequestNotification(
-    userId: number,
-    driverId: number,
-    title: string,
-    message: string,
-    actionUrl?: string,
-    metadata?: Record<string, any>,
+userId: number, driverId: number, id: number, title: string, message: string, actionUrl?: string, metadata?: Record<string, any>,
   ): Promise<Notification> {
     const notification = await this.create({
       userId,
       type: EventType.JOIN_REQUEST,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: driverId,
+      relatedEntityType: 'app-user',
+    });
+
+    return notification;
+  }
+  async JoinAcceptNotification(
+userId: number, driverId:number, id: number, title: string, message: string, actionUrl?: string, metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.JOIN_ACCEPT,
       title,
       message,
       actionUrl,
@@ -129,7 +140,76 @@ export class NotificationService {
 
     return notification;
   }
+  async reportNotification(
+    userId: number,
+    reportId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.REPORT_ADDED,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: reportId,
+      relatedEntityType: 'report',
+    });
 
+    return notification;
+  }
+  async reviewNotification(
+    userId: number,
+    reviewId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.REVIEW_ADDED,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: reviewId,
+      relatedEntityType: 'review',
+    });
+
+    return notification;
+  }
+
+  async commentNotification(
+    userId: number,
+    postId: number,
+    commentId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.NEW_COMMENT,
+      title,
+      message,
+      actionUrl,
+      metadata: {
+        ...metadata,
+        postId,
+        commentId,
+      },
+      relatedEntityId: postId,
+      relatedEntityType: 'post',
+    });
+
+    return notification;
+  }
   async findAll(): Promise<Notification[]> {
     return await this.notificationRepository.find({
       order: { createdAt: 'DESC' },

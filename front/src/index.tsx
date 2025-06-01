@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+    import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ApolloClient, InMemoryCache, ApolloProvider, split, HttpLink } from '@apollo/client';

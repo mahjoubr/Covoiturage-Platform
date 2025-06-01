@@ -116,46 +116,6 @@ enum Role {
   PASSENGER
 }
 
-type RidePaginationResult {
-  data: [Ride!]!
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
-}
-
-type MatchingRideResult {
-  ride: Ride
-  postOwnerId: String
-}
-
-type PostPaginatedResponse {
-  data: [Post!]!
-  totalItems: Float!
-  currentPage: Float!
-}
-
-type AppUserSearchResult {
-  data: [AppUser!]!
-  totalItems: Float!
-  currentPage: Float!
-}
-
-type Chat {
-  id: Float!
-  messages: [Message!]!
-  driver: AppUser!
-  rider: AppUser!
-  ride: Ride!
-}
-
-type Message {
-  id: Int!
-  text: String!
-  chat: Chat!
-  createdAt: DateTime!
-  sender: AppUser!
-}
-
 type Notification {
   id: Int!
   userId: Int!
@@ -183,8 +143,48 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+type RidePaginationResult {
+  data: [Ride!]!
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
+type MatchingRideResult {
+  ride: Ride
+  postOwnerId: String
+}
+
+type PostPaginatedResponse {
+  data: [Post!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
+type AppUserSearchResult {
+  data: [AppUser!]!
+  totalItems: Float!
+  currentPage: Float!
+}
+
 type MarkAllAsReadResponse {
   count: Int!
+}
+
+type Chat {
+  id: Float!
+  messages: [Message!]!
+  driver: AppUser!
+  rider: AppUser!
+  ride: Ride!
+}
+
+type Message {
+  id: Int!
+  text: String!
+  chat: Chat!
+  createdAt: DateTime!
+  sender: AppUser!
 }
 
 type DashboardStatsType {
@@ -302,20 +302,20 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
   searchRidesByUser(searchTerm: String!, page: Int! = 1, limit: Int! = 10, filterType: String): RidePaginationResult!
-  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
+  getPosts(searchTerm: String, page: Int, limit: Int, filter: String): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   isUserInRide(userId: Int!, rideId: Int!): Boolean!
-  getAllComments: [Comment!]!
-  getCommentsByPost(postId: Int!): [Comment!]!
-  getChatMessages(chatId: Int!): [Message!]!
-  messages: [Message!]!
-  message(id: Int!): Message!
   allNotifications: [Notification!]!
   notifications(userId: Int!, limit: Int, offset: Int): [Notification!]!
   unreadNotifications(userId: Int!): [Notification!]!
   unreadNotificationsCount(userId: Int!): Int!
   notification(id: Int!): Notification!
+  getAllComments: [Comment!]!
+  getCommentsByPost(postId: Int!): [Comment!]!
+  getChatMessages(chatId: Int!): [Message!]!
+  messages: [Message!]!
+  message(id: Int!): Message!
   getChats(userId: Int!): [Chat!]!
   getChat(chatId: Int!): Chat!
   getChatByRideId(rideId: Int!): Chat!
@@ -346,15 +346,15 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): Post!
   deletePost(id: Int!): Boolean!
   closepost(id: Int!): Boolean!
-  createComment(input: CreateCommentInput!): Comment!
-  createMessage(createMessageInput: CreateMessageInput!): Message!
-  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
-  removeMessage(id: Int!): Boolean!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
   markNotificationRead(notificationId: Int!): Notification!
   markAllNotificationsRead(userId: Int!): MarkAllAsReadResponse!
   deleteNotification(notificationId: Int!): Notification!
+  createComment(input: CreateCommentInput!): Comment!
+  createMessage(createMessageInput: CreateMessageInput!): Message!
+  updateMessage(updateMessageInput: UpdateMessageInput!): Message!
+  removeMessage(id: Int!): Boolean!
   CreateChat(createChatInput: CreateChatInput!): Chat
   RemoveChat(chatId: Int!): Boolean!
   createJoinRequest(postId: Int!): JoinRequest!
@@ -422,24 +422,6 @@ input CreatePostInput {
   postOwnerId: Float!
 }
 
-input CreateCommentInput {
-  text: String!
-  postId: Int!
-}
-
-input CreateMessageInput {
-  text: String!
-  chatId: Int!
-  senderId: Int!
-}
-
-input UpdateMessageInput {
-  text: String
-  chatId: Int
-  senderId: Int
-  id: Int!
-}
-
 input CreateNotificationInput {
   userId: Int!
   type: String!
@@ -469,8 +451,25 @@ input UpdateNotificationInput {
   status: NotificationStatus
 }
 
+input CreateCommentInput {
+  text: String!
+  postId: Int!
+}
+
+input CreateMessageInput {
+  text: String!
+  chatId: Int!
+  senderId: Int!
+}
+
+input UpdateMessageInput {
+  text: String
+  chatId: Int
+  senderId: Int
+  id: Int!
+}
+
 input CreateChatInput {
-  driverId: Int!
   riderId: Int!
   rideId: Int!
 }

@@ -8,13 +8,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { SubscriptionService } from 'src/subscription/subscription.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class JoinRequestService {
   private readonly logger = new Logger('EventEmitter');
   constructor(@InjectRepository(JoinRequest) private readonly repo: Repository<JoinRequest>,
   private readonly subscriptionService:SubscriptionService,
-  private readonly eventStreamService:EventStreamService
+  private readonly notificationService:NotificationService,
 ){}
   async create(data: { user: AppUser; ride: Ride },postId:number): Promise<JoinRequest> {
     const validDate = new Date();
@@ -27,27 +28,7 @@ export class JoinRequestService {
   
     const subscribers = await this.subscriptionService.getSubscribers(postId, 'post');
       
-    for (const recipientId of subscribers) {
-        const event = {
-          type: EventType.JOIN_REQUEST,
-          targetId: postId,
-          recipientId,
-          payload: {
-            rideId: data.ride.id,
-            requesterId: data.user.id,
-            timestamp: validDate.toISOString(),
-          },
-        };
-        this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
-      this.eventStreamService.emitEvent(event);
-      this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
-      
-    }
-    await this.subscriptionService.subscribe(
-      data.user.id,
-      data.ride.id,
-      'ride' // Entity type
-    );
+    
     //return this.repo.save(joinRequest);
     await this.repo.save(joinRequest);
     const fullJoinRequest = await this.repo.findOne({
@@ -55,6 +36,23 @@ export class JoinRequestService {
       relations: ['user', 'ride'],
     });
 if (!fullJoinRequest) throw new Error('JoinRequest not found after creation');
+    for (const recipientId of subscribers) {
+        
+   await this.notificationService.JoinRequestNotification(
+  recipientId, // userId (recipient)
+  data.user.id, // driverId (the requester)
+  fullJoinRequest.ride.id, // ride id
+  'New Join Request',
+  `${data.user.name} has requested to join your ride`,
+  `/post/${postId}`,
+);
+      
+    }
+    await this.subscriptionService.subscribe(
+      data.user.id,
+      data.ride.id,
+      'ride' // Entity type
+    );
 return fullJoinRequest;
 
   }
@@ -65,21 +63,16 @@ return fullJoinRequest;
     const subscribers = await this.subscriptionService.getSubscribers(postId, 'post');
       
     for (const recipientId of subscribers) {
-        const event = {
-          type: EventType.JOIN_REQUEST,
-          targetId: postId,
-          recipientId,
-          payload: {
-            rideId: rideId,
-            requesterId: userId,
-            timestamp: new Date().toISOString(),
-          },
-        };
-        this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
-      this.eventStreamService.emitEvent(event);
-      this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+       await this.notificationService.JoinRequestNotification(
+      recipientId, // userId (recipient)
+      postId,      // postId
+      -1, // joinRequestId (not applicable for deletion)
+      'Join Request Deleted', // title
+      `Your join request for the ride has been deleted`, // message
+      `/post/${postId}`, // actionUrl
       
-    }
+    );
+  }
     return (result.affected ?? 0) > 0;
 
 

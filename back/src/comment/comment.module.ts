@@ -10,9 +10,10 @@ import { AppUserModule } from 'src/app-user/app-user.module';
 import { PostModule } from 'src/post/post.module';
 import { EventStreamModule } from 'src/SSE/sse.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Comment, Post, AppUser]),AppUserModule,PostModule,EventStreamModule,SubscriptionModule],
+  imports:[TypeOrmModule.forFeature([Comment, Post, AppUser]),AppUserModule,PostModule,EventStreamModule,SubscriptionModule,NotificationModule],
   controllers: [CommentController],
   providers: [CommentService,CommentResolver],
     exports: [CommentService],
