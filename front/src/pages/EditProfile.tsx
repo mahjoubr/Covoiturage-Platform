@@ -77,9 +77,7 @@ const UserProfiles= () => {
           <p className="text-gray-500 " >No drives</p>
         )
         }
-          {drives.map((drive, index) => (
-        <UserDriveCard key={index} drive={drive} />
-      ))}
+          
         <div style={{justifySelf: "center"}}>
         
         </div>

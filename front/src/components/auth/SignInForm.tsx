@@ -28,7 +28,7 @@ export default function SignInForm() {
     console.log("Token saved:", accessToken);
     console.log(result.user.id)
       if (result.user.role=== 'admin') {
-        navigate("/profile");
+        navigate("/");
       } else if (user.role === 'user') {
         navigate("/");
       } else {

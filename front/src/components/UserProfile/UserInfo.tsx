@@ -32,16 +32,12 @@ export function UserInfo({ userId}: UserMetaCardProps) {
   }, [userId]);
 
   // Fetch average rating by user ID
-  const { loading, error, data } = useQuery(GET_AVERAGE_RATING_BY_ID, {
+  const { data } = useQuery(GET_AVERAGE_RATING_BY_ID, {
     variables: { id: userId },
     skip: !userId,
   });
 
-  if (!user) return <p>Loading user...</p>;
-  if (loading) return <p>Loading rating...</p>;
-  if (error) return <p>Error loading rating: {error.message}</p>;
 
-  const rating = data?.getAverageRatingById ?? 0;
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -61,8 +57,11 @@ export function UserInfo({ userId}: UserMetaCardProps) {
               </h4>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 xl:justify-start">
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-                <StarRating rating={rating} />
-              </div>
+{data?.getAverageRating== null ? (
+  <p className="text-gray-500 text-sm">No reviews yet</p>
+) : (
+  <StarRating rating={data.getAverageRating} />
+)}              </div>
               <div style={{borderLeft: "1px solid ", height: "20px"}}></div>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   {user?.email}
