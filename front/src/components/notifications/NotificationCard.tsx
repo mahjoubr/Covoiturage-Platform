@@ -4,6 +4,7 @@ import { Notification } from '../../types/Notification';
 import { useNotifications } from './NotificationProvider';
 import { EventType } from '../../types/event';
 import { X, ExternalLink } from 'lucide-react';
+import { formatDate } from '../../utils/dateTime';
 
 const getNotificationIcon = (type: string) => {
   const icons: Record<string, string> = {
@@ -92,7 +93,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => 
           
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {formatTimeAgo(notification.timestamp)}
+              {formatDate(new Date(notification.timestamp).toISOString())}
             </span>
             
             {/* Action buttons - only show on hover */}
