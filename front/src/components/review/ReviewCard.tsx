@@ -120,7 +120,9 @@ const ReviewCard = ({
       {isAuthor && (
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex justify-between items-center">
           <Link
-            to={`/users/${review.user.id}`}
+                    
+
+            to={`/profile/${review.user.id}`}
             className="text-sm text-blue-600 hover:text-blue-700 font-medium dark:text-blue-300 dark:hover:text-blue-400"
           >
             View Profile
