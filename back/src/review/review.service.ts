@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { PaginationResult, PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
-import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { ReviewPayload } from 'src/SSE/ReviewPayload';
 
 @Injectable()
@@ -68,7 +68,9 @@ export class ReviewService extends GenericService {
       };
 
   
-      this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
+    
+
+     this.eventStreamService.emitEvent({ recipientId: reviewedUserId, type: EventType.REVIEW_ADDED, targetId: reviewId, payload: reviewPayload });
     }
     
     async deleteReview(userid:number,id: number) {
@@ -134,8 +136,19 @@ export class ReviewService extends GenericService {
           .where('review.reviewer.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        return this.paginationService.paginateQuery(queryBuilder, page, limit);
-      }
+       const result = await this.paginationService.paginateQuery(queryBuilder, page, limit);
+
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+      result.data = result.data.map((review) => {
+        if (review.reviewedUser?.imageUrl) {
+          review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+        }
+        return review;
+      });
+
+      return result;
+     }
       
       async findByReviewedUserId(
         userId: number,
@@ -149,7 +162,18 @@ export class ReviewService extends GenericService {
           .where('review.reviewedUser.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        return this.paginationService.paginateQuery(queryBuilder, page, limit);
+        const result = await   this.paginationService.paginateQuery(queryBuilder, page, limit);
+
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+        result.data = result.data.map((review) => {
+          if (review.reviewedUser?.imageUrl) {
+            review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+          }
+          return review;
+      });
+
+      return result;
       }
 
       async findByRideId (rideId: number) {
@@ -176,11 +200,13 @@ export class ReviewService extends GenericService {
         if (sortField) {
           qb.orderBy(`review.${sortField}`, sortOrder);
         }
+
+        
     
         return this.paginationService.paginateQuery(qb, page, limit);
       }
 
-      async getAverageRating(userId: number): Promise<number> {
+      async getAverageRating(userId: number): Promise<number | null> {
         const reviews = await this.reviewRepository.find({
           where: [
             { reviewedUser: { id: userId } },
@@ -188,16 +214,61 @@ export class ReviewService extends GenericService {
         });
     
         if (reviews.length === 0) {
-          return 0;
+          return null;
         }
         const totalStars = reviews.reduce((sum, review) => sum + review.stars, 0);
         const averageRating = totalStars / reviews.length;
     
         return Math.round(averageRating); 
       }
+      async searchReviews(
+        userId: number,
+        searchTerm: string,
+        page: number = 1,
+        limit: number = 6,
+        isMyReviews: boolean = true
+      ): Promise<PaginationResult<Review>> {
+    console.log('Search params:', { userId, searchTerm, page, limit, isMyReviews });
     
+    const queryBuilder = this.reviewRepository.createQueryBuilder('review')
+      .leftJoinAndSelect('review.reviewer', 'reviewer')
+      .leftJoinAndSelect('review.reviewedUser', 'reviewedUser') 
+      .leftJoinAndSelect('review.ride', 'ride');
 
+    if (isMyReviews) {
+      queryBuilder.where('reviewer.id = :userId', { userId });
+    } else {
+      queryBuilder.where('reviewedUser.id = :userId', { userId });
+    }
 
+    const searchFields = [
+      'review.comment',
+      'reviewedUser.name',        
+      'reviewedUser.lastName',     
+      'reviewer.name', 
+      'reviewer.lastName',
+      'ride.departure',
+      'ride.arrival'
+    ];
 
+    console.log('Query SQL:', queryBuilder.getSql());
 
+    const searchResult = await this.searchService.searchQuery(
+      queryBuilder,
+      searchTerm,
+      searchFields,
+      page,
+      limit,
+    );
+
+    console.log('Search result:', searchResult);
+
+    const totalPages = Math.ceil((searchResult.totalItems || 0) / limit);
+
+    return {
+      ...searchResult,
+      totalPages,
+      currentPage: page,
+    };
+  }
 }

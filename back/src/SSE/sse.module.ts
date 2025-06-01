@@ -1,10 +1,14 @@
+
 import { Module } from '@nestjs/common';
-import { EventStreamController } from './sse-notifications.controller';
-import { EventStreamService } from './sse-subscription.service';
+import { SseNotificationsController } from './sse-notifications.controller';
+import { EventStreamService, SseSubscriptionService } from './sse-subscription.service';
+import { Subscription } from '@nestjs/graphql';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
-  controllers: [EventStreamController],
-  providers: [EventStreamService],
-  exports: [EventStreamService],
+  imports: [SubscriptionModule],
+  controllers: [SseNotificationsController],
+  providers: [EventStreamService, SseSubscriptionService],
+  exports: [EventStreamService, SseSubscriptionService], 
 })
 export class EventStreamModule {}

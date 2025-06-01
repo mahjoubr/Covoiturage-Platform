@@ -28,11 +28,13 @@ export class ReviewController {
     return this.reviewService.findOne(+id);
   }
 
+  @UseGuards(GqlAuthGuard)
   @Patch(':id')
   update(@MyUser()userInfo, @Body() updateReviewDto: UpdateReviewDto) {
     return this.reviewService.updateReview(userInfo.id,updateReviewDto);
   }
 
+  @UseGuards(GqlAuthGuard)
   @Delete(':id')
   remove(@MyUser() userInfo,@Param('id') id: string) {
     return this.reviewService.deleteReview(userInfo.id,+id);
@@ -42,7 +44,9 @@ export class ReviewController {
   paginate(@Query('page') page: number, @Query('limit') limit: number) {
     return this.reviewService.paginate(Number(page), Number(limit));
   }
+  
 
+  @UseGuards(GqlAuthGuard)
   @Get('search')
   search(
     @Query('searchTerm') searchTerm: string,

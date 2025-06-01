@@ -1,20 +1,23 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import PageMeta from "../components/common/PageMeta";
-import { Drive, Ride } from "../types";
+import { Drive, Ride, User } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Review from "../components/UserProfile/Review";
+import { fetchUserById } from "../services/userService";
 
 
 const UserProfiles= () => { 
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
   const [page] = useState(1);
   const limit = 2;
+  
   const {
           loading: loadingDriver,
           error: errorDriver,
@@ -47,6 +50,17 @@ const UserProfiles= () => {
           driver: 
             `${ride.driver?.name ?? ''} ${ride.driver?.lastName ?? ''}`.trim(),
         }));
+        const getUserData = async () => {
+      try {
+        const fetchedUser = await fetchUserById();
+        setUser(fetchedUser); 
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    useEffect(() => {
+      getUserData();
+    }, [])
       
   return (
     <>
@@ -58,8 +72,8 @@ const UserProfiles= () => {
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         
         <div className="space-y-6">
-          <UserMetaCard isReportable={false} isEditable={true} />
-          <UserInfoCard isEditable={true} />
+          <UserMetaCard user={user} isReportable={false} isEditable={true} />
+          <UserInfoCard user={user} isEditable={true} />
           <div className="container flex gap-6">
   <div className="w-1/2">
           <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
@@ -77,9 +91,7 @@ const UserProfiles= () => {
           <p className="text-gray-500 " >No drives</p>
         )
         }
-          {drives.map((drive, index) => (
-        <UserDriveCard key={index} drive={drive} />
-      ))}
+          
         <div style={{justifySelf: "center"}}>
         
         </div>

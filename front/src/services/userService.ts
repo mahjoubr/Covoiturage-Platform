@@ -14,6 +14,7 @@ export const fetchUserById = async () => {
 export const fetchUserPhoto= async () => {
   const { data } = await client.query({
     query: GET_APPUSER_PHOTO,
+     fetchPolicy: "network-only",
   });
     return data.getAppUserInfo;
   };

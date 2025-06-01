@@ -7,6 +7,7 @@ query {
       departure
       arrival
       date
+      state
       post {
         id
         postOwner {
@@ -185,3 +186,56 @@ mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
   }
 }
   `;
+
+export const END_RIDE = gql`
+mutation closeRide($rideId: Int!) {
+  closeRide(rideId: $rideId) {
+    id
+    state
+  }
+}
+    `;
+
+  export const SEARCH_RIDES_BY_USER = gql`
+  query SearchRidesByUser(
+    $searchTerm: String!
+    $page: Int
+    $limit: Int
+    $filterType: String
+  ) {
+    searchRidesByUser(
+      searchTerm: $searchTerm
+      page: $page
+      limit: $limit
+      filterType: $filterType
+    ) {
+      data {
+        id
+        departure
+        arrival
+        date
+        price
+        nbPassengers
+        state
+        post {
+          id
+          postOwner {
+            id
+            name
+            lastName
+          }
+        }
+        appUserRides {
+          appUser {
+            id
+            name
+            lastName
+          }
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
+    }
+  }
+`;

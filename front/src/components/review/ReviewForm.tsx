@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Star, CheckCircle } from 'lucide-react';
 import { createReview } from '../../services/reviews'; // <-- Import service
+import { getCurrentUserId } from '../../services/authService';
+import { useNavigate } from 'react-router';
 
 interface ReviewFormProps {
   rideId: number;
@@ -28,6 +30,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
       reviewedUserId: reviewedId, 
       rideId,
     };
+    
 
     try {
       await createReview(reviewData); 
@@ -45,6 +48,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ rideId, reviewedId, onReviewSub
       setIsSubmitting(false);
     }
   };
+  const navigate = useNavigate();
+   useEffect(() => {
+    const checkAuthStatus = async () => {
+      const userId = await getCurrentUserId();
+      if (!userId) {
+        navigate('/signup');  // Redirect to signup page if not logged in
+      }
+    };
+
+    checkAuthStatus();
+  }, [navigate]);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
