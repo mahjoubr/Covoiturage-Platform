@@ -117,3 +117,50 @@ export const GET_AVERAGE_RATING_BY_ID = gql`
     getAverageRatingById(id: $id) 
   }
 `;
+
+
+export const SEARCH_REVIEWS = gql`
+  query SearchMyReviews(
+    $searchTerm: String!
+    $page: Int
+    $limit: Int
+    $isMyReviews: Boolean
+  ) {
+    searchMyReviews(
+      searchTerm: $searchTerm
+      page: $page
+      limit: $limit
+      isMyReviews: $isMyReviews
+    ) {
+      data {
+        id
+        stars
+        comment
+        date
+        reviewer {
+          id
+          name
+          lastName
+          imageUrl
+        }
+        reviewedUser {
+           id
+          name
+          lastName
+          imageUrl
+        }
+        ride {
+           id
+        departure
+        date
+        arrival
+        price
+        time
+        }
+      }
+      totalItems
+      totalPages
+      currentPage
+    }
+  }
+`;

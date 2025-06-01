@@ -75,8 +75,8 @@ const ReviewCard = ({
       <div className="px-5 py-4 border-t border-gray-100 dark:border-gray-600">
         <div className="flex items-center mb-3">
           <div className="relative mr-3">
-            <img
-              src={review.user.imageUrl || '/default-user.png'}
+            <img src={review.user?.imageUrl || "/default.png"} 
+
               alt={`${review.user.name} ${review.user.lastName || ''}`}
               className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-600"
             />

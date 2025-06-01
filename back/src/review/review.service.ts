@@ -198,9 +198,54 @@ export class ReviewService extends GenericService {
     
         return Math.round(averageRating); 
       }
+  async searchReviews(
+    userId: number,
+    searchTerm: string,
+    page: number = 1,
+    limit: number = 6,
+    isMyReviews: boolean = true
+  ): Promise<PaginationResult<Review>> {
+    console.log('Search params:', { userId, searchTerm, page, limit, isMyReviews });
     
+    const queryBuilder = this.reviewRepository.createQueryBuilder('review')
+      .leftJoinAndSelect('review.reviewer', 'reviewer')
+      .leftJoinAndSelect('review.reviewedUser', 'reviewedUser') 
+      .leftJoinAndSelect('review.ride', 'ride');
 
+    if (isMyReviews) {
+      queryBuilder.where('reviewer.id = :userId', { userId });
+    } else {
+      queryBuilder.where('reviewedUser.id = :userId', { userId });
+    }
 
+    const searchFields = [
+      'review.comment',
+      'reviewedUser.name',        
+      'reviewedUser.lastName',     
+      'reviewer.name', 
+      'reviewer.lastName',
+      'ride.departure',
+      'ride.arrival'
+    ];
 
+    console.log('Query SQL:', queryBuilder.getSql());
 
+    const searchResult = await this.searchService.searchQuery(
+      queryBuilder,
+      searchTerm,
+      searchFields,
+      page,
+      limit,
+    );
+
+    console.log('Search result:', searchResult);
+
+    const totalPages = Math.ceil((searchResult.totalItems || 0) / limit);
+
+    return {
+      ...searchResult,
+      totalPages,
+      currentPage: page,
+    };
+  }
 }

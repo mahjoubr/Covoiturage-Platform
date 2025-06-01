@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA, GET_USER_REVIEWS } from '../graphQl/queries/reviews';
+import { GET_MY_REVIEWS, GET_REVIEW_FORM_DATA, GET_USER_REVIEWS, SEARCH_REVIEWS } from '../graphQl/queries/reviews';
 import { GetReviewFormDataResponse } from '../types/reviewFormData';
 
 import client from "../graphQl/client";
@@ -43,7 +43,7 @@ export const getMyReviews = async (page?: number, limit?: number): Promise<{ dat
   
   const transformedReviews: Review[] = data.getMyReviews.data.map((review: any) => ({
     ...review,
-    user: review.reviewedUser, // Rename field
+    user: review.reviewedUser, 
   }));
 
   return {
@@ -64,7 +64,7 @@ export const getReceivedReviews = async (userId: number, page?: number, limit?: 
   
   const transformedReviews: Review[] = data.getUserReviews.data.map((review: any) => ({
     ...review,
-    user: review.reviewer, // Rename field
+    user: review.reviewer, 
   }));
 
   return {
@@ -132,16 +132,19 @@ export const getPaginatedReviews = async (page: number, limit: number) => {
   }
 };
 
-export const searchReviews = async (searchTerm: string, fields: string[], page: number, limit: number) => {
-  try {
-    const response = await axios.get(`${API_URL}/search`, {
-      params: { searchTerm, fields: fields.join(','), page, limit },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error searching reviews:', error);
-    throw error;
-  }
+export const searchReviews = async (searchTerm: string, page: number = 1, limit: number = 6, isMyReviews: boolean = true) => {
+  console.log("in the search function front")
+  console.log("Search params:", { searchTerm, page, limit, isMyReviews }); // Added logging
+  const { data } = await client.query({
+    query: SEARCH_REVIEWS,
+    variables: {
+      searchTerm,
+      page,
+      limit,
+      isMyReviews
+    },
+  });
+  return data.searchMyReviews;
 };
 
 export const getReviewsByReviewedUser = async (reviewedUserId: number) => {

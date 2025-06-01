@@ -60,7 +60,6 @@ const CarpoolPostList: React.FC = () => {
     onError: (error) => console.error('GET_USER error:', error)
   });
 
-  // Debounce search term to avoid too many requests
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -69,12 +68,10 @@ const CarpoolPostList: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset page when search term changes
   useEffect(() => {
     setPage(1);
   }, [debouncedSearchTerm]);
 
-  // Add this effect to refetch data on route changes
   useEffect(() => {
     if (isLoggedIn) {
       console.log('Location changed or component mounted, refetching post data...');
@@ -82,12 +79,10 @@ const CarpoolPostList: React.FC = () => {
         refetchPosts();
       });
     } else {
-      // If not logged in, still refetch posts
       refetchPosts();
     }
   }, [location.pathname, isLoggedIn]);
   
-  // Function to manually trigger a refetch
   const refreshAllData = () => {
     if (isLoggedIn) {
       refetchUser().then(() => {
@@ -113,10 +108,8 @@ const CarpoolPostList: React.FC = () => {
   const userInfo = userData?.getAppUserInfo || {};
   
   const transformPosts = (): CarpoolPost[] => {
-    // Check if getPosts exists and if it has the expected structure
     if (!data?.getPosts) return [];
     
-    // Handle both formats: array response or paginated object with data property
     const posts = Array.isArray(data.getPosts) ? data.getPosts : data.getPosts.data;
     if (!posts) return [];
     
@@ -135,7 +128,6 @@ const CarpoolPostList: React.FC = () => {
         ? `${post.postOwner.name} ${post.postOwner.lastName}`
         : "Unknown",
       comments: post.comments ?? [],
-      // Store the post owner ID for filtering
       postOwnerId: post.postOwner?.id,
       status: post.status,
     }));
@@ -149,11 +141,9 @@ const CarpoolPostList: React.FC = () => {
     if (filter === 'all') {
       setFilteredPosts(allPosts);
     } else if (filter === 'my' && userInfo?.id) {
-      // Filter to only show posts where the current user is the owner
       const myPosts = allPosts.filter(post => Number(post.postOwnerId) === Number(userInfo.id));
       setFilteredPosts(myPosts);
     } else {
-      // Fallback to showing all posts if we can't determine ownership
       setFilteredPosts(allPosts);
     }
   }, [data, filter, userInfo]);
@@ -178,21 +168,17 @@ const CarpoolPostList: React.FC = () => {
   };
 
   const handleLoadMore = () => {
-    // Check if we have pagination data
     if (data?.getPosts?.currentPage) {
       if (data.getPosts.currentPage < Math.ceil(data.getPosts.totalItems / limit)) {
         setPage(prevPage => prevPage + 1);
       }
     } else {
-      // If no pagination data, just increment the page and let the backend handle it
       setPage(prevPage => prevPage + 1);
     }
   };
 
-  // Handle both paginated and non-paginated responses
   const totalPosts = data?.getPosts?.totalItems || 0;
   const currentPostsCount = filteredPosts.length;
-  // If we have pagination data, use it; otherwise, show the load more button if we got a full page
   const hasMorePosts = data?.getPosts?.totalItems ? 
     currentPostsCount < totalPosts : 
     currentPostsCount === limit;

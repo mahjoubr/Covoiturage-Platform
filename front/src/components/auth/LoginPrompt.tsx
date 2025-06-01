@@ -9,7 +9,7 @@ interface LoginPromptProps {
 
 const LoginPrompt: React.FC<LoginPromptProps> = ({
   message = "Please log in to access this content",
-  redirectPath = "/SignUp"
+  redirectPath = "/SignIn"
 }) => {
   const navigate = useNavigate();
 
@@ -18,8 +18,8 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
   };
 
 
-   const handleSignIn = () => {
-    navigate('/signin');
+   const handleSignUp = () => {
+    navigate('/signUp');
     }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -49,7 +49,7 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
             </button>
             
             <button 
-              onClick={handleSignIn}
+              onClick={handleSignUp}
               className="w-full flex items-center justify-center bg-white hover:bg-gray-50 text-indigo-600 border border-indigo-200 dark:bg-gray-700 dark:border-indigo-800 dark:hover:bg-gray-600 dark:text-indigo-300 py-3 px-6 rounded-md font-medium transition-colors duration-200 shadow-sm"
             >
               <UserPlus className="w-5 h-5 mr-2" />
