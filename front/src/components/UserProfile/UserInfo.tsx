@@ -5,15 +5,41 @@ import Label from "../form/Label";
 import StarRating from "./StarRating";
 import { User } from "../../types"
 import Input from "../form/input/InputField";
+import {useEffect, useState} from "react";
+import {getCurrentUserId} from "../../services/authService.ts";
+import {useNavigate} from "react-router-dom";
 
 interface UserMetaCardProps {
   user: User | null;
   rating: number | null;
 }
 
+
 export function UserInfo({ user, rating}: UserMetaCardProps) {
   const reportModal = useModal();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getCurrentUserId();
+      console.log("Current User ID:", id);
+
+      setCurrentUserId(id);
+    };
+    fetchUserId();
+  }, []);
+  const handleReportUser = async (userId: number) => {
+    console.log(userId);
+
+    if (userId === currentUserId) {
+      alert("You can not report yourself !! ");
+      return;
+    }
+
+    navigate('/report', {state: {reportedUserId: userId}});
+  };
 
   return (
     <>
@@ -49,7 +75,7 @@ export function UserInfo({ user, rating}: UserMetaCardProps) {
           </div>
           
             <button
-              onClick={reportModal.openModal}
+              onClick={() => handleReportUser(user?.id||0)}
               className="dark:bg-error-500 dark:text-white dark:text-white bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500
               flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium shadow-theme-xs dark:border-gray-700 lg:inline-flex lg:w-auto"
             >
