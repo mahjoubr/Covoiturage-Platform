@@ -180,7 +180,7 @@ export class ReviewService extends GenericService {
         return this.paginationService.paginateQuery(qb, page, limit);
       }
 
-      async getAverageRating(userId: number): Promise<number> {
+      async getAverageRating(userId: number): Promise<number | null> {
         const reviews = await this.reviewRepository.find({
           where: [
             { reviewedUser: { id: userId } },
@@ -188,7 +188,7 @@ export class ReviewService extends GenericService {
         });
     
         if (reviews.length === 0) {
-          return 0;
+          return null;
         }
         const totalStars = reviews.reduce((sum, review) => sum + review.stars, 0);
         const averageRating = totalStars / reviews.length;
