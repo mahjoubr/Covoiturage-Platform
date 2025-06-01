@@ -6,19 +6,25 @@ export enum EventType {
   RIDE_DELETE = 'RIDE_DELETE',
   RIDE_START = 'RIDE_START',
   REVIEW_ADDED = 'REVIEW_ADDED',
-    REPORT_ADDED = 'REPORT_ADDED',
-
+  REPORT_ADDED = 'REPORT_ADDED',
   MESSAGE = 'MESSAGE',
 }
+
 
 export interface SSEEventData {
   type: EventType | 'connection' | 'heartbeat';
   message?: string;
   timestamp: string;
-  postId?: number;
-  commentId?: number;
-  groupId?: number;
-  rideId?: number;
-  userId?: number;
+  userId?: string;
+  postId?: string;
+  rideId?: string;
+  groupId?: string;
+  commentId?: string;
+  reviewId?: string;
+  reportId?: string;
+  groupName?: string;
+  postTitle?: string;
+  userName?: string;
+  rideTitle?: string;
   [key: string]: any;
 }

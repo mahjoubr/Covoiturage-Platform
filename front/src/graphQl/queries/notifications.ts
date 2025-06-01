@@ -1,7 +1,7 @@
 
 import { gql } from '@apollo/client';
 
-// Queries
+/*
 export const GET_USER_NOTIFICATIONS = gql`
   query GetUserNotifications($userId: Int!, $limit: Int) {
     userNotifications(userId: $userId, limit: $limit) {
@@ -89,5 +89,53 @@ export const DELETE_NOTIFICATION = gql`
   }
 `;
 
+*/
 
+
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($userId: ID!, $limit: Int, $offset: Int) {
+    notifications(userId: $userId, limit: $limit, offset: $offset) {
+      id
+      type
+      title
+      message
+      timestamp
+      read
+      actionUrl
+      metadata
+      userId
+    }
+  }
+`;
+
+export const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationRead($notificationId: ID!) {
+    markNotificationRead(notificationId: $notificationId) {
+      id
+      read
+    }
+  }
+`;
+
+export const MARK_ALL_NOTIFICATIONS_READ = gql`
+  mutation MarkAllNotificationsRead($userId: ID!) {
+    markAllNotificationsRead(userId: $userId) {
+      count
+    }
+  }
+`;
+
+export const DELETE_NOTIFICATION = gql`
+  mutation DeleteNotification($notificationId: ID!) {
+    deleteNotification(notificationId: $notificationId) {
+      id
+    }
+  }
+`;
+
+export const GET_UNREAD_COUNT = gql`
+  query GetUnreadCount($userId: ID!) {
+    unreadNotificationsCount(userId: $userId)
+  }
+`;
 

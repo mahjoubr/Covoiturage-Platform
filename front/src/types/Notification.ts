@@ -5,6 +5,9 @@ export interface User {
   email: string;
 }
 
+
+
+
 export interface Notification {
   id: string;
   type: string;
@@ -13,10 +16,9 @@ export interface Notification {
   timestamp: Date;
   read: boolean;
   actionUrl?: string;
-  sender?: User;
   metadata?: Record<string, any>;
+  userId?: string;
 }
-
 
 
 
@@ -24,10 +26,16 @@ export interface SSEEventData {
   type: EventType | 'connection' | 'heartbeat';
   message?: string;
   timestamp: string;
-  postId?: number;
-  commentId?: number;
-  groupId?: number;
-  rideId?: number;
-  userId?: number;
+  userId?: string;
+  postId?: string;
+  rideId?: string;
+  groupId?: string;
+  commentId?: string;
+  reviewId?: string;
+  reportId?: string;
+  groupName?: string;
+  postTitle?: string;
+  userName?: string;
+  rideTitle?: string;
   [key: string]: any;
 }
