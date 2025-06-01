@@ -66,15 +66,22 @@ type NavItem = {
             path: "/rides",
           },
           {
-            icon: <Star />,
+
+            icon: <NewspaperIcon />,
             name: "Posts",
-            path: "/posts",
+            path: "/Posts",
           },
           {
             icon: <CalenderIcon />,
             name: "Calender",
             path: "/calendar",
           },
+          {
+          icon: <Star/>,
+          name: "Reviews",
+          path: "/reviews",
+        },
+
           {
             icon: <CircleAlertIcon/>,
             name: "Reports",

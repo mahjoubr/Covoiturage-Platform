@@ -110,7 +110,7 @@ useEffect(() => {
                     <div className="flex items-center mb-4">
                       {user.imageUrl ? (
                         <img 
-                          src={user.imageUrl} 
+                          src={user.imageUrl || '/images/user/default-avatar.jpg'} 
                           alt={`${user.name} ${user.lastName}`} 
                           className="h-16 w-16 rounded-full object-cover shadow-sm border border-gray-200 dark:border-gray-700"
                         />

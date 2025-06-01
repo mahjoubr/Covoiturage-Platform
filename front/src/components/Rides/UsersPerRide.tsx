@@ -105,8 +105,9 @@ const UsersPerRide: React.FC<ReviewPopupProps> = ({
                 >
                   <div className="relative w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-600 mr-4 overflow-hidden flex-shrink-0 border-2 border-white dark:border-gray-700 shadow-md">
                     {user.imageUrl ? (
-                      <img 
-                        src={user.imageUrl} 
+                   
+                      <img src={user?.imageUrl || '/images/user/default-avatar.jpg'} 
+
                         alt={`${user.name} ${user.lastName}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {

@@ -40,11 +40,14 @@ export class ReviewResolver {
     if (!user || !ride) {
       throw new Error('User or ride not found');
     }
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
     return {
       reviewedUser: {
         id: user.id,
-        imageUrl: user.imageUrl,
         name: user.name,
+        imageUrl:`${baseUrl}${user.imageUrl}`,
+        
         
       },
       ride: {
@@ -66,15 +69,28 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findByReviewerId(user.id, page, limit);
   }
-  
   @Query(() => PaginatedReviewsResponse, { name: 'getUserReviews' })
-  getUserReviews(
-    @Args('userId', { type: () => Int }) userId: number,
-    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
-    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
-  ): Promise<PaginationResult<Review>> {
-    return this.reviewService.findByReviewedUserId(userId, page, limit);
+async getUserReviews(
+  @Args('userId', { type: () => Int }) userId: number,
+  @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+): Promise<PaginationResult<Review>> {
+  const result = await this.reviewService.findByReviewedUserId(userId, page, limit);
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+  for (const review of result.data) {
+    if (review.reviewer?.imageUrl) {
+      review.reviewer.imageUrl = `${baseUrl}${review.reviewer.imageUrl}`;
+    }
+    if (review.reviewedUser?.imageUrl) {
+      review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+    }
   }
+
+  return result;
+}
+
 
   @Query(() => GraphQLInt, { name: 'getAverageRating' })
   getAverageRating(@CurrentUser() user: AppUser): Promise<number | null> {
