@@ -14,6 +14,7 @@ import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
 import { App } from 'supertest/types';
+import { SearchService } from 'src/services/searchService';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -21,6 +22,7 @@ export class RideService extends GenericService {
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
   private readonly EventStreamService: EventStreamService,
+  private readonly searchService: SearchService, 
   
 
 ){
@@ -142,7 +144,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
     const result = await this.rideRepo
         .createQueryBuilder('ride')
-        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') // ensures month is a string like '2025-12'
+        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') 
         .addSelect('COUNT(*)', 'count')
         .groupBy('month')
         .orderBy('month', 'DESC')
@@ -150,7 +152,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
         .getRawMany();
 
     return result.map(row => ({
-      month: row.month,                  // Make sure 'month' is a string
+      month: row.month,                  
       count: parseInt(row.count, 10),
     }));
   }
@@ -200,6 +202,9 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   return users;
 }
+
+
+
 async closeRide(rideId: number, userId: number): Promise<Ride> {
   const ride = await this.rideRepo.findOne({
     where: { id: rideId },
@@ -222,5 +227,59 @@ async closeRide(rideId: number, userId: number): Promise<Ride> {
 
   ride.state = RideState.CLOSED;
   return await this.rideRepo.save(ride);
+}
+
+
+
+async searchRidesByUser(
+  userId: number,
+  searchTerm: string,
+  page: number = 1,
+  limit: number = 10,
+  filterType?: string
+): Promise<PaginationResult<Ride>> {
+  let queryBuilder = this.rideRepo
+    .createQueryBuilder('ride')
+    .leftJoinAndSelect('ride.post', 'post')
+    .leftJoinAndSelect('post.postOwner', 'postOwner')
+    .leftJoinAndSelect('ride.appUserRides', 'appUserRides')
+    .leftJoinAndSelect('appUserRides.appUser', 'rideUser');
+
+  if (filterType === 'yourRides') {
+    queryBuilder = queryBuilder.where('post.postOwnerId = :userId', { userId });
+  } else if (filterType === 'ridesTaken') {
+    queryBuilder = queryBuilder
+      .innerJoin('ride.appUserRides', 'userRides')
+      .where('userRides.appUserId = :userId', { userId });
+  } else {
+    queryBuilder = queryBuilder.where(
+      '(post.postOwnerId = :userId OR EXISTS (SELECT 1 FROM app_user_ride aur WHERE aur.rideId = ride.id AND aur.appUserId = :userId))',
+      { userId }
+    );
+  }
+
+  const searchFields = [
+    'ride.departure',
+    'ride.arrival',
+    'postOwner.name',
+    'postOwner.lastName',
+    'rideUser.name',
+    'rideUser.lastName'
+  ];
+
+ const searchResults= await this.searchService.searchQuery(
+    queryBuilder,
+    searchTerm,
+    searchFields,
+    page,
+    limit
+  );
+  const totalPages = Math.ceil(searchResults.totalItems / limit);
+  return {
+    data: searchResults.data,
+    totalItems: searchResults.totalItems,
+    currentPage: page,
+    totalPages: totalPages,
+  };
 }
 }
