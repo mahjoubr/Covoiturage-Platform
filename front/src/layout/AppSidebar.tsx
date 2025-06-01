@@ -36,7 +36,7 @@ type NavItem = {
           {
             icon: <NewspaperIcon />,
             name: "Reports",
-            path: "/report",
+            path: "/myReports",
           },
           {
             icon: <Users />,

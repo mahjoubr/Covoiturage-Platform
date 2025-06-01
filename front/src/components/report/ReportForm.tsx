@@ -68,11 +68,11 @@ const ReportForm: React.FC<ReportFormProps> = ({
         try {
             await axios.post('http://localhost:3000/reports', formData, {
                 headers: { 'Content-Type': 'multipart/form-data'
-                , Authorization: `Bearer ${token}` },
+                    , Authorization: `Bearer ${token}` },
                 withCredentials: true,
             });
 
-            navigate('/users')
+            navigate(-1);
             alert('Your report has been submitted successfully.');
         } catch (err) {
             console.error(err);
