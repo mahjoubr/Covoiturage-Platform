@@ -9,12 +9,18 @@ import { ReportController } from './report.controller';
 import {ReportResolver} from "src/report/report.resolver";
 import {SearchService} from "src/services/searchService";
 import {PaginationService} from "src/services/paginationService";
+import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { EventStreamModule } from 'src/SSE/sse.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Report, AppUser, Ride]),
+    SubscriptionModule, 
+    EventStreamModule, 
+
   ],
-  providers: [ReportResolver,ReportService, SearchService,PaginationService],
+  providers: [ReportResolver,ReportService, SearchService,PaginationService, EventStreamService],
   controllers: [ReportController],
   exports: [ReportService],
 

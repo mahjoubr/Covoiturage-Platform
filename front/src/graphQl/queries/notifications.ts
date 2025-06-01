@@ -89,33 +89,5 @@ export const DELETE_NOTIFICATION = gql`
   }
 `;
 
-// Hooks for using the queries and mutations
-import { useQuery, useMutation } from '@apollo/client';
 
-export const useUserNotifications = (userId: number, limit?: number) => {
-  return useQuery(GET_USER_NOTIFICATIONS, {
-    variables: { userId, limit },
-    skip: !userId,
-    pollInterval: 30000, // Poll every 30 seconds as backup
-  });
-};
 
-export const useUnreadCount = (userId: number) => {
-  return useQuery(GET_UNREAD_COUNT, {
-    variables: { userId },
-    skip: !userId,
-    pollInterval: 30000,
-  });
-};
-
-export const useMarkAsRead = () => {
-  return useMutation(MARK_NOTIFICATION_AS_READ, {
-    refetchQueries: [GET_UNREAD_COUNT],
-  });
-};
-
-export const useMarkAllAsRead = () => {
-  return useMutation(MARK_ALL_NOTIFICATIONS_AS_READ, {
-    refetchQueries: [GET_USER_NOTIFICATIONS, GET_UNREAD_COUNT],
-  });
-};

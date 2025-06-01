@@ -23,6 +23,8 @@ import { EventStreamService } from 'src/SSE/sse-subscription.service';
 import { SearchService } from 'src/services/searchService';
 import { Subscription } from '@nestjs/graphql';
 import { EventStreamModule } from 'src/SSE/sse.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 
 
@@ -30,7 +32,7 @@ import { EventStreamModule } from 'src/SSE/sse.module';
   imports: [
     TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription]),
     MessageModule,
-    AppUserRideModule,EventStreamModule
+    AppUserRideModule,EventStreamModule,NotificationModule ,SubscriptionModule
   ],
   controllers: [ChatController],
   providers: [

@@ -12,9 +12,11 @@ import { ReviewResolver } from './review.resolver';
 import { RideModule } from 'src/ride/ride.module';
 import { EventStreamService } from 'src/SSE/sse-subscription.service';
 import { EventStreamModule } from 'src/SSE/sse.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Review]),AppUserModule,RideModule,EventStreamModule],
+  imports:[TypeOrmModule.forFeature([Review]),AppUserModule,RideModule,EventStreamModule,NotificationModule,SubscriptionModule],
   controllers: [ReviewController],
   providers: [ReviewService,PaginationService,SearchService,ReviewResolver,EventStreamService ],
   exports: [ReviewService],

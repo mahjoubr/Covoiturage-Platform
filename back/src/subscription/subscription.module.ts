@@ -10,8 +10,8 @@ import { Subscription } from './entities/subscription.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, Subscription]),
-    EventStreamModule,
-    NotificationModule,
+    
+    
   ],
   providers: [SubscriptionService],
   exports: [SubscriptionService],

@@ -7,6 +7,7 @@ import { AppUser } from '../app-user/entities/app-user.entity';
 import { Ride } from '../ride/entities/ride.entity';
 import { GenericService } from '../services/genericService';
 import { ReportStatus } from '../enums/report-status.enum';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 
 @Injectable()
 export class ReportService extends GenericService {
@@ -19,6 +20,7 @@ export class ReportService extends GenericService {
 
         @InjectRepository(Ride)
         private readonly rideRepo: Repository<Ride>,
+        private readonly eventStreamService: EventStreamService,
     ) {
         super(reportRepo);
     }
@@ -48,6 +50,25 @@ export class ReportService extends GenericService {
             report.proofPath = proofPath;
             report.proofUrl = `/uploads/proofs/${proofPath.split('\\').pop()}`;
         }
+        const reportPayload = {
+            id: report.id,
+            subjectType: report.subjectType,
+            reason: report.reason,
+            reporter: {
+                id: reporter.id,
+                name: reporter.name,
+            },
+            reportedUser: {
+                id: reportedUser.id,
+                name: reportedUser.name,
+            },
+            
+        };
+        //added notification logic
+        // Notify the admin user about the new report
+        const adminUser = await this.userRepo.findOneBy({ role: 'admin' });
+        if (!adminUser) throw new NotFoundException('Admin user not found');
+        this.eventStreamService.emitEvent({ recipientId: adminUser.id, type: EventType.REPORT_ADDED, targetId: reporter.id, payload: reportPayload });
 
         return this.reportRepo.save(report);
     }

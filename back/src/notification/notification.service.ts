@@ -14,7 +14,7 @@ export class NotificationService {
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
     private readonly eventStreamService: EventStreamService,
-    private readonly subscriptionService: SseSubscriptionService,
+    
   ) {}
 
   async create(createNotificationInput: CreateNotificationInput): Promise<Notification> {
@@ -46,6 +46,7 @@ export class NotificationService {
     actionUrl?: string,
     metadata?: Record<string, any>,
   ): Promise<Notification> {
+
     const notification = await this.create({
       userId,
       type: EventType.MESSAGE,
@@ -55,6 +56,70 @@ export class NotificationService {
       metadata,
       relatedEntityId: receiverId,
       relatedEntityType: 'app-user',
+    });
+    console.log('Message notification created:', notification);
+
+    return notification;
+  }
+  async RideNotification(
+    userId: number,
+    rideId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.RIDE_START,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: rideId,
+      relatedEntityType: 'ride',
+    });
+
+    return notification;
+  }
+  async JoinRequestNotification(
+    userId: number,
+    driverId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.JOIN_REQUEST,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: driverId,
+      relatedEntityType: 'app-user',
+    });
+
+    return notification;
+  }
+  async PostNotification(
+    userId: number,
+    postId: number,
+    title: string,
+    message: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ): Promise<Notification> {
+    const notification = await this.create({
+      userId,
+      type: EventType.POST_UPDATED,
+      title,
+      message,
+      actionUrl,
+      metadata,
+      relatedEntityId: postId,
+      relatedEntityType: 'post',
     });
 
     return notification;

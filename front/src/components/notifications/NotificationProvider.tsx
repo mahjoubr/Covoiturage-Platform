@@ -44,6 +44,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       [EventType.JOIN_REQUEST]: 'Join Request',
       [EventType.JOIN_ACCEPT]: 'Join Accepted',
       [EventType.RIDE_DELETE]: 'Ride Deleted',
+      [EventType.REPORT_ADDED]: 'New Report',
       [EventType.RIDE_START]: 'Ride Started',
       [EventType.REVIEW_ADDED]: 'New Review',
     };

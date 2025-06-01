@@ -9,11 +9,12 @@ import { MessageResolver } from './message.resolver';
 import { PubSub } from 'graphql-subscriptions';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { AppUserModule } from 'src/app-user/app-user.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Message,Chat,AppUser]),
-AppUserModule], 
+AppUserModule,NotificationModule], 
   exports: [MessageService], 
   controllers: [MessageController],
   providers: [MessageService, MessageResolver,

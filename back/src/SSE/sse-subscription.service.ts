@@ -24,6 +24,7 @@ export enum EventType {
   RIDE_DELETE = 'RIDE_DELETE',
   RIDE_START = 'RIDE_START',
   REVIEW_ADDED = 'REVIEW_ADDED',
+  REPORT_ADDED = 'REPORT_ADDED',//to add felfront
   MESSAGE = 'MESSAGE',
 }
 
@@ -132,6 +133,12 @@ export class EventStreamService {
     }, 5 * 60 * 1000);
   }
 
+  async subscribeToEvent(
+    userId: number,
+    response: Response
+  ): Promise<() => void> {
+    return this.sseSubscriptionService.subscribe(userId, response);
+  }
 
   async emitEvent(eventData: EventData): Promise<void> {
     if (eventData.recipientId) {
@@ -142,10 +149,7 @@ export class EventStreamService {
     }
   }
 
-  /**
-   * Emit event to subscribers of a target (e.g., post subscribers)
-   * This would typically query your database to find subscribers
-   */
+ 
   async emitEventToSubscribers(
     type: EventType,
     targetId: number,
