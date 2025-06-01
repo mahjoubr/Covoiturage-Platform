@@ -48,11 +48,13 @@ export class MessageService {
      this.notificationService.messageNotification(
       sender.id,
       chat.rider.id === sender.id ? chat.driver.id : chat.rider.id,
+      chat.id,
       'New Message',
       createMessageDto.text,
       `/chat/${chat.id}`,
-      { chatId: chat.id, senderId: sender.id }, 
+      { chatId: chat.id, senderId: sender.id },
       
+
     );
 
     return this.messageRepository.save(message);

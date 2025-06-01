@@ -52,7 +52,7 @@ export class SseNotificationsController {
     
     const unsubscribe = this.sseSubscriptionService.subscribe(userId, response);
 
-    // Handle client disconnect
+    
     const cleanup = () => {
       this.logger.log(`SSE connection closed for user ${userId}`);
       unsubscribe();
@@ -70,9 +70,9 @@ export class SseNotificationsController {
         type: 'heartbeat',
         timestamp: new Date().toISOString(),
       })}\n\n`);
-    }, 30000); // Send heartbeat every 30 seconds
+    }, 30000); //  heartbeat every 30 seconds
 
-    // Clean up heartbeat on disconnect
+    
     response.on('close', () => clearInterval(heartbeat));
   }
 }

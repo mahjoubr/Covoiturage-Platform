@@ -64,6 +64,7 @@ export default function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />

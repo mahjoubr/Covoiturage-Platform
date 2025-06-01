@@ -41,21 +41,26 @@ export class NotificationService {
   async messageNotification(
     userId: number,
     receiverId: number,
+    chatId: number,
     title: string,
     message: string,
     actionUrl?: string,
     metadata?: Record<string, any>,
   ): Promise<Notification> {
-
+    const finalMetadata = {
+    ...(metadata || {}),
+    chatId, 
+  };
     const notification = await this.create({
       userId,
       type: EventType.MESSAGE,
       title,
       message,
       actionUrl,
-      metadata,
+      metadata: finalMetadata,
       relatedEntityId: receiverId,
       relatedEntityType: 'app-user',
+       
     });
     console.log('Message notification created:', notification);
 
