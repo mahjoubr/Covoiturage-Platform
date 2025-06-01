@@ -302,7 +302,7 @@ type Query {
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
   searchRidesByUser(searchTerm: String!, page: Int! = 1, limit: Int! = 10, filterType: String): RidePaginationResult!
-  getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
+  getPosts(searchTerm: String, page: Int, limit: Int, filter: String): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
   isUserInRide(userId: Int!, rideId: Int!): Boolean!
