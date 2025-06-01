@@ -35,7 +35,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
       variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
       fetchPolicy: 'network-only',
       onCompleted: (data) => console.log('GET_ride completed:', data),
-      onError: (error) => console.error('GET_ride error:', error)
+      //onError: (error) => console.error('GET_ride error:', error)
     });
     useEffect(() => {
       if (joinRequest?.getJoinRequestsByRideUser) {
