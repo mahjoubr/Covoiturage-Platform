@@ -29,7 +29,7 @@ export class SearchService {
         .skip(skip)
         .take(limit)
         .getManyAndCount();
-
+    console.log("search result", data, total);
     return {
       data,
       totalItems: total,

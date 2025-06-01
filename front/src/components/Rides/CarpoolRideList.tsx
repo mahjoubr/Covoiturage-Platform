@@ -56,6 +56,8 @@ const CarpoolRideList: React.FC<CarpoolRideListProps> = ({ onView }) => {
     onCompleted: (data) => console.log('GET_RIDES_BY_PASSENGER completed:', data),
     onError: (error) => console.error('GET_RIDES_BY_PASSENGER error:', error),
   });
+  console.log('Driver Rides Data:', driverRidesData);
+  console.log('Passenger Rides Data:', passengerRidesData);
 
   // Use a separate lazy query for getting post details
   const [getPost, { loading: postLoading }] = useLazyQuery(GET_POST_BY_ID, {
