@@ -18,6 +18,7 @@ export const GET_POSTS = gql`
         id
         name
         lastName
+        imageUrl
       }
       comments{
         text
@@ -25,6 +26,7 @@ export const GET_POSTS = gql`
         commenter{
           name
           lastName
+          imageUrl
         }
       }
   }
@@ -50,6 +52,7 @@ export const GET_POSTS = gql`
           id
           name
           lastName
+          imageUrl
         }
         comments {
           text
@@ -57,6 +60,7 @@ export const GET_POSTS = gql`
           commenter {
             name
             lastName
+            imageUrl
           }
         }
       }

@@ -129,6 +129,7 @@ const CarpoolPostList: React.FC = () => {
         : "Unknown",
       comments: post.comments ?? [],
       postOwnerId: post.postOwner?.id,
+      postOwner:post.postOwner,
       status: post.status,
     }));
   };

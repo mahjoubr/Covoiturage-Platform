@@ -97,29 +97,52 @@ export class PostService extends GenericService {
       .leftJoinAndSelect('comments.commenter', 'commenter')
       .where('post.status != :status', { status: PostStatus.CLOSED })
 
+
+
+
     const fieldsToSearch = ['post.destination', 'post.departure', 'post.date', 'post.time'];
 
-    if (searchTerm) {
-      return await this.searchService.searchQuery<Post>(
-        queryBuilder,
-        searchTerm,
-        fieldsToSearch,
-        page,
-        limit,
-      );
-    }
-
-    const [data, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
-    return {
-      data,
-      totalItems: total,
-      currentPage: page,
-    };
+  if (searchTerm) {
+    const result = await this.searchService.searchQuery<Post>(
+      queryBuilder,
+      searchTerm,
+      fieldsToSearch,
+      page,
+      limit,
+    );
+    // Sort the results after fetching
+    result.data = this.sortPostsByDateProximity(result.data);
+    return result;
   }
+
+  const [data, total] = await queryBuilder
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getManyAndCount();
+
+  const sortedData = this.sortPostsByDateProximity(data);
+
+  return {
+    data: sortedData,
+    totalItems: total,
+    currentPage: page,
+  };
+}
+//this is useful to make the posts sorted by closest in date
+private sortPostsByDateProximity(posts: Post[]): Post[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  return posts.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    
+    const diffA = Math.abs(dateA - today.getTime());
+    const diffB = Math.abs(dateB - today.getTime());
+    
+    return diffA - diffB; 
+  });
+}
 
 
 

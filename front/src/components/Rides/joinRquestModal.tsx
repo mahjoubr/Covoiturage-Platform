@@ -137,7 +137,7 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                         {request.user?.imageUrl ? (
                           <img 
-                            src={request.user.imageUrl} 
+                           src={`http://localhost:3000${request.user.imageUrl}`}
                             alt={`${request.user.name}'s profile`} 
                             className="h-full w-full object-cover" 
                           />
