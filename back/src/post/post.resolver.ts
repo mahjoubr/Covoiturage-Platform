@@ -6,33 +6,23 @@ import { Ride, RideState } from 'src/ride/entities/ride.entity';
 import { Int } from 'type-graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository, SelectQueryBuilder } from 'typeorm';
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { MatchingRideResult } from './dto/matching-ride-result.dto';
 import { SearchService } from 'src/services/searchService';
 import { PostPaginatedResponse } from 'src/graphql/types/PostPaginatedResponse';
+import { GqlAuthGuard } from 'src/auth/guards/auth.Guard';
+import { Roles } from 'src/auth/role.decorator';
 
+
+@UseGuards(GqlAuthGuard)
+@Roles('user') 
 @Resolver(() => Post)
 export class PostResolver {
   private readonly logger = new Logger('EventEmitter');
   constructor(private readonly postService: PostService,private readonly searchService: SearchService,
     @InjectRepository(Post) private readonly postRepository :Repository<Post>
   ) {}
-  /*@Query(() => [Post], { name: 'getPosts' })
-  async getPosts(): Promise<Post[]> {
-    const posts = await this.postService.findAll();
-    
-    // Filter posts to only include those with OPEN status
-    const openPosts = posts.filter(post => post.status !== PostStatus.CLOSED);
-  
-    return openPosts.map(post => ({
-      ...post,
-      date: post.date instanceof Date ? post.date : new Date(post.date),
-      relations: ['listRide']
-    }));
-  }*/
-
-    
     @Query(() => PostPaginatedResponse, { name: 'getPosts' })
     async getPosts(
       @Args('searchTerm', { nullable: true }) searchTerm?: string,

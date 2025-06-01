@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRideDto } from './dto/create-ride.dto';
-import { UpdateRideDto } from './dto/update-ride.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Ride } from './entities/ride.entity';
@@ -30,7 +28,6 @@ export class RideService extends GenericService {
     super(rideRepo);
   }
   async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
-    //create a new ride and associate it with the post+post owner
     const ride = this.rideRepo.create({
       ...createRideInput,
       post,
@@ -204,5 +201,28 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
   });
 
   return users;
+}
+async closeRide(rideId: number, userId: number): Promise<Ride> {
+  const ride = await this.rideRepo.findOne({
+    where: { id: rideId },
+    relations: ['driver'],
+  });
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  // Verify the ride has a driver and the user is the driver
+  if (!ride.driver || ride.driver.id !== userId) {
+    throw new Error('Only the driver can close a ride');
+  }
+
+  // Check if ride is already closed
+  if (ride.state === RideState.CLOSED) {
+    throw new Error('Ride is already closed');
+  }
+
+  ride.state = RideState.CLOSED;
+  return await this.rideRepo.save(ride);
 }
 }

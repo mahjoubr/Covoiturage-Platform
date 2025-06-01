@@ -16,18 +16,11 @@ export default function Home() {
         getCurrentUser().then(setUser);
     }, []);
 
-    const isAdmin = user?.role === 'admin';
-
-    // Always call useQuery but skip execution if not admin or user not loaded
-    const { data, error } = useQuery(Get_DashboardData, {
-        skip: !user || !isAdmin
-    });
-
-    // Show placeholder while user auth is loading
     if (user === null) return <div>Loading...</div>;
 
-    // Common error handling (only for admin)
-    if (isAdmin && error) return (
+    const isAdmin = user?.role === 'admin';
+
+    if (error) return (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <strong className="font-bold">Error!</strong>
             <span className="block sm:inline"> Unable to load data: {error.message}</span>
