@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { PaginationResult, PaginationService } from 'src/services/paginationService';
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
-import { EventStreamService } from 'src/SSE/sse-subscription.service';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { ReviewPayload } from 'src/SSE/ReviewPayload';
 
 @Injectable()
@@ -68,7 +68,9 @@ export class ReviewService extends GenericService {
       };
 
   
-      this.eventStreamService.emitReviewEvent(reviewedUserId, reviewPayload);
+    
+
+     this.eventStreamService.emitEvent({ recipientId: reviewedUserId, type: EventType.REVIEW_ADDED, targetId: reviewId, payload: reviewPayload });
     }
     
     async deleteReview(userid:number,id: number) {

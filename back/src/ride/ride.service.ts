@@ -11,6 +11,7 @@ import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
 import { CreateRideInput } from './dto/create-ride.input';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
@@ -21,6 +22,8 @@ export class RideService extends GenericService {
   private readonly paginationService: PaginationService,
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
+  private readonly EventStreamService: EventStreamService,
+  
 
 ){
     
@@ -113,7 +116,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
 
   const user = await this.userService.findById(userId);
   if (!user) throw new Error('User not found');
-
+  this.EventStreamService.emitEvent({ recipientId: userId, type: EventType.JOIN_ACCEPT, targetId: ride.id, payload: { userId } });
   return this.appUserRideService.addPassenger(user, ride);
 }
 

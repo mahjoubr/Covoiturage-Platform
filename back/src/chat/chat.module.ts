@@ -22,6 +22,9 @@ import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService } from 'src/SSE/sse-subscription.service';
 import { SearchService } from 'src/services/searchService';
 import { Subscription } from '@nestjs/graphql';
+import { EventStreamModule } from 'src/SSE/sse.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 
 
@@ -30,7 +33,7 @@ import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
   imports: [
     TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription, AppUserRide]),
     MessageModule,
-    AppUserRideModule
+    AppUserRideModule,EventStreamModule,NotificationModule ,SubscriptionModule
   ],
   controllers: [ChatController],
   providers: [
