@@ -1,47 +1,78 @@
-import { Controller, Sse, Param, Req, Res } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
-import { EventStreamService, StreamEvent } from './sse-subscription.service';
 
-interface SseMessageEvent {
-  data: string | object;
-  id?: number;
-  type?: string;
-  retry?: number;
-}
+import {
+  Controller,
+  Get,
+  Param,
+  Res,
+  Headers,
+  Logger,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { SseSubscriptionService } from './sse-subscription.service';
 
 @Controller('events')
-export class EventStreamController {
-  constructor(private readonly eventStreamService: EventStreamService) {}
+export class SseNotificationsController {
+  private readonly logger = new Logger(SseNotificationsController.name);
 
-  @Sse('stream/:recipientId')
-  subscribeToEvents(
-    @Param('recipientId') recipientId: number,
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Observable<SseMessageEvent> {
-    const connectionId = Math.floor(Math.random() * 1000000000);
+  constructor(
+    private readonly sseSubscriptionService: SseSubscriptionService,
+  ) {}
 
-    
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no'); 
-    
-    this.eventStreamService.registerConnection(recipientId, connectionId);
-    
-    req.on('close', () => {
-      this.eventStreamService.removeConnection(recipientId, connectionId);
+  @Get('stream/:userId')
+  async streamEvents(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Res() response: Response,
+    @Headers('accept') accept: string,
+  ) {
+    // client accepts SSE
+    if (!accept || !accept.includes('text/event-stream')) {
+      return response.status(400).json({
+        error: 'Client must accept text/event-stream',
+      });
+    }
+
+    this.logger.log(`SSE connection established for user ${userId}`);
+
+    //  SSE headers
+    response.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control',
     });
+
+    response.write(`data: ${JSON.stringify({
+      type: 'connection',
+      message: 'Connected to notification stream',
+      timestamp: new Date().toISOString(),
+    })}\n\n`);
+
     
-    return this.eventStreamService.getStreamForRecipient(recipientId).pipe(
-      map(event => ({
-        data: JSON.stringify(event.payload),
-        id: Number(event.timestamp),
-        type: event.type
-      }))
-    );
+    const unsubscribe = this.sseSubscriptionService.subscribe(userId, response);
+
+    
+    const cleanup = () => {
+      this.logger.log(`SSE connection closed for user ${userId}`);
+      unsubscribe();
+    };
+
+    response.on('close', cleanup);
+    response.on('error', cleanup);
+
+    const heartbeat = setInterval(() => {
+      if (response.writableEnded) {
+        clearInterval(heartbeat);
+        return;
+      }
+      response.write(`data: ${JSON.stringify({
+        type: 'heartbeat',
+        timestamp: new Date().toISOString(),
+      })}\n\n`);
+    }, 30000); //  heartbeat every 30 seconds
+
+    
+    response.on('close', () => clearInterval(heartbeat));
   }
 }

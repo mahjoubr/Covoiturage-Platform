@@ -1,122 +1,180 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Subject, Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { ReviewPayload } from './ReviewPayload';
-import { ReportPayload} from "src/SSE/ReportPayload";
 
-export enum EventType{
-  POST_UPDATED='update_post',
-  NEW_COMMENT= 'new_comment',
-  JOIN_REQUEST= 'join_request',
-  JOIN_ACCEPT= 'join_accepted',
-  RIDE_DELETE='ride_deleted',
-  RIDE_START='ride_started',
-  REVIEW_ADDED='review_added',
-  REPORT_CREATED    = 'report_created',
-  REPORT_APPROVED   = 'report_approved',
-  REPORT_DECLINED   = 'report_declined',
+import { Injectable, Logger } from '@nestjs/common';
+import { Response } from 'express';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+interface EventData {
+  type: EventType;
+  targetId: number;
+  recipientId?: number;
+  payload: any;
 }
 
-export interface StreamEvent {
-  type: EventType;
-  targetId: number; 
-  recipientId: number; 
-  payload: any;
-  timestamp: number;
+
+interface SSEConnection {
+  userId: number;
+  response: Response;
+  lastActivity: Date;
+}
+
+export enum EventType {
+  POST_UPDATED = 'POST_UPDATED',
+  NEW_COMMENT = 'NEW_COMMENT',
+  JOIN_REQUEST = 'JOIN_REQUEST',
+  JOIN_ACCEPT = 'JOIN_ACCEPT',
+  RIDE_DELETE = 'RIDE_DELETE',
+  RIDE_START = 'RIDE_START',
+  REVIEW_ADDED = 'REVIEW_ADDED',
+  REPORT_ADDED = 'REPORT_ADDED',//to add felfront
+  MESSAGE = 'MESSAGE',
+}
+
+
+@Injectable()
+export class SseSubscriptionService {
+  private readonly logger = new Logger(SseSubscriptionService.name);
+  private connections = new Map<number, SSEConnection>();
+
+  
+  
+
+
+  subscribe(userId: number, response: Response): () => void {
+    const connection: SSEConnection = {
+      userId,
+      response,
+      lastActivity: new Date(),
+    };
+
+    this.connections.set(userId, connection);
+    this.logger.log(`User ${userId} subscribed to SSE events`);
+
+    
+    return () => {
+      this.connections.delete(userId);
+      this.logger.log(`User ${userId} unsubscribed from SSE events`);
+    };
+  }
+
+  async sendEventToUser(userId: number, eventData: EventData): Promise<boolean> {
+    const connection = this.connections.get(userId);
+    
+    if (!connection) {
+      this.logger.debug(`No active connection for user ${userId}`);
+      return false;
+    }
+
+    try {
+      const { response } = connection;
+      
+      if (response.writableEnded) {
+        this.connections.delete(userId);
+        return false;
+      }
+
+      const eventPayload = {
+        ...eventData.payload,
+        type: eventData.type,
+        timestamp: new Date().toISOString(),
+      };
+
+      response.write(`data: ${JSON.stringify(eventPayload)}\n\n`);
+      connection.lastActivity = new Date();
+      
+      this.logger.debug(`Event sent to user ${userId}: ${eventData.type}`);
+      return true;
+    } catch (error) {
+      this.logger.error(`Failed to send event to user ${userId}:`, error);
+      this.connections.delete(userId);
+      return false;
+    }
+  }
+
+ 
+  async sendEventToUsers(userIds: number[], eventData: EventData): Promise<void> {
+    const promises = userIds.map(userId => 
+      this.sendEventToUser(userId, eventData)
+    );
+    
+    await Promise.all(promises);
+  }
+
+
+  getActiveConnections(): number[] {
+    return Array.from(this.connections.keys());
+  }
+
+ 
+  cleanupStaleConnections(): void {
+    const now = new Date();
+    const staleThreshold = 5 * 60 * 1000; // 5 minutes
+
+    for (const [userId, connection] of this.connections.entries()) {
+      const timeSinceLastActivity = now.getTime() - connection.lastActivity.getTime();
+      
+      if (timeSinceLastActivity > staleThreshold || connection.response.writableEnded) {
+        this.connections.delete(userId);
+        this.logger.log(`Cleaned up stale connection for user ${userId}`);
+      }
+    }
+  }
 }
 
 @Injectable()
-export class EventStreamService implements OnModuleInit {
-  private readonly eventSubject = new Subject<StreamEvent>();
-  private activeConnections = new Map<number, Set<number>>();
+export class EventStreamService {
+  private readonly logger = new Logger(EventStreamService.name);
 
-  onModuleInit() {
-    console.log('EventStreamService initialized');
+  constructor(
+    private readonly sseSubscriptionService: SseSubscriptionService,
+    private readonly subscriptionService: SubscriptionService
+  ) {
+    // Clean up stale connections every 5 minutes
+    setInterval(() => {
+      this.sseSubscriptionService.cleanupStaleConnections();
+    }, 5 * 60 * 1000);
   }
 
-  emitEvent(event: Omit<StreamEvent, 'timestamp'>): void {
-    const completeEvent: StreamEvent = {
-      ...event,
-      timestamp: Date.now()
-    };
-    this.eventSubject.next(completeEvent);
+  async subscribeToEvent(
+    userId: number,
+    response: Response
+  ): Promise<() => void> {
+    return this.sseSubscriptionService.subscribe(userId, response);
   }
 
-  getStreamForRecipient(recipientId: number): Observable<StreamEvent> {
-    return this.eventSubject.asObservable().pipe(
-      filter(event => event.recipientId === recipientId)
-    );
-  }
-
-  registerConnection(recipientId: number, connectionId: number): void {
-    if (!this.activeConnections.has(recipientId)) {
-      this.activeConnections.set(recipientId, new Set());
-    }
-    const connections = this.activeConnections.get(recipientId);
-    if (connections) {
-      connections.add(connectionId);
-    }
-    console.log(`Connection registered: ${recipientId}:${connectionId}`);
-  }
-
-  removeConnection(recipientId: number, connectionId: number): void {
-    const connections = this.activeConnections.get(recipientId);
-    if (connections) {
-      connections.delete(connectionId);
-      if (connections.size === 0) {
-        this.activeConnections.delete(recipientId);
-      }
-      console.log(`Connection removed: ${recipientId}:${connectionId}`);
+  async emitEvent(eventData: EventData): Promise<void> {
+    if (eventData.recipientId) {
+      await this.sseSubscriptionService.sendEventToUser(
+        eventData.recipientId,
+        eventData
+      );
     }
   }
 
-  hasActiveConnections(recipientId: number): boolean {
-    const connections = this.activeConnections.get(recipientId);
-    return connections !== undefined && connections.size > 0;
-  }
-
-  getActiveRecipients(): number[] {
-    return Array.from(this.activeConnections.keys());
-  }
-
-
-  emitReviewEvent(
+ 
+  async emitEventToSubscribers(
+    type: EventType,
     targetId: number,
-    payload: ReviewPayload
-  ): void {
-    this.emitEvent({
-      type: EventType.REVIEW_ADDED,
+    targetType: string,
+    payload: any,
+  ): Promise<void> {
+  
+    const subscribers = await this.getSubscribers(targetId, targetType);
+    
+    const eventData: EventData = {
+      type,
       targetId,
-      recipientId: targetId,  // Recipient is the user being reviewed
-      payload
-    });
-  }
-  emitReportCreated(recipientId: number, payload : ReportPayload): void {
-    this.emitEvent({
-      type: EventType.REPORT_CREATED,
-      targetId: payload.reportId,
-      recipientId,
       payload,
-    });
+    };
+
+    await this.sseSubscriptionService.sendEventToUsers(subscribers, eventData);
   }
 
-  emitReportApproved(recipientId: number, payload: ReportPayload): void {
-    this.emitEvent({
-      type: EventType.REPORT_APPROVED,
-      targetId: payload.reportId,
-      recipientId,
-      payload,
-    });
-  }
+ 
+  async getSubscribers(targetId: number, targetType: string): Promise<number[]> {
 
-  emitReportDeclined(recipientId: number, payload: ReportPayload): void {
-    this.emitEvent({
-      type: EventType.REPORT_DECLINED,
-      targetId: payload.reportId,
-      recipientId,
-      payload,
-    });
+    
+    return this.subscriptionService.getSubscribers(targetId, targetType);
+    
+    
   }
-  
-  
 }
+

@@ -75,8 +75,8 @@ const ReviewCard = ({
       <div className="px-5 py-4 border-t border-gray-100 dark:border-gray-600">
         <div className="flex items-center mb-3">
           <div className="relative mr-3">
-            <img
-              src={review.user.imageUrl || '/default-user.png'}
+            <img src={review.user.imageUrl || '/images/user/default-avatar.jpg'} 
+
               alt={`${review.user.name} ${review.user.lastName || ''}`}
               className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-600"
             />
@@ -120,7 +120,9 @@ const ReviewCard = ({
       {isAuthor && (
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex justify-between items-center">
           <Link
-            to={`/users/${review.user.id}`}
+                    
+
+            to={`/profile/${review.user.id}`}
             className="text-sm text-blue-600 hover:text-blue-700 font-medium dark:text-blue-300 dark:hover:text-blue-400"
           >
             View Profile

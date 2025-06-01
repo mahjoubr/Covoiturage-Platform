@@ -2,6 +2,7 @@ import { User } from 'lucide-react';
 import React from 'react';
 import { ACCEPT_REQUEST, DELETE_REQUEST, GET_JOIN_REQUESTS_BY_RIDE, GET_RIDES_BY_DRIVER } from '../../graphQl/queries/rides';
 import { useMutation } from '@apollo/client';
+import { CREATE_CHAT } from '../../graphQl/queries/chat';
 
 interface User {
   id: number;
@@ -62,6 +63,8 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
       console.error('Error accepting request:', error);
     },
   });
+  
+  const [createChat] = useMutation(CREATE_CHAT);
 
   const handleDeleteRequest = (joinRequestId: number) => {
     deleteJoinRequest({
@@ -76,6 +79,7 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
   };
   
   const handleAcceptRequest = (requestId: number, userId: number) => {
+
     acceptJoinRequest({
       variables: { 
         requestId:Number(requestId),
@@ -88,6 +92,13 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
       onError: (error) => {
         console.error("Error accepting:", error);
       }
+    });
+    createChat({
+      variables:{
+        createChatInput:{
+        rideId:Number(rideId),
+        riderId:Number(userId)
+      }}
     });
   };
 
@@ -127,7 +138,7 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                         {request.user?.imageUrl ? (
                           <img 
-                            src={request.user.imageUrl} 
+                           src={`http://localhost:3000${request.user.imageUrl}`}
                             alt={`${request.user.name}'s profile`} 
                             className="h-full w-full object-cover" 
                           />

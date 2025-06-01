@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { User } from 'src/user/entities/user.entity';
 import { AppUser } from 'src/app-user/entities/app-user.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class MessageService {
@@ -14,6 +15,7 @@ export class MessageService {
     @InjectRepository(Message) private messageRepository: Repository<Message>,
     @InjectRepository(Chat) private chatRepository: Repository<Chat>,
     @InjectRepository(AppUser) private userRepository: Repository<AppUser>,
+    private readonly notificationService: NotificationService,
   ) {
 
   }
@@ -32,6 +34,7 @@ export class MessageService {
     if (!sender) {
       throw new Error('Sender not found.');
     }
+    console.log('sender', sender);
   
     const message = this.messageRepository.create({
       text: createMessageDto.text,
@@ -40,7 +43,21 @@ export class MessageService {
     });
     chat.messages.push(message); 
 
-     await this.chatRepository.save(chat);
+    await this.chatRepository.save(chat);
+     
+  
+     this.notificationService.messageNotification(
+      sender.id,
+      chat.rider.id === sender.id ? chat.driver.id : chat.rider.id,
+      chat.id,
+      'New Message',
+      createMessageDto.text,
+      `/chat/${chat.id}`,
+      { chatId: chat.id, senderId: sender.id },
+      
+
+    );
+
     return this.messageRepository.save(message);
   }
   

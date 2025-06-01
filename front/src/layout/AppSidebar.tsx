@@ -15,63 +15,84 @@ type NavItem = {
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
-const userString = localStorage.getItem("user");
-const role = userString ? JSON.parse(userString).role : null;
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: role === "admin" ? "Dashboard" : "Home",
-    path: "/",
-  },
-
-  {
-      icon: <UserCircleIcon />,
-      name: "User Profile",
-      path: "/profile",
-    },
-    {
-
-      icon: <NewspaperIcon />,
-      name: "Posts",
-      path: "/Posts",
-    },
-    {
-      icon: <CarIcon />,
-      name: "Rides",
-      path: "/rides",
-    },
-    {
-      icon:<ChatIcon />,
-      name: "Chat",
-      path: "/chat",
-    },
-    {
-      icon:<Users />,
-      name: "App Users",
-      path: "/users",
-    },
-    {
-      icon: <CalenderIcon />,
-      name: "Calendar",
-      path: "/calendar",
-    },
-    {
-      icon:<CircleAlertIcon/>,
-      name: "Reports",
-      path: "/myReports",
-    }, {
-      icon: <Star/>,
-      name: "Reviews",
-      path: "/reviews",
-    },
 
 
-];
-
-
-const AppSidebar: React.FC = () => {
+  const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+
+  const userString = localStorage.getItem("user");
+ const role = (() => {
+  return userString ? JSON.parse(userString)?.role ?? null : null;
+})();
+  const navItems: NavItem[] =
+    role === "admin"
+      ? [
+          {
+            icon: <GridIcon />,
+            name: "Dashboard",
+            path: "/",
+          },
+          {
+            icon: <NewspaperIcon />,
+            name: "Reports",
+            path: "/report",
+          },
+          {
+            icon: <Users />,
+            name: "App Users",
+            path: "/users",
+          },
+        ]
+      : [
+          {
+            icon: <GridIcon />,
+            name: "Home",
+            path: "/",
+          },
+          {
+            icon: <UserCircleIcon />,
+            name: "User Profile",
+            path: "/profile",
+          },
+           {
+            icon: <Users />,
+            name: "Search Users",
+            path: "/Users",
+          },
+           {
+            icon: <CarIcon />,
+            name: "Rides",
+            path: "/rides",
+          },
+          {
+
+            icon: <NewspaperIcon />,
+            name: "Posts",
+            path: "/Posts",
+          },
+          {
+            icon: <CalenderIcon />,
+            name: "Calender",
+            path: "/calendar",
+          },
+          {
+          icon: <Star/>,
+          name: "Reviews",
+          path: "/reviews",
+        },
+
+          {
+            icon: <CircleAlertIcon/>,
+            name: "Reports",
+            path: "/myReports",
+          },
+          {
+            icon: <ChatIcon />,
+            name: "Chat",
+            path: "/chat",
+          },
+        ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

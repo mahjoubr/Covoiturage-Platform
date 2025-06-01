@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send, Variable } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send, Variable, User } from 'lucide-react';
 import { CarpoolPost, Comment } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
@@ -35,7 +35,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
       variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
       fetchPolicy: 'network-only',
       onCompleted: (data) => console.log('GET_ride completed:', data),
-      onError: (error) => console.error('GET_ride error:', error)
+      //onError: (error) => console.error('GET_ride error:', error)
     });
     useEffect(() => {
       if (joinRequest?.getJoinRequestsByRideUser) {
@@ -296,9 +296,16 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
                       >
                       <div className="flex items-center">
                         <div className="w-5 h-5 bg-blue-100 dark:bg-blue-600 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-200 text-xs font-medium">
-                        {comment.commenter?.name
-                          ? `${comment.commenter.name.charAt(0)}`
-                          : ""}
+                        {comment.commenter?.imageUrl ? (
+                          <img 
+                           src={`http://localhost:3000${comment.commenter.imageUrl}`}
+                            alt={`${comment.commenter.name}'s profile`}
+                            className="w-full h-full object-cover rounded-full"
+
+                          />
+                        ) : (
+                          <User className="w-5 h-5 text-gray-500" />
+                        )}
                         </div>
                         <span className="ml-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
                           {comment.commenter?.name && comment.commenter?.lastName

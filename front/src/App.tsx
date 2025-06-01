@@ -36,19 +36,21 @@ import { SocketProvider } from "./hooks/useSocket";
 import { ApolloProvider } from "@apollo/client";
 import client from './graphQl/client';
 import UserProfile from "./pages/UserProfile";
+import NotificationProvider from "./components/notifications/NotificationProvider.tsx";
 
 
 export default function App() {
   return (
      <ApolloProvider client={client}>
       <SocketProvider>
+        <NotificationProvider>
     <React.Fragment>
       <Router>
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route index path="/" element={<Home/>} />
 
             {/* Others Page */}
             <Route path="/profile" element={<EditProfile />} />
@@ -62,6 +64,7 @@ export default function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/users/:userId/reviews" element={<UserReviewsPage />} />
@@ -97,6 +100,7 @@ export default function App() {
         </Routes>
       </Router>
       </React.Fragment>
+    </NotificationProvider>
       </SocketProvider>
       </ApolloProvider>
         );

@@ -15,6 +15,7 @@ export interface CarpoolPost {
     comments? : Comment[];
     postOwnerId: number;
     status: string;
+    postOwner?: AppUser;
   }
 
 export enum RideState {

@@ -12,8 +12,11 @@ import { PaginationResult } from 'src/services/paginationService';
 import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResponse';
 import { GraphQLInt } from 'graphql';
 import { ReviewPaginationResult } from './dto/ReviewPaginationResult';
+import { Roles } from 'src/auth/role.decorator';
 
+@UseGuards(GqlAuthGuard)
 @Resolver()
+@Roles('user') 
 export class ReviewResolver {
   constructor(
     private userService: AppUserService,
@@ -24,7 +27,6 @@ export class ReviewResolver {
 
 
   
-
 
  @Query(() => ReviewFormData)
   async reviewFormData(
@@ -40,11 +42,14 @@ export class ReviewResolver {
     if (!user || !ride) {
       throw new Error('User or ride not found');
     }
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
     return {
       reviewedUser: {
         id: user.id,
-        imageUrl: user.imageUrl,
         name: user.name,
+        imageUrl:`${baseUrl}${user.imageUrl}`,
+        
         
       },
       ride: {
@@ -58,7 +63,6 @@ export class ReviewResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
   async getMyReviews(
     @CurrentUser() user: AppUser,
@@ -67,29 +71,39 @@ export class ReviewResolver {
   ): Promise<PaginationResult<Review>> {
     return this.reviewService.findByReviewerId(user.id, page, limit);
   }
-  
   @Query(() => PaginatedReviewsResponse, { name: 'getUserReviews' })
-  getUserReviews(
-    @Args('userId', { type: () => Int }) userId: number,
-    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
-    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
-  ): Promise<PaginationResult<Review>> {
-    return this.reviewService.findByReviewedUserId(userId, page, limit);
+async getUserReviews(
+  @Args('userId', { type: () => Int }) userId: number,
+  @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number
+): Promise<PaginationResult<Review>> {
+  const result = await this.reviewService.findByReviewedUserId(userId, page, limit);
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+  for (const review of result.data) {
+    if (review.reviewer?.imageUrl) {
+      review.reviewer.imageUrl = `${baseUrl}${review.reviewer.imageUrl}`;
+    }
+    if (review.reviewedUser?.imageUrl) {
+      review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+    }
   }
 
-  @UseGuards(GqlAuthGuard)
+  return result;
+}
+
+
   @Query(() => GraphQLInt, { name: 'getAverageRating' })
-  getAverageRating(@CurrentUser() user: AppUser): Promise<number> {
+  getAverageRating(@CurrentUser() user: AppUser): Promise<number | null> {
     return this.reviewService.getAverageRating(user.id);
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRatingById' })
-  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number> {
+  getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number | null> {
     return this.reviewService.getAverageRating(id);
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => ReviewPaginationResult, { name: 'getPaginatedMyReviews' }) 
   async getPaginatedReviews(
     @CurrentUser() user: AppUser,
@@ -101,4 +115,17 @@ export class ReviewResolver {
     return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
   }
   
+  @Query(() => PaginatedReviewsResponse, { name: 'searchMyReviews' })
+  async searchMyReviews(
+    @CurrentUser() user: AppUser,
+   @Args('searchTerm', { type: () => String }) searchTerm: string,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number,
+    @Args('isMyReviews', { type: () => Boolean, nullable: true, defaultValue: true }) isMyReviews: boolean
+  ): Promise<PaginationResult<Review>> {
+    console.log("in the search function back");
+    console.log("Search params:", { userId: user.id, searchTerm, page, limit, isMyReviews }); // Added logging
+    return this.reviewService.searchReviews(user.id, searchTerm, page, limit, isMyReviews);
+  }
+
 }

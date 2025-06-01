@@ -34,12 +34,10 @@ export default function Home() {
         </div>
     );
 
-    // 🛠 Debug logs (only for admin)
     if (isAdmin) {
         console.log("Dashboard data:", data);
     }
 
-    // Extract data safely (only for admin)
     const stats = data?.getDashboardData.stats || {};
     const ridesPerMonth = data?.getDashboardData.ridesPerMonth || [];
     const recentRides = data?.getDashboardData.recentRides || [];

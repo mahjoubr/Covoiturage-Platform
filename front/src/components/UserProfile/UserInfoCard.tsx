@@ -3,19 +3,19 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useEffect, useState } from "react";
-import { fetchUserById, updateUser } from "../../services/userService";
+import { useState } from "react";
+import {  updateUser } from "../../services/userService";
 import { UpdateAppUserInput, User } from "../../types";
 
 
 interface UserMetaCardProps {
   isEditable: boolean; 
+  user: User | null;
   
 }
 
 
-export default function UserInfoCard({ isEditable}: UserMetaCardProps) {
-  const [user, setUser] = useState<User | null>(null);
+export default function UserInfoCard({ user, isEditable}: UserMetaCardProps) {
   const [name, setName] = useState('');
 const [lastName, setLastName] = useState('');
 const [email, setEmail] = useState('');
@@ -24,17 +24,7 @@ const [dateOfBirth, setDateOfBirth] = useState('');
 const [password, setPassword] = useState('');
 const [error, setError] = useState<string | null>(null);
 
-    const getUserData = async () => {
-      try {
-        const fetchedUser = await fetchUserById();
-        setUser(fetchedUser); 
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    useEffect(() => {
-      getUserData();
-    }, [])
+   
 
   
   const { isOpen, openModal, closeModal } = useModal();
@@ -57,7 +47,8 @@ const [error, setError] = useState<string | null>(null);
     try {
       await updateUser(updatePayload as UpdateAppUserInput);
       closeModal();
-      await getUserData();
+      window.location.reload();
+      
     } catch (error) {
       setError("Failed to update user. Please try again.");
       console.error("Error updating user:", error);

@@ -18,6 +18,7 @@ export const GET_POSTS = gql`
         id
         name
         lastName
+        imageUrl
       }
       comments{
         text
@@ -25,15 +26,15 @@ export const GET_POSTS = gql`
         commenter{
           name
           lastName
+          imageUrl
         }
       }
   }
 }
 `;
-*/
-export const GET_POSTS = gql`
-  query GetPosts($searchTerm: String, $page: Int, $limit: Int) {
-    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+*/export const GET_POSTS = gql`
+  query GetPosts($searchTerm: String, $page: Int, $limit: Int, $filter: String) {
+    getPosts(searchTerm: $searchTerm, page: $page, limit: $limit, filter: $filter) {
       data {
         id
         destination
@@ -50,6 +51,7 @@ export const GET_POSTS = gql`
           id
           name
           lastName
+          imageUrl
         }
         comments {
           text
@@ -57,6 +59,7 @@ export const GET_POSTS = gql`
           commenter {
             name
             lastName
+            imageUrl
           }
         }
       }

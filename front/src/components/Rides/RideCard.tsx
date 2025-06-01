@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Ride } from '../../types/posts';
-import { useQuery } from '@apollo/client';
+import { Ride,RideState } from '../../types/posts';
+import { useMutation, useQuery } from '@apollo/client';
 import { GET_POST_BY_ID } from '../../graphQl/queries/posts';
-import {GET_JOIN_REQUESTS_BY_RIDE } from '../../graphQl/queries/rides';
+import {GET_JOIN_REQUESTS_BY_RIDE,END_RIDE } from '../../graphQl/queries/rides';
 import JoinRequestsModal from './joinRquestModal'; // Import the modal component
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
@@ -35,6 +35,36 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
   const [rideUsers, setRideUsers] = useState<RideUser[]>([]);
   const [isReviewPopupOpen, setIsReviewPopupOpen] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+      const [endRide] = useMutation(END_RIDE, {
+      refetchQueries: [
+        { query: GET_JOIN_REQUESTS_BY_RIDE, variables: { rideId: Number(ride.id) } },
+      ],
+    });
+
+    const handleEndRide = async () => {
+      try {
+        await endRide({
+          variables: {
+            rideId: Number(ride.id)
+          }
+        });
+      } catch (error) {
+        console.error('Error ending ride:', error);
+      }
+    };
+    const [closeRide, { loading: isClosingRide }] = useMutation(END_RIDE, {
+  refetchQueries: [
+    { 
+      query: GET_JOIN_REQUESTS_BY_RIDE, 
+      variables: { rideId: Number(ride.id) } 
+    },
+    // Add any other queries that need refreshing
+  ],
+  onError: (error) => {
+    console.error('Error closing ride:', error);
+    // You can add a toast notification here if needed
+  },
+});
 
   const handleLeaveReviewClick = async () => {
     setIsLoadingUsers(true);
@@ -48,6 +78,7 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
       setIsLoadingUsers(false);
     }
   };
+  console.log("hneeeeeeeeeeeeeeeeee",ride.state);
   
     useEffect(() => {
       if (isJoinRequestsModalOpen) {
@@ -75,10 +106,8 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
     const post = data.getPostById;
-    const { date, arrival, departure, isYourRide, isRideYouTook, driver, appUserRides } = ride;
+    const { date, arrival, departure, isYourRide, isRideYouTook, driver, appUserRides } = ride
 
-
-  // Handle loading and error states
   if (loading) return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 animate-pulse min-h-[300px]">
       <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
@@ -192,52 +221,77 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
 
       {/* Action buttons */}
       <div className="flex flex-col space-y-2">
-        <button
-          onClick={() => onView(""+post.id)}
-          className="w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors dark:bg-blue-500/20 dark:text-white/90 dark:hover:bg-blue-500/30 font-medium flex items-center justify-center"
-        >
-          <span>View Post</span>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        
-        {/* Join Requests button - only shown for rides you own */}
-        {isYourRide && (
+        <div className="flex gap-2">
           <button
-            onClick={() => setIsJoinRequestsModalOpen(true)}
-            className="w-full bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors dark:bg-green-500/20 dark:text-white/90 dark:hover:bg-green-500/30 font-medium flex items-center justify-center"
+            onClick={() => onView(""+post.id)}
+            className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors dark:bg-blue-500/20 dark:text-white/90 dark:hover:bg-blue-500/30 font-medium flex items-center justify-center hover:scale-[1.02] transform transition-transform"
           >
-            <span>View Join Requests</span>
-            <span className="ml-2 bg-white dark:bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
-              {joinRequests.length || 0}
-            </span>
+            <span>View Post</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
-        )}{/* Leave Review button - only shown for rides you took */}
-            {isRideYouTook && (
-              <button
-                onClick={handleLeaveReviewClick}
-                className="w-full bg-yellow-600 text-white px-4 py-3 rounded-md hover:bg-yellow-700 transition-colors dark:bg-yellow-500/20 dark:text-white/90 dark:hover:bg-yellow-500/30 font-medium flex items-center justify-center"
-                disabled={isLoadingUsers}
-              >
-                {isLoadingUsers ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading...
-                  </span>
-                ) : (
-                  <>
-                    <span>Leave Review</span>
-                    <Star className="ml-2" size={18} />
-                  </>
-                )}
-              </button>
-            )}
+          
+          {/* Join Requests or End Ride button - only shown for rides you own */}
+          {isYourRide && (
+            <button
+              onClick={() => setIsJoinRequestsModalOpen(true)}
+              className="flex-1 bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors dark:bg-green-500/20 dark:text-white/90 dark:hover:bg-green-500/30 font-medium flex items-center justify-center hover:scale-[1.02] transform transition-transform"
+            >
+              <span>Requests</span>
+              <span className="ml-2 bg-white dark:bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
+                {joinRequests.length || 0}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* Second row for End Ride or Leave Review */}
+        {isYourRide && ride.state !== RideState.CLOSED && (
+  <button
+    onClick={handleEndRide}
+    disabled={isClosingRide}
+    className="flex-1 bg-red-500 text-white px-4 py-3 rounded-md hover:bg-red-600 transition-colors dark:bg-red-500/20 dark:text-white/90 dark:hover:bg-red-500/30 font-medium flex items-center justify-center hover:scale-[1.02] transform transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {isClosingRide ? (
+      <span className="flex items-center">
+        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Ending...
+      </span>
+    ) : (
+      'End Ride'
+    )}
+  </button>
+)}
+          
+          {isRideYouTook && (
+            <button
+              onClick={handleLeaveReviewClick}
+              className="flex-1 bg-yellow-600 text-white px-4 py-3 rounded-md hover:bg-yellow-700 transition-colors dark:bg-yellow-500/20 dark:text-white/90 dark:hover:bg-yellow-500/30 font-medium flex items-center justify-center hover:scale-[1.02] transform transition-transform"
+              disabled={isLoadingUsers}
+            >
+              {isLoadingUsers ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                <>
+                  <span>Review</span>
+                  <Star className="ml-2" size={18} />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
+      
 
       {/* Popup-style modals rendered outside the card container */}
       <UsersPerRide 

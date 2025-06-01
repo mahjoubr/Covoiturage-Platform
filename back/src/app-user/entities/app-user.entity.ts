@@ -41,7 +41,7 @@ export class AppUser extends User {
   reviews: Review[];
 
   @Column({ type: 'float' })
-  @Field()
+  @Field({ nullable: true })  
   rating: number;
 
   @OneToMany(() => AppUserRide, (appUserRide) => appUserRide.appUser)

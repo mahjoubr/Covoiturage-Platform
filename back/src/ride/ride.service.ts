@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRideDto } from './dto/create-ride.dto';
-import { UpdateRideDto } from './dto/update-ride.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Ride } from './entities/ride.entity';
@@ -11,23 +9,27 @@ import { AppUserRideService } from 'src/app-user-ride/app-user-ride.service';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { Post } from 'src/post/entities/post.entity';
 import { CreateRideInput } from './dto/create-ride.input';
+import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
 import { App } from 'supertest/types';
+import { SearchService } from 'src/services/searchService';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
   private readonly paginationService: PaginationService,
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
+  private readonly EventStreamService: EventStreamService,
+  private readonly searchService: SearchService, 
+  
 
 ){
     
     super(rideRepo);
   }
   async createRide(createRideInput: CreateRideInput, post: Post): Promise<Ride> {
-    //create a new ride and associate it with the post+post owner
     const ride = this.rideRepo.create({
       ...createRideInput,
       post,
@@ -113,7 +115,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
 
   const user = await this.userService.findById(userId);
   if (!user) throw new Error('User not found');
-
+  this.EventStreamService.emitEvent({ recipientId: userId, type: EventType.JOIN_ACCEPT, targetId: ride.id, payload: { userId } });
   return this.appUserRideService.addPassenger(user, ride);
 }
 
@@ -142,7 +144,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   async countRidesPerMonth(): Promise<{ month: string; count: number }[]> {
     const result = await this.rideRepo
         .createQueryBuilder('ride')
-        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') // ensures month is a string like '2025-12'
+        .select("DATE_FORMAT(ride.date, '%Y-%m')", 'month') 
         .addSelect('COUNT(*)', 'count')
         .groupBy('month')
         .orderBy('month', 'DESC')
@@ -150,7 +152,7 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
         .getRawMany();
 
     return result.map(row => ({
-      month: row.month,                  // Make sure 'month' is a string
+      month: row.month,                  
       count: parseInt(row.count, 10),
     }));
   }
@@ -188,12 +190,10 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   const users: AppUserWithRole[] = [];
 
-  // Add driver if exists
   if (ride.driver) {
     users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
   }
 
-  // Add passengers
   ride.appUserRides.forEach((appUserRide) => {
     if (appUserRide.appUser) {
       users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
@@ -201,5 +201,91 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
   });
 
   return users;
+}
+
+async findOne(id: number): Promise<Ride | null>{
+  return this.rideRepo.findOne({
+  where: { id },
+  relations: ['driver'],
+});
+
+}
+
+async closeRide(rideId: number, userId: number): Promise<Ride> {
+  const ride = await this.rideRepo.findOne({
+    where: { id: rideId },
+    relations: ['driver'],
+  });
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  // Verify the ride has a driver and the user is the driver
+  if (!ride.driver || ride.driver.id !== userId) {
+    throw new Error('Only the driver can close a ride');
+  }
+
+  // Check if ride is already closed
+  if (ride.state === RideState.CLOSED) {
+    throw new Error('Ride is already closed');
+  }
+
+  ride.state = RideState.CLOSED;
+  return await this.rideRepo.save(ride);
+}
+
+
+
+async searchRidesByUser(
+  userId: number,
+  searchTerm: string,
+  page: number = 1,
+  limit: number = 10,
+  filterType?: string
+): Promise<PaginationResult<Ride>> {
+  let queryBuilder = this.rideRepo
+    .createQueryBuilder('ride')
+    .leftJoinAndSelect('ride.post', 'post')
+    .leftJoinAndSelect('post.postOwner', 'postOwner')
+    .leftJoinAndSelect('ride.appUserRides', 'appUserRides')
+    .leftJoinAndSelect('appUserRides.appUser', 'rideUser');
+
+  if (filterType === 'yourRides') {
+    queryBuilder = queryBuilder.where('post.postOwnerId = :userId', { userId });
+  } else if (filterType === 'ridesTaken') {
+    queryBuilder = queryBuilder
+      .innerJoin('ride.appUserRides', 'userRides')
+      .where('userRides.appUserId = :userId', { userId });
+  } else {
+    queryBuilder = queryBuilder.where(
+      '(post.postOwnerId = :userId OR EXISTS (SELECT 1 FROM app_user_ride aur WHERE aur.rideId = ride.id AND aur.appUserId = :userId))',
+      { userId }
+    );
+  }
+
+  const searchFields = [
+    'ride.departure',
+    'ride.arrival',
+    'postOwner.name',
+    'postOwner.lastName',
+    'rideUser.name',
+    'rideUser.lastName'
+  ];
+
+ const searchResults= await this.searchService.searchQuery(
+    queryBuilder,
+    searchTerm,
+    searchFields,
+    page,
+    limit
+  );
+  const totalPages = Math.ceil(searchResults.totalItems / limit);
+  return {
+    data: searchResults.data,
+    totalItems: searchResults.totalItems,
+    currentPage: page,
+    totalPages: totalPages,
+  };
 }
 }

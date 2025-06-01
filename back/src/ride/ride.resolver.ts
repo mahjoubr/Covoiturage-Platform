@@ -16,7 +16,11 @@ import { RidePaginationResult } from './dto/ride-pagination-result';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
 import { AppUserWithRole} from 'src/graphql/types/AppUserWithRole';
+import { Roles } from 'src/auth/role.decorator';
 
+
+@UseGuards(GqlAuthGuard)
+@Roles('user') 
 @Resolver(() => Ride)
 export class RideResolver {
   
@@ -38,9 +42,12 @@ export class RideResolver {
   @Query(() => Ride, { name: 'getRideById' })
   async findOne(@Args('id', { type: () => String }) id: string): Promise<Ride> {
     const ride = await this.rideService.findOne(+id);
+    if (!ride) {
+throw new Error('Ride not found'); 
+}
     return {
       ...ride,
-      date: ride.date instanceof Date ? ride.date : new Date(ride.date)
+      date: ride?.date instanceof Date ? ride.date : new Date(ride?.date)
     };
   }
 
@@ -56,23 +63,16 @@ export class RideResolver {
   @Mutation(() => Ride)
   async createRide(
     @Args('createRideInput') createRideInput: CreateRideInput,
-    @Args('postId') postId: number,  // Accept the postId as a parameter
+    @Args('postId') postId: number,  
   ): Promise<Ride> {
     if (createRideInput.date && typeof createRideInput.date === 'string') {
       createRideInput.date = new Date(createRideInput.date);
     }
-    
-
-  
-  
-    // Find the post by the provided postId
     const post = await this.postrepo.findOne(postId);
   
     if (!post) {
       throw new Error('Post not found');
     }
-  
-    // Create a new Ride and associate it with the found Post
     const ride = await this.rideService.createRide(createRideInput, post);
   
     return ride;
@@ -124,7 +124,13 @@ export class RideResolver {
     }
     
   }
-  
+  @Mutation(() => Ride)
+  async closeRide(
+    @Args('rideId',{ type: () => Int }) rideId: number,
+    @CurrentUser() user: AppUser
+  ): Promise<Ride> {
+    return this.rideService.closeRide(rideId, user.id);
+  }
 
   @Query(() => [Ride], { name: 'getRidesByState' })
   async findByState(@Args('state', { type: () => String }) state: RideState): Promise<Ride[]> {
@@ -218,12 +224,44 @@ async getUsersForRide(
   @Args('rideId', { type: () => Int }) rideId: number,
 ): Promise<AppUserWithRole[]> {
   this.logger.log(`Getting users for ride: ${rideId}`);
+
   try {
-    return await this.rideService.getUsersForRide(rideId);
+    const users = await this.rideService.getUsersForRide(rideId);
+
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+    for (const user of users) {
+      if (user.imageUrl) {
+        user.imageUrl = `${baseUrl}${user.imageUrl}`;
+      }
+    }
+
+    return users;
   } catch (error) {
     this.logger.error(`Error getting users for ride: ${error.message}`);
     throw error;
   }
 }
+
+
+@Query(() => RidePaginationResult, { name: 'searchRidesByUser' })
+@UseGuards(GqlAuthGuard)
+async searchRidesByUser(
+  @CurrentUser() user: AppUser,
+  @Args('searchTerm', { type: () => String }) searchTerm: string,
+  @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  @Args('filterType', { type: () => String, nullable: true }) filterType?: string,
+): Promise<PaginationResult<Ride>> {
+  const result = await this.rideService.searchRidesByUser(user.id, searchTerm, page, limit, filterType);
+
+  result.data = result.data.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date),
+  }));
+
+  return result;
+}
+
 }
 
