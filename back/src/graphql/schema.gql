@@ -62,7 +62,7 @@ type AppUser {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
 }
 
@@ -106,7 +106,7 @@ type AppUserWithRole {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
   roleInRide: Role!
 }
@@ -335,6 +335,7 @@ type Mutation {
   createRide(createRideInput: CreateRideInput!, postId: Float!): Ride!
   updateRide(id: String!, updateRideInput: UpdateRideInput!): Ride!
   removeRide(id: String!): Boolean!
+  closeRide(rideId: Int!): Ride!
   createPost(createPostInput: CreatePostInput!): Post!
   deletePost(id: Int!): Boolean!
   closepost(id: Int!): Boolean!
