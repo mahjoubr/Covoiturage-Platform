@@ -62,7 +62,7 @@ type AppUser {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
 }
 
@@ -106,7 +106,7 @@ type AppUserWithRole {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
   roleInRide: Role!
 }
@@ -276,7 +276,7 @@ type Query {
   getAllJoinRequests: [JoinRequest!]!
   getJoinRequestsByRide(rideId: Int!): [JoinRequest!]!
   getJoinRequestsByRideUser(rideId: Int!, userId: Int!): [JoinRequest!]!
-  getMyReports(page: Int! = 1, limit: Int! = 3, search: String, status: String): ReportPagination!
+  getMyReports(page: Int! = 1, limit: Int! = 6, search: String, status: String): ReportPagination!
   notification(id: Int!): Notification!
 }
 
