@@ -438,7 +438,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Link } from "react-router";
 import { useNotifications } from "../notifications/NotificationProvider";
-import { EventType } from "../../types/events";
+import { EventType } from "../../types/event";
 import { formatDate } from "../../utils/dateTime";
 import { Bell, BellOff, Loader2, RefreshCw } from "lucide-react";
 

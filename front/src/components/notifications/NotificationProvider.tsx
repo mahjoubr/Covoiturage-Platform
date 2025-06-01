@@ -262,7 +262,7 @@ import React, {
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Notification } from '../../types/Notification';
-import { EventType, SSEEventData } from '../../types/events';
+import { EventType, SSEEventData } from '../../types/event';
 import { DELETE_NOTIFICATION, GET_NOTIFICATIONS, GET_UNREAD_COUNT, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../graphQl/queries/notifications';
 
 interface NotificationContextType {

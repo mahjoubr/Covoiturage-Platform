@@ -11,7 +11,6 @@ import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { AppUserModule } from 'src/app-user/app-user.module';
 import { NotificationModule } from 'src/notification/notification.module';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([Message,Chat,AppUser]),
 AppUserModule,NotificationModule], 

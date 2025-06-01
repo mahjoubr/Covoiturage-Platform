@@ -16,6 +16,8 @@ export interface SSEEventData {
   message?: string;
   timestamp: string;
   userId?: string;
+  chatId?: string;
+  notificationId?: string;
   postId?: string;
   rideId?: string;
   groupId?: string;

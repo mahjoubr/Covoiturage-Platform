@@ -15,6 +15,13 @@ query {
           lastName
         }
       }
+      appUserRides {
+      appUser {
+        id
+        name
+        lastName
+      } 
+      }
     }
   }
 `;
@@ -56,8 +63,8 @@ query {
   `;
 
 export const GET_RIDES_DRIVER_PAGINATED = gql`
-query GetRidesPaginatedByDriver($page: Int!, $limit: Int!) {
-  getRidesPaginatedByDriver(page: $page, limit: $limit) {
+query GetRidesPaginatedByDriver($page: Int!, $limit: Int!, $id: Int) {
+  getRidesPaginatedByDriver(page: $page, limit: $limit, id: $id) {
     data {
       date
       departure
@@ -68,6 +75,7 @@ query GetRidesPaginatedByDriver($page: Int!, $limit: Int!) {
       appUser {
         name
         lastName
+        id
       }
     }
 
@@ -80,8 +88,8 @@ query GetRidesPaginatedByDriver($page: Int!, $limit: Int!) {
 `;
 
 export const GET_RIDES_PASSENGER_PAGINATED = gql`
-query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
-  getRidesPaginatedByPassenger(page: $page, limit: $limit) {
+query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!,$id: Int) {
+  getRidesPaginatedByPassenger(page: $page, limit: $limit, id: $id) {
     data {
       date
       departure
@@ -89,9 +97,10 @@ query GetRidesPaginatedByPassenger($page: Int!, $limit: Int!) {
       time
       state
       driver{
-      
+        id
         name
         lastName
+        id
       
       }
     }
@@ -163,7 +172,6 @@ export const ACCEPT_REQUEST = gql`
 mutation AcceptJoinRequest($requestId: Int!,$rideId: Int!, $userId: Int!) {
   acceptJoinRequest(requestId:$requestId,rideId: $rideId, userId: $userId) {
     id
-    role
     appUser {
       id
       name

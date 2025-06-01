@@ -3,10 +3,10 @@ import { MapPin, Calendar, Clock, Users, RotateCcw } from 'lucide-react';
 import { CarpoolPost } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
-import { useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
-import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE } from '../../graphQl/queries/posts.ts';
-
+import { CLOSE_POST, DELETE_POST, GET_JOIN_REQUESTS, GET_POSTS, GET_RIDE,IS_USER_IN_RIDE } from '../../graphQl/queries/posts.ts';
+import { Link } from 'react-router-dom';
 interface CarpoolPostItemProps {
   post: CarpoolPost;
   onClick: (post: CarpoolPost) => void;
@@ -33,20 +33,33 @@ const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick ,userDa
 const token = localStorage.getItem('auth_token');
   const isLoggedIn = !!token;
   
-  const { data: rideData, loading: userLoading, error: userError } = useQuery(GET_RIDE, {
+  const { data: rideData} = useQuery(GET_RIDE, {
     variables:{postId:Number(post.id)},
     skip: !isLoggedIn,
-    fetchPolicy: 'network-only',
-    //onCompleted: (data) => console.log('GET_ride completed:', data),
-   // onError: (error) => console.error('GET_ride error:', error)
+    fetchPolicy: 'network-only'
   });
+      const [checkIsPassenger, { data: isPassengerData }] = useLazyQuery(IS_USER_IN_RIDE);
+    
+    useEffect(() => {
+      if (rideData?.matchingRide?.ride?.id && userData?.id) {
+        checkIsPassenger({
+          variables: {
+            userId: Number(userData.id),
+            rideId: Number(rideData.matchingRide.ride.id),
+          },
+        });
+      }
+    }, [rideData, userData]);
   const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
     variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
     skip: !isLoggedIn,
     fetchPolicy: 'network-only',
-    //onCompleted: (data) => console.log('GET_ride completed:', data),
-    //onError: (error) => console.error('GET_ride error:', error)
+    onCompleted: (data) => console.log('GET_ride completed:', data),
+    onError: (error) => console.error('GET_ride error:', error)
   });
+  const handleNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the modal trigger
+  };
   //console.log(joinRequest);
 useEffect(() => {
   if (joinRequest?.getJoinRequestsByRideUser) {
@@ -145,13 +158,18 @@ const handleJoinRide = async (e: React.MouseEvent) => {
         </div>
         
         <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-white/[0.03]">
-          <div className="flex items-center">
+          <Link
+            to={`/profile/${post.postOwnerId}`} 
+            className="flex items-center no-underline text-inherit hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-md"
+            onClick={handleNameClick}
+          >
             <div className="w-8 h-8 bg-blue-100 dark:bg-brand-500/15 rounded-full flex items-center justify-center text-blue-700 dark:text-brand-400 font-medium">
               {post.driverName.charAt(0)}
             </div>
-            <span className="ml-2 text-sm font-medium dark:text-gray-300">{post.driverName}</span>
-          </div>
-          
+            <span className="ml-2 text-sm font-medium dark:text-gray-300">
+              {post.driverName}
+            </span>
+          </Link>  
           <div className="flex space-x-4">
             <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
               <Users size={16} className="mr-1 text-gray-500 dark:text-gray-500" />
@@ -170,6 +188,8 @@ const handleJoinRide = async (e: React.MouseEvent) => {
       {!isPostOwner && (
   <button
     onClick={handleJoinRide}
+    disabled={isPassengerData?.isUserInRide}
+    title={isPassengerData?.isUserInRide ? 'Already joined this ride' : ''}
     className={`w-full py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
       requestPending
         ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'

@@ -82,28 +82,17 @@ export default function InnovativeMonthlyRidesChart({
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const [showFullStats, setShowFullStats] = useState<boolean>(false);
 
+
+    const safeData = data ?? [];
+    // Sort the data chronologically - moved before useEffect
+    const sortedData = useMemo(() => sortMonthsChronologically(safeData), [safeData]);
+
     // Set initial visible range to show the most recent months
     useEffect(() => {
         if (sortedData.length > visibleMonths) {
             setStartIndex(sortedData.length - visibleMonths);
         }
-    }, [data]);
-
-    // Handle empty data case
-    if (!data || data.length === 0) {
-        return (
-            <div className="flex h-96 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 text-gray-800 dark:text-gray-100 p-6 shadow-lg transition-all duration-300">
-                <div className="text-center">
-                    <CalendarIcon className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600 opacity-80" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-200">No ride data available</h3>
-                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try adding some monthly ride data to visualize your stats</p>
-                </div>
-            </div>
-        );
-    }
-
-    // Sort the data chronologically
-    const sortedData = useMemo(() => sortMonthsChronologically(data), [data]);
+    }, [sortedData, visibleMonths]); // Added sortedData to dependencies
 
     // Calculate visible data range
     const visibleData = useMemo(() => {
@@ -158,7 +147,18 @@ export default function InnovativeMonthlyRidesChart({
             growthIsPositive: growthRate >= 0
         };
     }, [sortedData]);
-
+    // Handle empty data case
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex h-96 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 text-gray-800 dark:text-gray-100 p-6 shadow-lg transition-all duration-300">
+                <div className="text-center">
+                    <CalendarIcon className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600 opacity-80" />
+                    <h3 className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-200">No ride data available</h3>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try adding some monthly ride data to visualize your stats</p>
+                </div>
+            </div>
+        );
+    }
     // Helper to navigate through months
     const canGoBack = startIndex > 0;
     const canGoForward = startIndex + visibleMonths < sortedData.length;

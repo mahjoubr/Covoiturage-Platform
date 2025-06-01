@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, RotateCcw, DollarSign, Mail, Send, Variable } from 'lucide-react';
 import { CarpoolPost, Comment } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
-import { useMutation } from '@apollo/client';
-import { CREATE_COMMENT } from '../../graphQl/queries/posts';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { CREATE_COMMENT, GET_RIDE, IS_USER_IN_RIDE,GET_JOIN_REQUESTS } from '../../graphQl/queries/posts';
 import { CREATE_JOIN_REQUEST, DELETE_JOIN_REQUEST } from '../../graphQl/queries/rides.ts';
-
+import { Link } from 'react-router-dom';
 
 interface ViewPostModalProps {
   isOpen: boolean;
@@ -27,9 +27,42 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
-    const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
+  const { data: rideData} = useQuery(GET_RIDE, {
+    variables: { postId: Number(post?.id )},
+  });
+  console.log("ride",rideData);
+    const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
+      variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
+      fetchPolicy: 'network-only',
+      onCompleted: (data) => console.log('GET_ride completed:', data),
+      onError: (error) => console.error('GET_ride error:', error)
+    });
+    useEffect(() => {
+      if (joinRequest?.getJoinRequestsByRideUser) {
+        const hasRequests = Array.isArray(joinRequest.getJoinRequestsByRideUser) 
+          ? joinRequest.getJoinRequestsByRideUser.length > 0 
+          : !!joinRequest.getJoinRequestsByRideUser;
+        
+        setRequestPending(hasRequests);
+      } else {
+        setRequestPending(false);
+      }
+    }, [joinRequest]);
+    const [checkIsPassenger, { data: isPassengerData }] = useLazyQuery(IS_USER_IN_RIDE);
+  
+  useEffect(() => {
+    if (rideData?.matchingRide?.ride?.id && userData?.id) {
+      checkIsPassenger({
+        variables: {
+          userId: Number(userData.id),
+          rideId: Number(rideData.matchingRide.ride.id),
+        },
+      });
+    }
+  }, [rideData, userData]);
+  console.log("is", isPassengerData);
+  const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
   const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
-  // Apollo mutation hook configuration
   const [createComment] = useMutation(CREATE_COMMENT, {
     onCompleted: (data) => {
       const newCommentData :Comment = {
@@ -124,13 +157,11 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
   };
     const handleDeletePost = (e: React.MouseEvent) => {
       e.stopPropagation();
-      // Implement delete post functionality here
       console.log("Delete post clicked for post ID:", post.id);
     };
   
     const handleClosePost = (e: React.MouseEvent) => {
       e.stopPropagation();
-      // Implement close post functionality here
       console.log("Close post clicked for post ID:", post.id);
     };
   
@@ -161,12 +192,17 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
         <div className="p-3 overflow-y-auto flex-grow">
           <div className="mb-3">
             <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-2">{post.departure} → {post.destination}</h3>
+            <Link
+            to={`/profile/${post.postOwnerId}`} 
+            className="flex items-center no-underline text-inherit hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-md"
+          >
             <div className="flex items-center mb-1">
               <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium mr-2 dark:bg-blue-600 dark:text-blue-200">
                 {post.driverName.charAt(0)}
               </div>
               <span className="font-medium text-gray-800 dark:text-gray-100">{post.driverName}</span>
             </div>
+            </Link>
           </div>
           
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -254,6 +290,10 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
                 comments.map((comment) => (
                   <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
                     <div className="flex justify-between items-center mb-1">
+                      <Link
+                        to={`/profile/${comment.commenter.id}`} 
+                        className="flex items-center no-underline text-inherit hover:bg-gray-90 dark:hover:bg-gray-700 p-1 rounded-md"
+                      >
                       <div className="flex items-center">
                         <div className="w-5 h-5 bg-blue-100 dark:bg-blue-600 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-200 text-xs font-medium">
                         {comment.commenter?.name
@@ -266,6 +306,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
                           : "Unknown"}
                         </span>
                       </div>
+                      </Link>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatCommentTime(comment.date)}
                       </span>
@@ -290,7 +331,7 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
               />
               <button
                 onClick={handleAddComment}
-                disabled={submittingComment || !newComment.trim()}
+                disabled={submittingComment || !newComment.trim() || post.status=='closed'}
                 className={`${
                   submittingComment || !newComment.trim() 
                     ? 'bg-blue-400 dark:bg-blue-600 cursor-not-allowed'
@@ -312,6 +353,8 @@ const ViewPostModal: React.FC<ViewPostModalProps> = ({ isOpen, onClose, post,use
           {!isPostOwner && post.status !== "closed" &&(
             <button
               onClick={handleJoinRide}
+              disabled={isPassengerData?.isUserInRide}
+              title={isPassengerData?.isUserInRide ? 'Already joined this ride' : ''}
               className={`py-1 px-4 rounded-md font-medium text-sm transition-all duration-300 ${
                 requestPending
                   ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30'

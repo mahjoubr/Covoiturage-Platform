@@ -15,5 +15,6 @@ import { Subscription } from './entities/subscription.entity';
   ],
   providers: [SubscriptionService],
   exports: [SubscriptionService],
+  
 })
 export class SubscriptionModule {}

@@ -71,11 +71,16 @@ export class RideSchedulerService {
             this.logger.debug(`Post ${post.id} has frequency ${post.frequency}. Creating next ride.`);
 
             const nextDate = this.calculateNextDate(ride.date, post.frequency);
+            const { appUserRides, ...rideWithoutPassengers } = ride;
+
             const newRideInput: CreateRideInput = {
-              ...ride,
+              ...rideWithoutPassengers,
               date: nextDate,
+              time: ride.post?.time, 
               state: RideState.NOT_STARTED,
             };
+
+
           
 
             delete (newRideInput as any)['id']; 

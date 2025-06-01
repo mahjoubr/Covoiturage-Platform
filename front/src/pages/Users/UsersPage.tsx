@@ -3,6 +3,7 @@ import { useState } from "react";
 import { GET_USERS } from "../../graphQl/queries/users";
 import { Flag } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import {getCurrentUserId} from "../../services/authService.ts";
 
 
   
@@ -11,15 +12,25 @@ const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const limit = 5;
-
+const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_USERS, {
     variables: { searchTerm: searchTerm || "", page, limit },
   });
 
-  const handleReportUser = (userId: number) => {
-        navigate('/report', { state: { reportedUserId: userId } });
-  }
-  const navigate = useNavigate();
+
+  const handleReportUser = async (userId: number) => {
+    const currentUserId = await getCurrentUserId();
+
+    if (userId === currentUserId) {
+
+      alert("You can not report yourself !! ");
+      return;
+    }
+
+    navigate('/report', {state: {reportedUserId: userId}});
+  };
+
+
   // Subtle card accent colors
   const cardAccents = [
     "border-blue-400",

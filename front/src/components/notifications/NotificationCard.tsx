@@ -2,7 +2,7 @@ import React from 'react';
 import { formatTimeAgo } from './utils';
 import { Notification } from '../../types/Notification';
 import { useNotifications } from './NotificationProvider';
-import { EventType } from '../../types/events';
+import { EventType } from '../../types/event';
 import { X, ExternalLink } from 'lucide-react';
 
 const getNotificationIcon = (type: string) => {

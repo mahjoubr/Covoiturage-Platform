@@ -25,12 +25,13 @@ import { Subscription } from '@nestjs/graphql';
 import { EventStreamModule } from 'src/SSE/sse.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription]),
+    TypeOrmModule.forFeature([Chat, User, Ride, Message, AppUser, Review,Subscription, AppUserRide]),
     MessageModule,
     AppUserRideModule,EventStreamModule,NotificationModule ,SubscriptionModule
   ],
