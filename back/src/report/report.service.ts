@@ -20,8 +20,8 @@ export class ReportService extends GenericService {
         @InjectRepository(Report)
         private readonly reportRepo: Repository<Report>,
 
-        @InjectRepository(AppUser)
-        private readonly userRepo: Repository<AppUser>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
 
         @InjectRepository(Ride)
         private readonly rideRepo: Repository<Ride>,
@@ -91,7 +91,7 @@ export class ReportService extends GenericService {
                 saved.id,
                 'New Report',
                 `A new report has been filed by ${reporter.name} against ${reportedUser.name}.`,
-                `/reports/${saved.id}`,
+                `/myReports`,
                 {
                     subjectType: saved.subjectType,
                     reporterId: reporter.id,

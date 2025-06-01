@@ -49,23 +49,13 @@ export class ReviewService extends GenericService {
     
     
       await this.userService.updateUserRating(createReviewDto.reviewedUserId);
-         /* this.notificationService.messageNotification(
-      sender.id,
-      chat.rider.id === sender.id ? chat.driver.id : chat.rider.id,
-      chat.id,
-      'New Message',
-      createMessageDto.text,
-      `/chat/${chat.id}`,
-      { chatId: chat.id, senderId: sender.id },
       
-
-    );*/
-    return this.notificationService.reviewNotification(
+    return await this.notificationService.reviewNotification(
       createReviewDto.reviewedUserId, // userId (recipient)
       savedReview.id,                 // reviewId
       'New Review',                   // title
       'added review',        // message
-      `/profile/${createReviewDto.reviewedUserId}/reviews`, // actionUrl
+      `/users/${createReviewDto.reviewedUserId}/reviews`, // actionUrl
       { stars: createReviewDto.stars, reviewerId: createReviewDto.reviewerId } // metadata (optional)
     );
     
@@ -137,19 +127,8 @@ export class ReviewService extends GenericService {
           .where('review.reviewer.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-       const result = await this.paginationService.paginateQuery(queryBuilder, page, limit);
-
-      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-
-      result.data = result.data.map((review) => {
-        if (review.reviewedUser?.imageUrl) {
-          review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
-        }
-        return review;
-      });
-
-      return result;
-     }
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
+      }
       
       async findByReviewedUserId(
         userId: number,
@@ -163,18 +142,7 @@ export class ReviewService extends GenericService {
           .where('review.reviewedUser.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        const result = await   this.paginationService.paginateQuery(queryBuilder, page, limit);
-
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-
-        result.data = result.data.map((review) => {
-          if (review.reviewedUser?.imageUrl) {
-            review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
-          }
-          return review;
-      });
-
-      return result;
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
       }
 
       async findByRideId (rideId: number) {
@@ -201,8 +169,6 @@ export class ReviewService extends GenericService {
         if (sortField) {
           qb.orderBy(`review.${sortField}`, sortOrder);
         }
-
-        
     
         return this.paginationService.paginateQuery(qb, page, limit);
       }
@@ -222,7 +188,7 @@ export class ReviewService extends GenericService {
     
         return Math.round(averageRating); 
       }
-      async searchReviews(
+    async searchReviews(
         userId: number,
         searchTerm: string,
         page: number = 1,
@@ -272,4 +238,8 @@ export class ReviewService extends GenericService {
       currentPage: page,
     };
   }
+
+
+
+
 }
