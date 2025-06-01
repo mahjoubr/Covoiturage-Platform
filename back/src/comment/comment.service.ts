@@ -9,6 +9,7 @@ import { AppUser } from 'src/app-user/entities/app-user.entity';
 import { PostService } from 'src/post/post.service';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class CommentService extends GenericService {
@@ -17,7 +18,8 @@ export class CommentService extends GenericService {
   private readonly postService : PostService,
   private readonly subscriptionService:SubscriptionService,
   private readonly eventStreamService:EventStreamService,
-  
+  private readonly notificationService:NotificationService
+
 ) {
     super(repo);
   } 
@@ -35,21 +37,18 @@ async createCommentWithNotif(createDto: CreateCommentInput, commenter: AppUser):
   
   for (const recipientId of subscribers) {
     if (recipientId !== commenter.id) {
-      const event = {
-        type: EventType.NEW_COMMENT,
-        targetId: post.id,
-        recipientId,
-        payload: {
-          postId: post.id,
-          commentId: comment.id,
-          commentAuthor: commenter.id,
-          commentText: comment.text?.substring(0, 100),
-          timestamp: new Date().toISOString(),
-        },
-      };
-      this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
-    this.eventStreamService.emitEvent(event);
-    this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+
+      
+    this.notificationService.commentNotification(
+      recipientId, // userId (recipient)
+      post.id,     // postId
+      savedComment.id, // commentId
+      'New Comment', // title
+      `${commenter.name} commented on your post`, // message
+      `/post/${post.id}`, // actionUrl
+      { commentId: savedComment.id, postId: post.id, commenterId: commenter.id } // metadata (optional)
+    );
+    
     }
   }
   return savedComment;

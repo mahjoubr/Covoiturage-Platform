@@ -9,7 +9,8 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
-import { ReviewPayload } from 'src/SSE/ReviewPayload';
+import { NotificationService } from 'src/notification/notification.service';
+//import { ReviewPayload } from 'src/SSE/ReviewPayload';
 
 @Injectable()
 export class ReviewService extends GenericService {
@@ -18,7 +19,7 @@ export class ReviewService extends GenericService {
 
      constructor(@InjectRepository(Review) private readonly reviewRepository: Repository<Review>,private readonly paginationService: PaginationService,private readonly searchService: SearchService,
         private readonly userService: AppUserService,
-        private readonly eventStreamService: EventStreamService,
+        private readonly notificationService:NotificationService
       ) {
         super(reviewRepository)
         
@@ -48,31 +49,31 @@ export class ReviewService extends GenericService {
     
     
       await this.userService.updateUserRating(createReviewDto.reviewedUserId);
-      this.emitReviewNotification(createReviewDto, savedReview.id);
+         /* this.notificationService.messageNotification(
+      sender.id,
+      chat.rider.id === sender.id ? chat.driver.id : chat.rider.id,
+      chat.id,
+      'New Message',
+      createMessageDto.text,
+      `/chat/${chat.id}`,
+      { chatId: chat.id, senderId: sender.id },
+      
 
+    );*/
+    return this.notificationService.reviewNotification(
+      createReviewDto.reviewedUserId, // userId (recipient)
+      savedReview.id,                 // reviewId
+      'New Review',                   // title
+      'added review',        // message
+      `/profile/${createReviewDto.reviewedUserId}/reviews`, // actionUrl
+      { stars: createReviewDto.stars, reviewerId: createReviewDto.reviewerId } // metadata (optional)
+    );
     
     }
-
-
-   async  emitReviewNotification(createReviewDto: CreateReviewDto, reviewId: number) {
-      const { reviewedUserId, reviewerId, stars, comment } = createReviewDto;
-      const reviewer = await this.userService.findOne(reviewerId); 
-      const reviewPayload: ReviewPayload = {
-        reviewId,
-        reviewerId,
-        reviewerName: reviewer.firstName,  
-        reviewerLastName: reviewer.firstName, 
-        reviewContent: comment,
-        rating: stars,
-        date: new Date().toISOString().split('T')[0], 
-      };
 
   
     
 
-     this.eventStreamService.emitEvent({ recipientId: reviewedUserId, type: EventType.REVIEW_ADDED, targetId: reviewId, payload: reviewPayload });
-    }
-    
     async deleteReview(userid:number,id: number) {
 
       const review = await this.findOne(id);

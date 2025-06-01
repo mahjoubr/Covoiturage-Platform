@@ -12,6 +12,7 @@ import {EventStreamModule} from "src/SSE/sse.module";
 import {User} from "src/user/entities/user.entity";
 import { EventStreamService } from 'src/SSE/sse-subscription.service';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { SubscriptionModule } from 'src/subscription/subscription.module';
     EventStreamModule,
     TypeOrmModule.forFeature([Report, AppUser, Ride]),
     SubscriptionModule, 
-    EventStreamModule, 
+    NotificationModule
 
   ],
   providers: [ReportResolver,ReportService, SearchService,PaginationService, EventStreamService],
