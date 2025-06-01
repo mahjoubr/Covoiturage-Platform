@@ -264,6 +264,9 @@ import { gql } from '@apollo/client';
 import { Notification } from '../../types/Notification';
 import { EventType, SSEEventData } from '../../types/event';
 import { DELETE_NOTIFICATION, GET_NOTIFICATIONS, GET_UNREAD_COUNT, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../graphQl/queries/notifications';
+import ViewPostModal from '../posts/ViewPostModal';
+import { GET_POST_BY_ID } from '../../graphQl/queries/posts';
+import { CarpoolPost } from '../../types/posts';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -289,7 +292,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [offset, setOffset] = useState(0);
+   const [postId, setPostId] = useState(0);
+  const [post, setPost] = useState<CarpoolPost | null>(null);
   const [hasMore, setHasMore] = useState(true);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const maxReconnectAttempts = 5;
@@ -334,7 +341,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       setHasMore(notificationsData.notifications.length === NOTIFICATIONS_LIMIT);
     }
   }, [notificationsData]);
-
+  useEffect(() => {
+      if (isViewModalOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+      
+      return () => {
+        document.body.style.overflow = 'auto';
+      };
+    }, [ isViewModalOpen]);
   const getNotificationTitle = (type: EventType): string => {
     const titles: Record<EventType, string> = {
       [EventType.MESSAGE]: 'New Message',
@@ -351,6 +368,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getActionUrl = (data: SSEEventData): string => {
+    if (data.type === EventType.POST_UPDATED || data.type === EventType.NEW_COMMENT) {
+      setIsViewModalOpen(true);
+      setPostId(Number(data.postId));
+      const { data:data1 } = useQuery(GET_POST_BY_ID, {
+      variables: { id: postId },
+      });
+      setPost(data1?.post);
+
+    }
     switch (data.type) {
       case EventType.MESSAGE:
         return `/chat/${data.metadata.chatId}`;
@@ -360,12 +386,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         return `/post/${data.postId}`;
       case EventType.RIDE_DELETE:
       case EventType.RIDE_START:
-        return `/ride/${data.rideId}`;
+
       case EventType.JOIN_REQUEST:
+        
       case EventType.JOIN_ACCEPT:
-        return `/post/${data.groupId}`;
+        return `/rides`;
       case EventType.REVIEW_ADDED:
-        return `/profile/${data.userId}`;
+        return `/users/:${data.userId}/reviews`;
       default:
         return '/notifications';
     }
@@ -591,6 +618,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const error = queryError?.message || null;
 
   return (
+    <>
     <NotificationContext.Provider
       value={{ 
         notifications, 
@@ -610,6 +638,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     >
       {children}
     </NotificationContext.Provider>
+    <ViewPostModal 
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        post={post}
+        userData={user}
+      />
+    </>
   );
 };
 

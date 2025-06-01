@@ -98,6 +98,6 @@ import { NotificationModule } from './notification/notification.module';
      
      
         controllers: [AppController],
-        providers: [AppService, JwtStrategy,ChatGateway],
+        providers: [AppService, JwtStrategy],
 })
 export class AppModule {}

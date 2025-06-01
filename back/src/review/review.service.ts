@@ -9,7 +9,8 @@ import { PaginationResult, PaginationService } from 'src/services/paginationServ
 import { SearchService } from 'src/services/searchService';
 import { AppUserService } from 'src/app-user/app-user.service';
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
-import { ReviewPayload } from 'src/SSE/ReviewPayload';
+import { NotificationService } from 'src/notification/notification.service';
+//import { ReviewPayload } from 'src/SSE/ReviewPayload';
 
 @Injectable()
 export class ReviewService extends GenericService {
@@ -18,7 +19,7 @@ export class ReviewService extends GenericService {
 
      constructor(@InjectRepository(Review) private readonly reviewRepository: Repository<Review>,private readonly paginationService: PaginationService,private readonly searchService: SearchService,
         private readonly userService: AppUserService,
-        private readonly eventStreamService: EventStreamService,
+        private readonly notificationService:NotificationService
       ) {
         super(reviewRepository)
         
@@ -48,31 +49,21 @@ export class ReviewService extends GenericService {
     
     
       await this.userService.updateUserRating(createReviewDto.reviewedUserId);
-      this.emitReviewNotification(createReviewDto, savedReview.id);
-
+      
+    return await this.notificationService.reviewNotification(
+      createReviewDto.reviewedUserId, // userId (recipient)
+      savedReview.id,                 // reviewId
+      'New Review',                   // title
+      'added review',        // message
+      `/users/${createReviewDto.reviewedUserId}/reviews`, // actionUrl
+      { stars: createReviewDto.stars, reviewerId: createReviewDto.reviewerId } // metadata (optional)
+    );
     
     }
-
-
-   async  emitReviewNotification(createReviewDto: CreateReviewDto, reviewId: number) {
-      const { reviewedUserId, reviewerId, stars, comment } = createReviewDto;
-      const reviewer = await this.userService.findOne(reviewerId); 
-      const reviewPayload: ReviewPayload = {
-        reviewId,
-        reviewerId,
-        reviewerName: reviewer.firstName,  
-        reviewerLastName: reviewer.firstName, 
-        reviewContent: comment,
-        rating: stars,
-        date: new Date().toISOString().split('T')[0], 
-      };
 
   
     
 
-     this.eventStreamService.emitEvent({ recipientId: reviewedUserId, type: EventType.REVIEW_ADDED, targetId: reviewId, payload: reviewPayload });
-    }
-    
     async deleteReview(userid:number,id: number) {
 
       const review = await this.findOne(id);
@@ -136,19 +127,8 @@ export class ReviewService extends GenericService {
           .where('review.reviewer.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-       const result = await this.paginationService.paginateQuery(queryBuilder, page, limit);
-
-      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-
-      result.data = result.data.map((review) => {
-        if (review.reviewedUser?.imageUrl) {
-          review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
-        }
-        return review;
-      });
-
-      return result;
-     }
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
+      }
       
       async findByReviewedUserId(
         userId: number,
@@ -162,18 +142,7 @@ export class ReviewService extends GenericService {
           .where('review.reviewedUser.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        const result = await   this.paginationService.paginateQuery(queryBuilder, page, limit);
-
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-
-        result.data = result.data.map((review) => {
-          if (review.reviewedUser?.imageUrl) {
-            review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
-          }
-          return review;
-      });
-
-      return result;
+        return this.paginationService.paginateQuery(queryBuilder, page, limit);
       }
 
       async findByRideId (rideId: number) {
@@ -200,8 +169,6 @@ export class ReviewService extends GenericService {
         if (sortField) {
           qb.orderBy(`review.${sortField}`, sortOrder);
         }
-
-        
     
         return this.paginationService.paginateQuery(qb, page, limit);
       }
@@ -221,7 +188,7 @@ export class ReviewService extends GenericService {
     
         return Math.round(averageRating); 
       }
-      async searchReviews(
+    async searchReviews(
         userId: number,
         searchTerm: string,
         page: number = 1,
@@ -271,4 +238,8 @@ export class ReviewService extends GenericService {
       currentPage: page,
     };
   }
+
+
+
+
 }

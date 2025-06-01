@@ -15,14 +15,19 @@ import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
 import { App } from 'supertest/types';
 import { SearchService } from 'src/services/searchService';
+import { NotificationService } from 'src/notification/notification.service';
+import { User } from 'src/user/entities/user.entity';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
+  @InjectRepository(User) private readonly UserRepo: Repository<User>,
   private readonly paginationService: PaginationService,
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
   private readonly EventStreamService: EventStreamService,
   private readonly searchService: SearchService, 
+  
+  private readonly notificationService: NotificationService
   
 
 ){
@@ -112,10 +117,25 @@ async findByPassenger(passengerId: number): Promise<Ride[]> {
 async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
   const ride = await this.rideRepo.findOne({ where: { id: rideId } });
   if (!ride) throw new Error('Ride not found');
+  const rider= await this.UserRepo.findOne({
+    where: { id: ride.driver?.id },  
+    relations: ['appUserRides'],
+  });
+  if (!rider) throw new Error('Rider not found for this ride');
 
   const user = await this.userService.findById(userId);
   if (!user) throw new Error('User not found');
-  this.EventStreamService.emitEvent({ recipientId: userId, type: EventType.JOIN_ACCEPT, targetId: ride.id, payload: { userId } });
+  await this.notificationService.JoinAcceptNotification(
+    userId, // recipientId
+    rider.id, 
+    ride.id, 
+    'Join Request Accepted', // title
+    `You have been accepted to join the ride from ${ride.departure} to ${ride.arrival}`, // message
+    `/rides`, // actionUrl
+
+  )
+  /*
+  this.EventStreamService.emitEvent({ recipientId: userId, type: EventType.JOIN_ACCEPT, targetId: ride.id, payload: { userId } });*/
   return this.appUserRideService.addPassenger(user, ride);
 }
 

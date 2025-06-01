@@ -7,24 +7,25 @@ import { AppUser } from '../app-user/entities/app-user.entity';
 import { Ride } from '../ride/entities/ride.entity';
 import { GenericService } from '../services/genericService';
 import { ReportStatus } from '../enums/report-status.enum';
-import { ReportPayload } from '../SSE/ReportPayload';
+//import { ReportPayload } from '../SSE/ReportPayload';
 import {User} from "src/user/entities/user.entity";
 import { EventStreamService, EventType } from 'src/SSE/sse-subscription.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class ReportService extends GenericService {
     constructor(
         @InjectRepository(AppUser) private readonly appUserRepo: Repository<AppUser>,
-        private readonly eventStream: EventStreamService,
+        
         @InjectRepository(Report)
         private readonly reportRepo: Repository<Report>,
 
-        @InjectRepository(AppUser)
-        private readonly userRepo: Repository<AppUser>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
 
         @InjectRepository(Ride)
         private readonly rideRepo: Repository<Ride>,
-        private readonly eventStreamService: EventStreamService,
+        private readonly notificationService: NotificationService,
     ) {
         super(reportRepo);
     }
@@ -71,23 +72,34 @@ export class ReportService extends GenericService {
         };
         //added notification logic
         // Notify the admin user about the new report
-        const adminUser = await this.userRepo.findOneBy({ role: 'admin' });
-        if (!adminUser) throw new NotFoundException('Admin user not found');
-        this.eventStreamService.emitEvent({ recipientId: adminUser.id, type: EventType.REPORT_ADDED, targetId: reporter.id, payload: reportPayload });
 
         const saved = await this.reportRepo.save(report);
 
         const admin = await this.userRepo.findOne({ where: { role: 'admin' } });
         if (admin) {
-            const payload: ReportPayload = {
+            const payload = {
                 reportId: saved.id,
                 subjectType: saved.subjectType,
                 reporterId: reporter.id,
                 reason: saved.reason,
                 status: saved.status,
             };
-            //this.eventStream.emitReportCreated(admin.id, payload);
-            console.log('Report created:', payload);
+            
+ 
+            await this.notificationService.reportNotification(
+                admin.id,
+                saved.id,
+                'New Report',
+                `A new report has been filed by ${reporter.name} against ${reportedUser.name}.`,
+                `/myReports`,
+                {
+                    subjectType: saved.subjectType,
+                    reporterId: reporter.id,
+                    reason: saved.reason,
+                    status: saved.status,
+                }
+            );
+
         }
 
         return saved;
@@ -116,7 +128,7 @@ export class ReportService extends GenericService {
             await this.appUserRepo.save(report.reportedUser);
         }
 
-        const payload: ReportPayload = {
+        const payload= {
             reportId: saved.id,
             reporterId: report.reporter.id,
             reason: saved.reason,
@@ -142,7 +154,7 @@ export class ReportService extends GenericService {
         report.status = ReportStatus.REJECTED;
         const saved = await this.reportRepo.save(report);
 
-        const payload: ReportPayload = {
+        const payload= {
             reportId: saved.id,
             subjectType: saved.subjectType,
             status: saved.status,

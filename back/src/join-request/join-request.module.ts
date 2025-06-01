@@ -10,9 +10,10 @@ import { Post } from 'src/post/entities/post.entity';
 import { Ride } from 'src/ride/entities/ride.entity';
 import { PostModule } from 'src/post/post.module';
 import { RideModule } from 'src/ride/ride.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([JoinRequest,Post,Ride]),EventStreamModule,SubscriptionModule,PostModule,RideModule],
+  imports:[TypeOrmModule.forFeature([JoinRequest,Post,Ride]),EventStreamModule,SubscriptionModule,PostModule,RideModule,NotificationModule],
   controllers: [JoinRequestController],
   providers: [JoinRequestService,JoinRequestResolver],
 })

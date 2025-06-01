@@ -1,4 +1,4 @@
-import { EventType } from './events';
+import { EventType } from './event';
 export interface User {
   id: number;
   name: string;
@@ -22,20 +22,3 @@ export interface Notification {
 
 
 
-export interface SSEEventData {
-  type: EventType | 'connection' | 'heartbeat';
-  message?: string;
-  timestamp: string;
-  userId?: string;
-  postId?: string;
-  rideId?: string;
-  groupId?: string;
-  commentId?: string;
-  reviewId?: string;
-  reportId?: string;
-  groupName?: string;
-  postTitle?: string;
-  userName?: string;
-  rideTitle?: string;
-  [key: string]: any;
-}
