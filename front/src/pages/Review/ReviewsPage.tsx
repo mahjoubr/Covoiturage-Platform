@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, AlertTriangle, Send, ThumbsUp, Users, Star, MessageSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertTriangle, Send, ThumbsUp, Users, Star, MessageSquare, Search, X } from 'lucide-react';
 
 import ReviewCard from '../../components/review/ReviewCard';
 import { getMyReviews, getReceivedReviews, deleteReview } from '../../services/reviews';
@@ -16,6 +16,7 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -81,10 +82,48 @@ const ReviewsPage = () => {
 
   const currentConfig = config[activeView];
 
+  // Filter reviews based on search term and active tab
+  const filteredReviews = useMemo(() => {
+    let filtered = reviews;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(review => {
+        const userName = `${review.user.name} ${review.user.lastName}`.toLowerCase();
+        const comment = review.comment?.toLowerCase() || '';
+        const departure = review.ride.departure.toLowerCase();
+        const arrival = review.ride.arrival.toLowerCase();
+        const rideRoute = `${departure} ${arrival}`;
+        
+        return (
+          userName.includes(searchLower) ||
+          comment.includes(searchLower) ||
+          rideRoute.includes(searchLower) ||
+          departure.includes(searchLower) ||
+          arrival.includes(searchLower)
+        );
+      });
+    }
+
+    // Apply rating filter
+    if (activeTab === 'positive') {
+      filtered = filtered.filter(review => review.stars >= 4);
+    } else if (activeTab === 'negative') {
+      filtered = filtered.filter(review => review.stars < 4);
+    }
+
+    return filtered;
+  }, [reviews, searchTerm, activeTab]);
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPagination(prev => ({ ...prev, page: newPage }));
     }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
   };
 
   // Check authentication status first
@@ -131,7 +170,7 @@ const ReviewsPage = () => {
     
       fetchReviews();
     }
-  }, [activeView, pagination.page, activeTab, isLoggedIn]);
+  }, [activeView, pagination.page, isLoggedIn]);
 
   const handleDeleteReview = (id: number) => {
     setReviewToDelete(id);
@@ -180,18 +219,13 @@ const ReviewsPage = () => {
     }
   };
 
-  const filteredReviews = reviews.filter(review => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'positive') return review.stars >= 4;
-    return review.stars < 4;
-  });
-  const userid=getCurrentUserId();
+  const userid = getCurrentUserId();
   console.log('userId', userid); 
   console.log('isLoggedIn', isLoggedIn);
- if (isLoggedIn === false) {
+  
+  if (isLoggedIn === false) {
     return <LoginPrompt />;
   }
-
 
   if (error) {
     return (
@@ -250,9 +284,38 @@ const ReviewsPage = () => {
           } mb-3`}>
             {currentConfig.title}
           </h1>
-          <p className={`text-${currentConfig.accentColor}-700 max-w-lg mx-auto dark:text-gray-300`}>
+          <p className={`text-${currentConfig.accentColor}-700 max-w-lg mx-auto dark:text-gray-300 mb-6`}>
             {currentConfig.subtitle}
           </p>
+
+          {/* Search Bar */}
+          <div className="max-w-md mx-auto mb-6">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search reviews, users, or routes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
+              />
+              {searchTerm && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <X className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                {filteredReviews.length} result{filteredReviews.length !== 1 ? 's' : ''} found
+              </p>
+            )}
+          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -320,7 +383,7 @@ const ReviewsPage = () => {
                       : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
                   }`}
                 >
-                  All
+                  All ({reviews.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('positive')}
@@ -330,7 +393,7 @@ const ReviewsPage = () => {
                       : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
                   }`}
                 >
-                  Positive
+                  Positive ({reviews.filter(r => r.stars >= 4).length})
                 </button>
                 <button
                   onClick={() => setActiveTab('negative')}
@@ -340,23 +403,44 @@ const ReviewsPage = () => {
                       : 'text-gray-700 hover:bg-blue-50 dark:text-white dark:hover:bg-gray-700'
                   }`}
                 >
-                  Negative
+                  Negative ({reviews.filter(r => r.stars < 4).length})
                 </button>
               </div>
             </div>
 
+            {/* No Results Message */}
+            {filteredReviews.length === 0 && searchTerm && (
+              <div className="text-center py-12">
+                <Search size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No reviews found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Try adjusting your search terms or filters
+                </p>
+                <button
+                  onClick={clearSearch}
+                  className="text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+
             {/* Reviews Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {filteredReviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  variant={currentConfig.variant}
-                  onEdit={currentConfig.variant === 'author' ? handleEditReview : undefined}
-                  onDelete={currentConfig.variant === 'author' ? handleDeleteReview : undefined}
-                />
-              ))}
-            </div>
+            {filteredReviews.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {filteredReviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    variant={currentConfig.variant}
+                    onEdit={currentConfig.variant === 'author' ? handleEditReview : undefined}
+                    onDelete={currentConfig.variant === 'author' ? handleDeleteReview : undefined}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
 
@@ -409,8 +493,7 @@ const ReviewsPage = () => {
           </div>
         )}
 
-        {/* Page info */}
-        {reviews.length > 0 && (
+        {reviews.length > 0 && !searchTerm && (
           <div className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
             {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of{' '}
@@ -419,7 +502,6 @@ const ReviewsPage = () => {
         )}
       </div>
 
-      {/* Modals */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
         onClose={() => {

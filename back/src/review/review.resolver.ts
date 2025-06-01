@@ -13,6 +13,7 @@ import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResp
 import { GraphQLInt } from 'graphql';
 import { ReviewPaginationResult } from './dto/ReviewPaginationResult';
 
+@UseGuards(GqlAuthGuard)
 @Resolver()
 export class ReviewResolver {
   constructor(
@@ -24,7 +25,6 @@ export class ReviewResolver {
 
 
   
-
 
  @Query(() => ReviewFormData)
   async reviewFormData(
@@ -58,7 +58,6 @@ export class ReviewResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => PaginatedReviewsResponse, { name: 'getMyReviews' })
   async getMyReviews(
     @CurrentUser() user: AppUser,
@@ -77,19 +76,16 @@ export class ReviewResolver {
     return this.reviewService.findByReviewedUserId(userId, page, limit);
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRating' })
   getAverageRating(@CurrentUser() user: AppUser): Promise<number | null> {
     return this.reviewService.getAverageRating(user.id);
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => GraphQLInt, { name: 'getAverageRatingById' })
   getAverageRatingById(@Args('id', { type: () => Int }) id: number): Promise<number | null> {
     return this.reviewService.getAverageRating(id);
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => ReviewPaginationResult, { name: 'getPaginatedMyReviews' }) 
   async getPaginatedReviews(
     @CurrentUser() user: AppUser,
@@ -101,4 +97,17 @@ export class ReviewResolver {
     return this.reviewService.findPaginatedByReviewedUserId(user.id, page, limit, sortField, sortOrder);
   }
   
+  @Query(() => PaginatedReviewsResponse, { name: 'searchMyReviews' })
+  async searchMyReviews(
+    @CurrentUser() user: AppUser,
+   @Args('searchTerm', { type: () => String }) searchTerm: string,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 6 }) limit: number,
+    @Args('isMyReviews', { type: () => Boolean, nullable: true, defaultValue: true }) isMyReviews: boolean
+  ): Promise<PaginationResult<Review>> {
+    console.log("in the search function back");
+    console.log("Search params:", { userId: user.id, searchTerm, page, limit, isMyReviews }); // Added logging
+    return this.reviewService.searchReviews(user.id, searchTerm, page, limit, isMyReviews);
+  }
+
 }
