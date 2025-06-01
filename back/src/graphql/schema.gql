@@ -62,7 +62,7 @@ type AppUser {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
 }
 
@@ -106,7 +106,7 @@ type AppUserWithRole {
   imageUrl: String
   posts: [Post!]!
   reviews: [Review!]!
-  rating: Float!
+  rating: Float
   appUserRides: [AppUserRide!]!
   roleInRide: Role!
 }
