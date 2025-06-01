@@ -16,6 +16,7 @@ import { AppUserRide } from 'src/app-user-ride/entities/app-user-ride.entity';
 import { AppUserWithRole } from 'src/graphql/types/AppUserWithRole';
 import { Role } from 'src/enums/role';
 import { App } from 'supertest/types';
+import { SearchService } from 'src/services/searchService';
 @Injectable()
 export class RideService extends GenericService {
   constructor(@InjectRepository(Ride) private readonly rideRepo:Repository<Ride>,   
@@ -23,6 +24,7 @@ export class RideService extends GenericService {
   private userService: AppUserService,
   private appUserRideService: AppUserRideService,
   private readonly EventStreamService: EventStreamService,
+  private readonly searchService: SearchService, // Assuming you have a SearchService for searching
   
 
 ){
@@ -191,10 +193,12 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
 
   const users: AppUserWithRole[] = [];
 
+  // Add driver if exists
   if (ride.driver) {
     users.push(new AppUserWithRole(ride.driver, Role.DRIVER));
   }
 
+  // Add passengers
   ride.appUserRides.forEach((appUserRide) => {
     if (appUserRide.appUser) {
       users.push(new AppUserWithRole(appUserRide.appUser, Role.PASSENGER));
@@ -202,5 +206,61 @@ async getUsersForRide(rideId: number): Promise<AppUserWithRole[]> {
   });
 
   return users;
+}
+
+// Add this method to your RideService class
+async searchRidesByUser(
+  userId: number,
+  searchTerm: string,
+  page: number = 1,
+  limit: number = 10,
+  filterType?: string
+): Promise<PaginationResult<Ride>> {
+  let queryBuilder = this.rideRepo
+    .createQueryBuilder('ride')
+    .leftJoinAndSelect('ride.post', 'post')
+    .leftJoinAndSelect('post.postOwner', 'postOwner')
+    .leftJoinAndSelect('ride.appUserRides', 'appUserRides')
+    .leftJoinAndSelect('appUserRides.appUser', 'rideUser');
+
+  // Apply filter based on filterType
+  if (filterType === 'yourRides') {
+    queryBuilder = queryBuilder.where('post.postOwnerId = :userId', { userId });
+  } else if (filterType === 'ridesTaken') {
+    queryBuilder = queryBuilder
+      .innerJoin('ride.appUserRides', 'userRides')
+      .where('userRides.appUserId = :userId', { userId });
+  } else {
+    // Show all rides for the user (both as driver and passenger)
+    queryBuilder = queryBuilder.where(
+      '(post.postOwnerId = :userId OR EXISTS (SELECT 1 FROM app_user_ride aur WHERE aur.rideId = ride.id AND aur.appUserId = :userId))',
+      { userId }
+    );
+  }
+
+  // Apply search using SearchService
+  const searchFields = [
+    'ride.departure',
+    'ride.arrival',
+    'postOwner.name',
+    'postOwner.lastName',
+    'rideUser.name',
+    'rideUser.lastName'
+  ];
+
+ const searchResults= await this.searchService.searchQuery(
+    queryBuilder,
+    searchTerm,
+    searchFields,
+    page,
+    limit
+  );
+  const totalPages = Math.ceil(searchResults.totalItems / limit);
+  return {
+    data: searchResults.data,
+    totalItems: searchResults.totalItems,
+    currentPage: page,
+    totalPages: totalPages,
+  };
 }
 }

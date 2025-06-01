@@ -225,5 +225,26 @@ async getUsersForRide(
     throw error;
   }
 }
+
+
+@Query(() => RidePaginationResult, { name: 'searchRidesByUser' })
+@UseGuards(GqlAuthGuard)
+async searchRidesByUser(
+  @CurrentUser() user: AppUser,
+  @Args('searchTerm', { type: () => String }) searchTerm: string,
+  @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+  @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  @Args('filterType', { type: () => String, nullable: true }) filterType?: string,
+): Promise<PaginationResult<Ride>> {
+  const result = await this.rideService.searchRidesByUser(user.id, searchTerm, page, limit, filterType);
+
+  result.data = result.data.map(ride => ({
+    ...ride,
+    date: ride.date instanceof Date ? ride.date : new Date(ride.date),
+  }));
+
+  return result;
+}
+
 }
 

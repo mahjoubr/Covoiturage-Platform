@@ -9,12 +9,10 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-
-import { onError } from '@apollo/client/link/error';
-
 const httpLink = createHttpLink({
   uri: 'http://localhost:3000/graphql',
 });
+
 const authToken = () => localStorage.getItem('auth_token');
 
 const authLink = setContext((_, { headers }) => ({
@@ -24,43 +22,28 @@ const authLink = setContext((_, { headers }) => ({
   },
 }));
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
-    for (let err of graphQLErrors) {
-      if (err.extensions?.code === 'UNAUTHENTICATED') {
-        window.location.replace('/signIn');
-      }
-      else if (err.extensions?.code === 'FORBIDDEN' || err.extensions?.code === 'NOT_FOUND') {
-        window.location.replace('/404');
-    }
-    }
-  }
+const httpAuthLink = authLink.concat(httpLink);
 
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
-  }
-});
-
-const httpErrorHandledLink = errorLink.concat(authLink.concat(httpLink));
-const wsLink = new GraphQLWsLink(createClient({
-  url: 'ws://localhost:3000/graphql',
-  connectionParams: () => ({
-    headers: {
-      authorization: authToken() ? `Bearer ${authToken()}` : '',
-    }
-  }),
-}));
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: 'ws://localhost:3000/graphql',
+    connectionParams: () => ({
+      headers: {
+        authorization: authToken() ? `Bearer ${authToken()}` : '',
+      },
+    }),
+  })
+);
 
 const splitLink = split(
   ({ query }) => {
     const def = getMainDefinition(query);
     return (
-      def.kind === 'OperationDefinition' &&
-      def.operation === 'subscription'
+      def.kind === 'OperationDefinition' && def.operation === 'subscription'
     );
   },
   wsLink,
-  httpErrorHandledLink
+  httpAuthLink
 );
 
 const client = new ApolloClient({

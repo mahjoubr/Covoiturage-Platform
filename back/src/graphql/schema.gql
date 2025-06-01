@@ -296,6 +296,7 @@ type Query {
   getRidesByUserId: [Ride!]!
   getRidesByPassenger: [Ride!]!
   getUsersForRide(rideId: Int!): [AppUserWithRole!]!
+  searchRidesByUser(searchTerm: String!, page: Int! = 1, limit: Int! = 10, filterType: String): RidePaginationResult!
   getPosts(searchTerm: String, page: Int, limit: Int): PostPaginatedResponse!
   getPostById(id: String!): Post!
   matchingRide(postId: Int!): MatchingRideResult
@@ -319,6 +320,7 @@ type Query {
   getAverageRating: Int!
   getAverageRatingById(id: Int!): Int!
   getPaginatedMyReviews(page: Int = 1, limit: Int = 10, sortField: String = "createdAt", sortOrder: String = "DESC"): ReviewPaginationResult!
+  searchMyReviews(searchTerm: String!, page: Int = 1, limit: Int = 6, isMyReviews: Boolean = true): PaginatedReviewsResponse!
   getDashboardData: DashboardData!
   getMyReports(page: Int! = 1, limit: Int! = 6, search: String, status: String): ReportPagination!
   getJoinRequestById(id: Float!): JoinRequest!

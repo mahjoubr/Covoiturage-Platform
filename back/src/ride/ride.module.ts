@@ -12,12 +12,13 @@ import { EventStreamModule } from 'src/SSE/sse.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { AppUserRideModule } from 'src/app-user-ride/app-user-ride.module';
 import { PaginationService } from 'src/services/paginationService';
+import { SearchService } from 'src/services/searchService';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Ride,Post]),forwardRef(() => PostModule), AppUserModule,AppUserRideModule,
   EventStreamModule,SubscriptionModule ],
   controllers: [RideController], 
-  providers: [RideService,RideResolver,RideSchedulerService,PaginationService],
+  providers: [RideService,RideResolver,RideSchedulerService,PaginationService,SearchService],
   exports: [RideService]
 })
 export class RideModule {}
