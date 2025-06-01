@@ -37,7 +37,7 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
             setFile(event.target.files[0]);
           }
         };
-       const handleSave = async () => {
+  const handleSave = async () => {
   if (!file) return;
 
   const reader = new FileReader();
