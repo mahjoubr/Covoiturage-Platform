@@ -38,13 +38,18 @@ export class ChatResolver {
   async GetChatByRideId(@Args('rideId', { type: () => Int }) rideId: number) : Promise<Chat>{
     return this.chatService.findByRideId(rideId);
   }
-  @Mutation(() => Chat, { nullable: true })
+ @Mutation(() => Chat, { nullable: true })
   async CreateChat(@Args('createChatInput', { type: () => CreateChatInput }) createChatInput: CreateChatInput) : Promise<Chat | null>{
     const ride = await this.rideService.findOne(createChatInput.rideId);
     if (!ride) {
       throw new Error('Ride not found');
     }
-    const driver = await this.userService.findOne(createChatInput.driverId);
+    if (!ride.driver || ride.driver === null) {
+      throw new Error('Ride has no driver assigned');
+    }
+    console.log("Ride object:", ride);
+    console.log("Ride driver:", ride.driver); 
+    const driver = await this.userService.findOne(ride.driver.id);
     if (!driver) {
       throw new Error('Driver not found');
     }

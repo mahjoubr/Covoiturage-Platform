@@ -125,13 +125,13 @@ async addPassengerToRide(rideId: number, userId: number): Promise<AppUserRide> {
 
   const user = await this.userService.findById(userId);
   if (!user) throw new Error('User not found');
-  this.notificationService.JoinAcceptNotification(
+  await this.notificationService.JoinAcceptNotification(
     userId, // recipientId
     rider.id, 
     ride.id, 
     'Join Request Accepted', // title
     `You have been accepted to join the ride from ${ride.departure} to ${ride.arrival}`, // message
-    `/ride/${ride.id}`, // actionUrl
+    `/rides`, // actionUrl
 
   )
   /*

@@ -38,15 +38,14 @@ export class JoinRequestService {
 if (!fullJoinRequest) throw new Error('JoinRequest not found after creation');
     for (const recipientId of subscribers) {
         
-   this.notificationService.JoinRequestNotification(
-      recipientId, // userId (recipient)
-      postId,      // postId
-      fullJoinRequest.id, // joinRequestId
-      'New Join Request', // title
-      `${data.user.name} has requested to join your ride`, // message
-      `/post/${postId}`, // actionUrl
-      
-    );
+   await this.notificationService.JoinRequestNotification(
+  recipientId, // userId (recipient)
+  data.user.id, // driverId (the requester)
+  fullJoinRequest.ride.id, // ride id
+  'New Join Request',
+  `${data.user.name} has requested to join your ride`,
+  `/post/${postId}`,
+);
       
     }
     await this.subscriptionService.subscribe(
@@ -64,7 +63,7 @@ return fullJoinRequest;
     const subscribers = await this.subscriptionService.getSubscribers(postId, 'post');
       
     for (const recipientId of subscribers) {
-        this.notificationService.JoinRequestNotification(
+       await this.notificationService.JoinRequestNotification(
       recipientId, // userId (recipient)
       postId,      // postId
       -1, // joinRequestId (not applicable for deletion)

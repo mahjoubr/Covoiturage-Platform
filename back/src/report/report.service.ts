@@ -85,18 +85,8 @@ export class ReportService extends GenericService {
                 status: saved.status,
             };
             
-    /* this.notificationService.messageNotification(
-      sender.id,
-      chat.rider.id === sender.id ? chat.driver.id : chat.rider.id,
-      chat.id,
-      'New Message',
-      createMessageDto.text,
-      `/chat/${chat.id}`,
-      { chatId: chat.id, senderId: sender.id },
-      
-
-    );*/
-            this.notificationService.reportNotification(
+ 
+            await this.notificationService.reportNotification(
                 admin.id,
                 saved.id,
                 'New Report',

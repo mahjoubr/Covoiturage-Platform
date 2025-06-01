@@ -470,7 +470,6 @@ input UpdateMessageInput {
 }
 
 input CreateChatInput {
-  driverId: Int!
   riderId: Int!
   rideId: Int!
 }
