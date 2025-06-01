@@ -12,8 +12,10 @@ import { PaginationResult } from 'src/services/paginationService';
 import { PaginatedReviewsResponse } from 'src/graphql/types/PaginatedReviewsResponse';
 import { GraphQLInt } from 'graphql';
 import { ReviewPaginationResult } from './dto/ReviewPaginationResult';
+import { Roles } from 'src/auth/role.decorator';
 
 @Resolver()
+@Roles('user') 
 export class ReviewResolver {
   constructor(
     private userService: AppUserService,
