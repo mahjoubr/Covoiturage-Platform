@@ -143,6 +143,12 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onView, userData }) => {
               Ride I Took
             </div>
           )}
+          {ride.state && (
+          <div className="mt-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm text-center">
+            {ride.state}
+          </div>
+        )}
+
         </div>
 
         {/* Card content with better spacing and organization */}

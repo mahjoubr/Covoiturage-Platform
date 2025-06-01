@@ -22,14 +22,14 @@ export class RideSchedulerService {
   @Cron(CronExpression.EVERY_MINUTE)
   async handleScheduledRides() {
     const now = new Date();
-    this.logger.debug(`Checking rides at: ${now.toISOString()}`);
+    //this.logger.debug(`Checking rides at: ${now.toISOString()}`);
 
     let rides;
     try {
       rides = await this.rideService.findByState(RideState.NOT_STARTED);
-      this.logger.debug(`Found ${rides.length} NOT_STARTED rides`);
+      //this.logger.debug(`Found ${rides.length} NOT_STARTED rides`);
     } catch (error) {
-      this.logger.error('Failed to fetch NOT_STARTED rides', error.stack);
+      //this.logger.error('Failed to fetch NOT_STARTED rides', error.stack);
       return;
     }
 
@@ -37,10 +37,10 @@ export class RideSchedulerService {
       try {
         const rideDate = new Date(ride.date);
         const rideDateTime = new Date(`${rideDate.toISOString().split('T')[0]}T${ride.time}`);
-        this.logger.debug(`Ride ${ride.id} scheduled for ${rideDateTime.toISOString()}`);
+        //this.logger.debug(`Ride ${ride.id} scheduled for ${rideDateTime.toISOString()}`);
 
         if (rideDateTime <= now) {
-          this.logger.log(`Ride ${ride.id} is due. Marking as STARTED.`);
+          //this.logger.log(`Ride ${ride.id} is due. Marking as STARTED.`);
 
           ride.state = RideState.STARTED;
           await this.rideService.update(ride.id, ride);
@@ -57,18 +57,18 @@ export class RideSchedulerService {
                   timestamp: new Date().toISOString(),
                 },
               };
-              this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+              //this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
             this.eventStreamService.emitEvent(event);
-            this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+            //this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
             }
           const post = ride.post as Post;
           if (!post) {
-            this.logger.warn(`Ride ${ride.id} has no associated post.`);
+            //this.logger.warn(`Ride ${ride.id} has no associated post.`);
             continue;
           }
 
           if ((post.frequency !== 'One-time')&&(post.frequency !== 'Once')&&(post.status!=PostStatus.CLOSED)) {
-            this.logger.debug(`Post ${post.id} has frequency ${post.frequency}. Creating next ride.`);
+            //this.logger.debug(`Post ${post.id} has frequency ${post.frequency}. Creating next ride.`);
 
             const nextDate = this.calculateNextDate(ride.date, post.frequency);
             const { appUserRides, ...rideWithoutPassengers } = ride;
@@ -86,7 +86,7 @@ export class RideSchedulerService {
             delete (newRideInput as any)['id']; 
 
             await this.rideService.createRide(newRideInput, post);
-            this.logger.log(`Next ride created for Post ${post.id} on ${nextDate.toISOString()}`);
+            //this.logger.log(`Next ride created for Post ${post.id} on ${nextDate.toISOString()}`);
 
             post.date = nextDate;
             await this.postService.update(post.id, post);
@@ -104,22 +104,22 @@ export class RideSchedulerService {
                     timestamp: new Date().toISOString(),
                   },
                 };
-                this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
+                //this.logger.log(`Emitting event: ${JSON.stringify(event)}`);
               this.eventStreamService.emitEvent(event);
-              this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
+              //this.logger.log(`Emitted event: ${JSON.stringify(event)}`);
               
             }
 
-            this.logger.debug(`Post ${post.id} updated with new date ${nextDate.toISOString()}`);
+            //this.logger.debug(`Post ${post.id} updated with new date ${nextDate.toISOString()}`);
           }
           else{
             this.postService.close(post.id);
           }
         } else {
-          this.logger.debug(`Ride ${ride.id} is not yet due.`);
+          //this.logger.debug(`Ride ${ride.id} is not yet due.`);
         }
       } catch (error) {
-        this.logger.error(`Error processing ride ${ride.id}: ${error.message}`, error.stack);
+        //this.logger.error(`Error processing ride ${ride.id}: ${error.message}`, error.stack);
       }
     }
   }
@@ -153,7 +153,7 @@ export class RideSchedulerService {
       }
   
       default:
-        this.logger.warn(`Unsupported frequency "${frequency}". Using original date.`);
+        //this.logger.warn(`Unsupported frequency "${frequency}". Using original date.`);
         break;
     }
   
