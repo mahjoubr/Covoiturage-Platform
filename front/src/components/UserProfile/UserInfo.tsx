@@ -3,39 +3,16 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Label from "../form/Label";
 import StarRating from "./StarRating";
-import { getUserById } from "../../services/userService";
-import { useEffect, useState } from "react";
 import { User } from "../../types"
-import {  useQuery } from "@apollo/client";
-import { GET_AVERAGE_RATING_BY_ID } from "../../graphQl/queries/reviews";
 import Input from "../form/input/InputField";
 
 interface UserMetaCardProps {
-  userId: number;
+  user: User | null;
+  rating: number | null;
 }
 
-export function UserInfo({ userId}: UserMetaCardProps) {
+export function UserInfo({ user, rating}: UserMetaCardProps) {
   const reportModal = useModal();
-  const [user, setUser] = useState<User | null>(null);
-  
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const fetchedUser = await getUserById(userId);
-        setUser(fetchedUser);
-      } catch (error) {
-        console.error("Failed to fetch user", error);
-      }
-    };
-
-    fetchUser();
-  }, [userId]);
-
-  // Fetch average rating by user ID
-  const { data } = useQuery(GET_AVERAGE_RATING_BY_ID, {
-    variables: { id: userId },
-    skip: !userId,
-  });
 
 
   return (
@@ -57,10 +34,10 @@ export function UserInfo({ userId}: UserMetaCardProps) {
               </h4>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 xl:justify-start">
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-{data?.getAverageRating== null ? (
+{rating== null ? (
   <p className="text-gray-500 text-sm">No reviews yet</p>
 ) : (
-  <StarRating rating={data.getAverageRating} />
+  <StarRating rating={rating} />
 )}              </div>
               <div style={{borderLeft: "1px solid ", height: "20px"}}></div>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">

@@ -137,8 +137,19 @@ export class ReviewService extends GenericService {
           .where('review.reviewer.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        return this.paginationService.paginateQuery(queryBuilder, page, limit);
-      }
+       const result = await this.paginationService.paginateQuery(queryBuilder, page, limit);
+
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+      result.data = result.data.map((review) => {
+        if (review.reviewedUser?.imageUrl) {
+          review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+        }
+        return review;
+      });
+
+      return result;
+     }
       
       async findByReviewedUserId(
         userId: number,
@@ -152,7 +163,18 @@ export class ReviewService extends GenericService {
           .where('review.reviewedUser.id = :userId', { userId })
           .orderBy('review.date', 'DESC');
       
-        return this.paginationService.paginateQuery(queryBuilder, page, limit);
+        const result = await   this.paginationService.paginateQuery(queryBuilder, page, limit);
+
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+        result.data = result.data.map((review) => {
+          if (review.reviewedUser?.imageUrl) {
+            review.reviewedUser.imageUrl = `${baseUrl}${review.reviewedUser.imageUrl}`;
+          }
+          return review;
+      });
+
+      return result;
       }
 
       async findByRideId (rideId: number) {
@@ -179,6 +201,8 @@ export class ReviewService extends GenericService {
         if (sortField) {
           qb.orderBy(`review.${sortField}`, sortOrder);
         }
+
+        
     
         return this.paginationService.paginateQuery(qb, page, limit);
       }
@@ -198,13 +222,13 @@ export class ReviewService extends GenericService {
     
         return Math.round(averageRating); 
       }
-  async searchReviews(
-    userId: number,
-    searchTerm: string,
-    page: number = 1,
-    limit: number = 6,
-    isMyReviews: boolean = true
-  ): Promise<PaginationResult<Review>> {
+      async searchReviews(
+        userId: number,
+        searchTerm: string,
+        page: number = 1,
+        limit: number = 6,
+        isMyReviews: boolean = true
+      ): Promise<PaginationResult<Review>> {
     console.log('Search params:', { userId, searchTerm, page, limit, isMyReviews });
     
     const queryBuilder = this.reviewRepository.createQueryBuilder('review')

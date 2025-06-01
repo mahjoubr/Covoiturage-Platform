@@ -1,6 +1,6 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
-import { Drive, Ride } from "../types";
+import { Drive, Ride, User } from "../types";
 import UserDriveCard from "../components/UserProfile/UserDriveCard";
 import UserRideCard from "../components/UserProfile/UserRideCard";
 import ReviewCarousel from "../components/UserProfile/ReviewCarousel";
@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import { useRidesPaginatedByDriver, useRidesPaginatedByPassenger } from "../services/ridesService";
 import { useNavigate, useParams } from 'react-router-dom';
 import UserInfo from "../components/UserProfile/UserInfo";
+import { getUserById } from "../services/userService";
+import { useQuery } from "@apollo/client";
+import { GET_AVERAGE_RATING_BY_ID } from "../graphQl/queries/reviews";
 
     const UserProfiles = () => {
       const navigate = useNavigate();
@@ -20,7 +23,25 @@ import UserInfo from "../components/UserProfile/UserInfo";
           navigate('/404', { replace: true });
         }
       }, [id, navigate]);
+        const [user, setUser] = useState<User | null>(null);
+        
+        useEffect(() => {
+          const fetchUser = async () => {
+            try {
+              const fetchedUser = await getUserById(userId);
+              console.log("Fetched user:", fetchedUser);
+              setUser(fetchedUser);
+            } catch (error) {
+              console.error("Failed to fetch user", error);
+            }
+          };
       
+          fetchUser();
+        }, [userId]);
+  const { data } = useQuery(GET_AVERAGE_RATING_BY_ID, {
+    variables: { id: userId },
+    skip: !userId,
+  });
       
       const {
         loading: loadingDriver,
@@ -63,7 +84,7 @@ import UserInfo from "../components/UserProfile/UserInfo";
     
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
             <div className="space-y-6">
-              <UserInfo userId={userId}  />
+              <UserInfo user={user} rating= {data?.getAverageRating} />
     
               <div className="container flex gap-6">
                 <div className="w-1/2">

@@ -42,9 +42,12 @@ export class RideResolver {
   @Query(() => Ride, { name: 'getRideById' })
   async findOne(@Args('id', { type: () => String }) id: string): Promise<Ride> {
     const ride = await this.rideService.findOne(+id);
+    if (!ride) {
+throw new Error('Ride not found'); 
+}
     return {
       ...ride,
-      date: ride.date instanceof Date ? ride.date : new Date(ride.date)
+      date: ride?.date instanceof Date ? ride.date : new Date(ride?.date)
     };
   }
 
@@ -221,8 +224,19 @@ async getUsersForRide(
   @Args('rideId', { type: () => Int }) rideId: number,
 ): Promise<AppUserWithRole[]> {
   this.logger.log(`Getting users for ride: ${rideId}`);
+
   try {
-    return await this.rideService.getUsersForRide(rideId);
+    const users = await this.rideService.getUsersForRide(rideId);
+
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+    for (const user of users) {
+      if (user.imageUrl) {
+        user.imageUrl = `${baseUrl}${user.imageUrl}`;
+      }
+    }
+
+    return users;
   } catch (error) {
     this.logger.error(`Error getting users for ride: ${error.message}`);
     throw error;

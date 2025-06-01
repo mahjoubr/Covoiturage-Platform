@@ -103,20 +103,8 @@ export const GET_CHAT_BY_RIDE_ID=gql`
 `;
 export const CREATE_CHAT=gql`
  mutation CreateChat($createChatInput: CreateChatInput!) {
-  createChat(createChatInput: $createChatInput) {
+  CreateChat(createChatInput: $createChatInput) {
     id
-    RiderId
-    DriverId
-    RideId
-    messages {
-      id
-      text
-      createdAt
-      sender {
-        id
-        name
-      }
-    }
   }
 }
 `;

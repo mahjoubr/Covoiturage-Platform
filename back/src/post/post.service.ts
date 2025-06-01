@@ -89,6 +89,7 @@ export class PostService extends GenericService {
     searchTerm?: string,
     page = 1,
     limit = 10,
+    filter?: string,
   ): Promise<{ data: Post[]; totalItems: number; currentPage: number }> {
     const queryBuilder = this.postRepo.createQueryBuilder('post')
       .leftJoinAndSelect('post.postOwner', 'postOwner')
@@ -96,30 +97,52 @@ export class PostService extends GenericService {
       .leftJoinAndSelect('post.comments', 'comments')
       .leftJoinAndSelect('comments.commenter', 'commenter')
       .where('post.status != :status', { status: PostStatus.CLOSED })
-
+      if (filter) {
+        queryBuilder.andWhere('postOwner.id = :ownerId', { ownerId: filter });
+      }
     const fieldsToSearch = ['post.destination', 'post.departure', 'post.date', 'post.time'];
 
-    if (searchTerm) {
-      return await this.searchService.searchQuery<Post>(
-        queryBuilder,
-        searchTerm,
-        fieldsToSearch,
-        page,
-        limit,
-      );
-    }
-
-    const [data, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
-    return {
-      data,
-      totalItems: total,
-      currentPage: page,
-    };
+  if (searchTerm) {
+    const result = await this.searchService.searchQuery<Post>(
+      queryBuilder,
+      searchTerm,
+      fieldsToSearch,
+      page,
+      limit,
+    );
+    result.data = this.sortPostsByDateProximity(result.data);
+    return result;
   }
+
+const allData = await queryBuilder.getMany();
+const sortedData = this.sortPostsByDateProximity(allData);
+const startIndex = (page - 1) * limit;
+const endIndex = startIndex + limit;
+const paginatedData = sortedData.slice(startIndex, endIndex);
+const total = sortedData.length;
+
+return {
+  data: paginatedData,
+  totalItems: total,
+  currentPage: page,
+};
+
+}
+//closest in date sort
+private sortPostsByDateProximity(posts: Post[]): Post[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  return posts.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    
+    const diffA = Math.abs(dateA - today.getTime());
+    const diffB = Math.abs(dateB - today.getTime());
+    
+    return diffA - diffB; 
+  });
+}
 
 
 

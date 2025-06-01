@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Calendar, Clock, Users, RotateCcw } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, RotateCcw, User } from 'lucide-react';
 import { CarpoolPost } from '../../types/posts.ts';
 import { formatDate, formatTime } from '../../utils/dateTime';
 import '../../styles/posts.css';
@@ -93,10 +93,8 @@ const handleJoinRide = async (e: React.MouseEvent) => {
     e.stopPropagation();
     deletePost({ 
       variables: { postId: Number(post.id) },
-      // Optional: Update cache or handle success/error
       onCompleted: (data) => {
         console.log("Post deleted successfully", data);
-        // Add any additional logic like refreshing the list
       },
       onError: (error) => {
         console.error("Error deleting post:", error);
@@ -110,7 +108,6 @@ const handleJoinRide = async (e: React.MouseEvent) => {
       variables: { postId: Number(post.id) },
       onCompleted: (data) => {
         console.log("Post closed successfully", data);
-        // Add any additional logic here
       },
       onError: (error) => {
         console.error("Error closing post:", error);
@@ -164,7 +161,16 @@ const handleJoinRide = async (e: React.MouseEvent) => {
             onClick={handleNameClick}
           >
             <div className="w-8 h-8 bg-blue-100 dark:bg-brand-500/15 rounded-full flex items-center justify-center text-blue-700 dark:text-brand-400 font-medium">
-              {post.driverName.charAt(0)}
+              {post.postOwner?.imageUrl ? (
+                          <img 
+                           src={`http://localhost:3000${post.postOwner.imageUrl}`}
+                            alt={`${post.postOwner.name}'s profile`}
+                            className="w-full h-full object-cover rounded-full"
+
+                          />
+                        ) : (
+                          <User className="w-5 h-5 text-gray-500" />
+                        )}
             </div>
             <span className="ml-2 text-sm font-medium dark:text-gray-300">
               {post.driverName}

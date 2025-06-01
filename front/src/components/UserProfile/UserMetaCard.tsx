@@ -2,8 +2,8 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import StarRating from "./StarRating";
-import { fetchUserPhoto, uploadUserPhoto } from "../../services/userService";
-import { useEffect, useState } from "react";
+import {  uploadUserPhoto } from "../../services/userService";
+import { useState } from "react";
 import { User } from "../../types"
 import  FileInput  from "../form/input/FileInput";
 import { useApolloClient, useQuery } from "@apollo/client";
@@ -11,24 +11,15 @@ import { GET_AVERAGE_RATING } from "../../graphQl/queries/reviews";
 interface UserMetaCardProps {
   isReportable: boolean; 
   isEditable: boolean;
+  user : User | null;
 }
 
-export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardProps) {
+export default function UserMetaCard({ user,isReportable, isEditable}: UserMetaCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
-  const [user, setUser] = useState<User | null>(null);
-  const getUserData = async () => {
-    try {
-      const fetchedUser = await fetchUserPhoto();
-      setUser(fetchedUser); 
-    } catch (error) {
-      console.error(error);
-    }
-  };
+
   const { data} = useQuery(GET_AVERAGE_RATING);
 
-  useEffect(() => {
-    getUserData();
-  }, [])
+  
         const client = useApolloClient();
         const [file, setFile] = useState<File | null>(null);
       
@@ -48,8 +39,7 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
       console.log("Upload success", response);
       setFile(null);       
       closeModal();
-      getUserData()
-
+      window.location.reload(); // Reload the page to reflect the changes
     } catch (error) {
       console.error("Failed to upload user photo", error);
     }
@@ -65,7 +55,7 @@ export default function UserMetaCard({ isReportable, isEditable}: UserMetaCardPr
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
             <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
               <img
-                  src={user?.imageUrl }
+                  src={user?.imageUrl || '/images/user/default-avatar.jpg'}
                   alt="User profile"
                   width={100}
                   height={100}
