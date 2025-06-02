@@ -15,19 +15,43 @@ interface CarpoolPostItemProps {
     name?: string;
     lastName?: string;
   };
+    onPostDeleted?: (postId: number) => void; 
+  onPostClosed?: (postId: number) => void;  
 }
 
-const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick ,userData}) => {
+const CarpoolPostItem: React.FC<CarpoolPostItemProps> = ({ post, onClick ,userData,  onPostDeleted, 
+  onPostClosed}) => {
   const [requestPending, setRequestPending] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [createJoinRequest] = useMutation(CREATE_JOIN_REQUEST);
   const [deleteJoinRequest] = useMutation(DELETE_JOIN_REQUEST);
-  const [deletePost] = useMutation(DELETE_POST, {
-      refetchQueries: [{ query: GET_POSTS }]
-    });
-  const [closePost] = useMutation(CLOSE_POST, {
-      refetchQueries: [{ query: GET_POSTS }]
-    });
+const [deletePost] = useMutation(DELETE_POST, {
+  update: (cache) => {
+    const existingPosts = cache.readQuery<{ getPosts: CarpoolPost[] }>({ query: GET_POSTS });
+    if (existingPosts?.getPosts) {
+      cache.writeQuery({
+        query: GET_POSTS,
+        data: {
+          getPosts: existingPosts.getPosts.filter(post1 => post1.id !== post.id),
+        },
+      });
+    }
+  },
+});
+
+const [closePost] = useMutation(CLOSE_POST, {
+  update: (cache) => {
+    const existingPosts = cache.readQuery<{ getPosts: CarpoolPost[] }>({ query: GET_POSTS });
+    if (existingPosts?.getPosts) {
+      cache.writeQuery({
+        query: GET_POSTS,
+        data: {
+          getPosts: existingPosts.getPosts.filter(post1 => post1.id !== post.id),
+        },
+      });
+    }
+  },
+});
 
 
 const token = localStorage.getItem('auth_token');
@@ -51,16 +75,15 @@ const token = localStorage.getItem('auth_token');
       }
     }, [rideData, userData]);
   const { data: joinRequest } = useQuery(GET_JOIN_REQUESTS, {
-    variables:{rideId:Number(rideData?.matchingRide?.ride?.id),userId:Number(userData.id)},
+    variables:{rideId:Number(rideData?.matchingRide?.ride?.id ? rideData?.matchingRide?.ride?.id: '0' ),userId:Number(userData.id)},
     skip: !isLoggedIn,
     fetchPolicy: 'network-only',
     onCompleted: (data) => console.log('GET_ride completed:', data),
     onError: (error) => console.error('GET_ride error:', error)
   });
   const handleNameClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the modal trigger
+    e.stopPropagation(); 
   };
-  //console.log(joinRequest);
 useEffect(() => {
   if (joinRequest?.getJoinRequestsByRideUser) {
     const hasRequests = Array.isArray(joinRequest.getJoinRequestsByRideUser) 
@@ -89,30 +112,32 @@ const handleJoinRide = async (e: React.MouseEvent) => {
     }
   };
 
-  const handleDeletePost = (e: React.MouseEvent) => {
+  const handleDeletePost = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    deletePost({ 
-      variables: { postId: Number(post.id) },
-      onCompleted: (data) => {
-        console.log("Post deleted successfully", data);
-      },
-      onError: (error) => {
-        console.error("Error deleting post:", error);
-      }
-    });
+    try {
+      await deletePost({ 
+        variables: { postId: Number(post.id) },
+        onCompleted: () => {
+          onPostDeleted?.(Number(post.id)); 
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
-  
-  const handleClosePost = (e: React.MouseEvent) => {
+
+  const handleClosePost = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    closePost({ 
-      variables: { postId: Number(post.id) },
-      onCompleted: (data) => {
-        console.log("Post closed successfully", data);
-      },
-      onError: (error) => {
-        console.error("Error closing post:", error);
-      }
-    });
+    try {
+      await closePost({ 
+        variables: { postId: Number(post.id) },
+        onCompleted: () => {
+          onPostClosed?.(Number(post.id)); 
+        },
+      });
+    } catch (error) {
+      console.error("Error closing post:", error);
+    }
   };
 
   const isPostOwner = Number(rideData?.matchingRide?.postOwnerId) === Number(userData?.id);
