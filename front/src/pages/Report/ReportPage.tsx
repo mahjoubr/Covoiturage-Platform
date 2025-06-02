@@ -150,7 +150,7 @@ const ReportPage: React.FC = () => {
 
                 {/* Footer note */}
                 <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                    Your report will be reviewed by our moderation team.
+                    Your report will be reviewed by our admin .
                 </p>
             </div>
         </div>
